@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteCond %{REQUEST_FILENAME} !-d
+	RewriteRule ^(.*)$ index.php/$1 [L]
+</IfModule>
+
+# Larang akses langsung ke folder application, system, vendor
+<IfModule mod_alias.c>
+	RedirectMatch 403 ^/application/.*$
+	RedirectMatch 403 ^/system/.*$
+</IfModule>

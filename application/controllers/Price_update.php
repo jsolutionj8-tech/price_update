@@ -1,0 +1,224 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Price_update
+ * Controller inti aplikasi: form update Modal/HPP/harga per kanal, kalkulasi otomatis,
+ * simpan sebagai batch riwayat, dan memicu pengiriman notifikasi email.
+ */
+class Price_update extends Editor_Controller
+{
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('product_model');
+		$this->load->model('product_vendor_cost_model');
+		$this->load->model('price_model');
+		$this->load->model('price_change_batch_model');
+		$this->load->library('price_calculator');
+	}
+
+	public function index()
+	{
+		$data = array(
+			'title'    => 'Update Harga',
+			'products' => $this->product_model->get_all(),
+		);
+		$this->render_view('price_update/index', $data);
+	}
+
+	/**
+	 * Form update harga untuk 1 produk (semua vendor A/B/C ditampilkan sebagai tab).
+	 */
+	public function form($product_id)
+	{
+		$product = $this->product_model->find($product_id);
+		if (!$product) show_404();
+
+		$vendor_costs = $this->product_vendor_cost_model->get_for_product($product_id);
+		$existing_vendor_ids = array_column($vendor_costs, 'vendor_id');
+		$all_vendors = $this->product_model->get_all_vendors();
+
+		$data = array(
+			'title'       => 'Update Harga - ' . $product['product_name'],
+			'product'     => $product,
+			'vendor_costs'=> $vendor_costs,
+			'available_vendors' => array_values(array_filter($all_vendors, function ($v) use ($existing_vendor_ids) {
+				return !in_array($v['id'], $existing_vendor_ids);
+			})),
+			'channels'    => $this->price_model->get_channels(),
+			'competitors' => $this->price_model->get_competitors(),
+			'competitor_prices' => $this->price_model->get_current_competitor_prices($product_id),
+		);
+
+		// Untuk tiap vendor, lampirkan harga saat ini per kanal
+		foreach ($data['vendor_costs'] as &$vc) {
+			$vc['current_prices'] = $this->price_model->get_current_prices($product_id, $vc['vendor_id']);
+		}
+
+		$this->render_view('price_update/form', $data);
+	}
+
+	/**
+	 * Tambahkan vendor baru (cost awal 0) untuk produk ini, agar muncul sebagai tab
+	 * di form Update Harga dan bisa langsung diisi Modal/HPP-nya.
+	 */
+	public function add_vendor($product_id)
+	{
+		$product = $this->product_model->find($product_id);
+		if (!$product) show_404();
+
+		$vendor_id = (int) $this->input->post('vendor_id');
+		if ($vendor_id) {
+			$this->product_vendor_cost_model->upsert($product_id, $vendor_id, array(
+				'modal' => 0,
+				'target_hpp_pct' => 0,
+				'srp_suggest' => 0,
+				'srp_markup_pct' => 0,
+				'srp_margin_pct' => 0,
+				'updated_by' => $this->auth_lib->user_id(),
+			));
+		}
+
+		redirect('price-update/form/' . $product_id);
+	}
+
+	/**
+	 * Endpoint AJAX: hitung SRP Suggest / Markup% / Margin% secara real-time.
+	 * Markup% & Margin% dihitung dari harga jual aktual (kanal Offline sebagai acuan utama,
+	 * sesuai konvensi pada spreadsheet acuan) jika sudah diisi; jika belum, fallback ke SRP Suggest.
+	 */
+	public function calculate()
+	{
+		$modal = (float) $this->input->post('modal');
+		$target_hpp = (float) $this->input->post('target_hpp_pct');
+		$actual_price = $this->input->post('actual_price');
+		$result = $this->price_calculator->calculate($modal, $target_hpp, $actual_price);
+
+		$this->output->set_content_type('application/json')->set_output(json_encode($result));
+	}
+
+	/**
+	 * Simpan perubahan harga: update cost, update harga aktif per kanal,
+	 * catat batch riwayat (snapshot lama vs baru), lalu panggil Notifier.
+	 */
+	public function save()
+	{
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('product_id', 'Produk', 'required|integer');
+		$this->form_validation->set_rules('vendor_id', 'Vendor', 'required|integer');
+		$this->form_validation->set_rules('modal', 'Modal', 'required|numeric');
+		$this->form_validation->set_rules('target_hpp_pct', 'Target HPP', 'required|numeric');
+		$this->form_validation->set_rules('effective_date', 'Tanggal Efektif', 'required');
+
+		if ($this->form_validation->run() === FALSE) {
+			$this->session->set_flashdata('error', validation_errors());
+			redirect('price-update/form/' . $this->input->post('product_id'));
+		}
+
+		$product_id = (int) $this->input->post('product_id');
+		$vendor_id  = (int) $this->input->post('vendor_id');
+		$modal      = (float) $this->input->post('modal');
+		$target_hpp = (float) $this->input->post('target_hpp_pct');
+		$effective_date = $this->input->post('effective_date');
+		$notes = $this->input->post('notes', TRUE);
+		$user_id = $this->auth_lib->user_id();
+		// Kanal Offline dipakai sebagai acuan utama perhitungan Markup%/Margin% (sesuai konvensi
+		// spreadsheet acuan); jika Offline tidak diisi, fallback dilakukan di dalam Price_calculator.
+		$reference_price = $this->input->post('price_OFFLINE');
+
+		// --- snapshot SEBELUM perubahan ---
+		$old_cost = $this->product_vendor_cost_model->find($product_id, $vendor_id);
+		$old_prices = $this->price_model->get_current_prices($product_id, $vendor_id);
+
+		// --- hitung nilai baru ---
+		$calc = $this->price_calculator->calculate($modal, $target_hpp, $reference_price);
+
+		// --- simpan cost baru ---
+		$this->product_vendor_cost_model->upsert($product_id, $vendor_id, array(
+			'modal' => $modal,
+			'target_hpp_pct' => $target_hpp,
+			'srp_suggest' => $calc['srp_suggest'],
+			'srp_markup_pct' => $calc['markup_pct'],
+			'srp_margin_pct' => $calc['margin_pct'],
+			'effective_date' => $effective_date,
+			'updated_by' => $user_id,
+		));
+
+		// --- simpan harga baru per kanal (hanya kanal yang dikirim & berubah) ---
+		$channels = $this->price_model->get_channels();
+		$new_prices = array();
+		$channels_changed = array();
+
+		foreach ($channels as $ch) {
+			$posted = $this->input->post('price_' . $ch['channel_code']);
+			if ($posted === NULL || $posted === '') continue;
+
+			$posted = (float) $posted;
+			$new_prices[$ch['channel_code']] = $posted;
+
+			if (!isset($old_prices[$ch['channel_code']]) || (float) $old_prices[$ch['channel_code']] !== $posted) {
+				$channels_changed[] = $ch['channel_code'];
+			}
+
+			$this->price_model->upsert_price($product_id, $vendor_id, $ch['id'], $posted, $effective_date, $user_id);
+		}
+
+		// --- catat batch riwayat (trigger notifikasi) ---
+		$batch_id = $this->price_change_batch_model->create(array(
+			'product_id' => $product_id,
+			'vendor_id'  => $vendor_id,
+			'effective_date' => $effective_date,
+			'changed_by' => $user_id,
+			'notes' => $notes,
+			'old_values' => json_encode(array(
+				'modal' => $old_cost['modal'] ?? 0,
+				'target_hpp_pct' => $old_cost['target_hpp_pct'] ?? 0,
+				'srp_suggest' => $old_cost['srp_suggest'] ?? 0,
+				'channel_prices' => $old_prices,
+			)),
+			'new_values' => json_encode(array(
+				'modal' => $modal,
+				'target_hpp_pct' => $target_hpp,
+				'srp_suggest' => $calc['srp_suggest'],
+				'markup_pct' => $calc['markup_pct'],
+				'margin_pct' => $calc['margin_pct'],
+				'channel_prices' => $new_prices,
+				'channels_changed' => $channels_changed,
+			)),
+		));
+
+		// --- kirim notifikasi email (synchronous; untuk volume tinggi lihat dokumentasi mode queue/cron) ---
+		$this->load->library('notifier');
+		$result = $this->notifier->dispatch($batch_id);
+
+		if ($result['success']) {
+			$this->session->set_flashdata('success', "Harga berhasil disimpan. Notifikasi terkirim ke {$result['sent']} penerima" . ($result['failed'] > 0 ? ", {$result['failed']} gagal." : '.'));
+		} else {
+			$this->session->set_flashdata('error', 'Harga tersimpan, namun notifikasi gagal diproses: ' . $result['message']);
+		}
+
+		redirect('price-history/detail/' . $batch_id);
+	}
+
+	/**
+	 * Endpoint AJAX: pratinjau isi email sebelum benar-benar disimpan/dikirim.
+	 */
+	public function preview_email()
+	{
+		$product = $this->product_model->find($this->input->post('product_id'));
+		$modal = (float) $this->input->post('modal');
+		$target_hpp = (float) $this->input->post('target_hpp_pct');
+		$reference_price = $this->input->post('price_OFFLINE');
+		$calc = $this->price_calculator->calculate($modal, $target_hpp, $reference_price);
+
+		$html = $this->load->view('emails/templates/price_update', array(
+			'product' => $product,
+			'calc' => $calc,
+			'effective_date' => $this->input->post('effective_date'),
+			'changed_by' => current_user()['name'],
+		), TRUE);
+
+		$this->output->set_content_type('text/html')->set_output($html);
+	}
+}
