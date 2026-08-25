@@ -72,6 +72,7 @@ $route['products/store']               = 'products/store';
 $route['products/edit/(:num)']         = 'products/edit/$1';
 $route['products/update/(:num)']       = 'products/update/$1';
 $route['products/delete/(:num)']       = 'products/delete/$1';
+$route['products/search']              = 'products/search';
 
 // Kategori barang (master data)
 $route['categories']                   = 'categories/index';
@@ -119,13 +120,18 @@ $route['price-update/preview-email']   = 'price_update/preview_email';
 $route['price-update/send-pending']    = 'price_update/send_pending';
 
 // Harga kompetitor
-$route['competitor-price']             = 'competitor_price/index';
-$route['competitor-price/save']        = 'competitor_price/save';
+$route['competitor-price']                    = 'competitor_price/index';
+$route['competitor-price/create']             = 'competitor_price/create';
+$route['competitor-price/store']              = 'competitor_price/store';
+$route['competitor-price/edit/(:num)']        = 'competitor_price/edit/$1';
+$route['competitor-price/update/(:num)']      = 'competitor_price/update/$1';
+$route['competitor-price/delete/(:num)']      = 'competitor_price/delete/$1';
 
 // Riwayat perubahan harga
 $route['price-history']                = 'price_history/index';
 $route['price-history/detail/(:num)']  = 'price_history/detail/$1';
 $route['price-history/resend/(:num)']  = 'price_history/resend/$1';
+$route['price-history/export']         = 'price_history/export';
 
 // User & role
 $route['users']                        = 'users/index';
@@ -142,6 +148,10 @@ $route['notification-groups/store']        = 'notification_groups/store';
 $route['notification-groups/edit/(:num)']  = 'notification_groups/edit/$1';
 $route['notification-groups/update/(:num)'] = 'notification_groups/update/$1';
 $route['notification-groups/delete/(:num)'] = 'notification_groups/delete/$1';
+
+// Hak akses (menu per role)
+$route['access-control']               = 'access_control/index';
+$route['access-control/update']        = 'access_control/update';
 
 // Import / export
 $route['reports/export']               = 'reports/export';

@@ -5,7 +5,7 @@ class Competitor_model extends CI_Model
 {
 	protected $table = 'competitors';
 
-	public function get_all($filters = array())
+	public function get_all($filters = array(), $limit = NULL, $offset = 0)
 	{
 		$this->db->from($this->table);
 		if (!empty($filters['keyword'])) {
@@ -15,7 +15,24 @@ class Competitor_model extends CI_Model
 				->group_end();
 		}
 		$this->db->order_by('competitor_name', 'ASC');
+		if ($limit !== NULL) $this->db->limit($limit, $offset);
 		return $this->db->get()->result_array();
+	}
+
+	public function count_all($filters = array())
+	{
+		if (!empty($filters['keyword'])) {
+			$this->db->group_start()
+				->like('competitor_name', $filters['keyword'])
+				->or_like('competitor_code', $filters['keyword'])
+				->group_end();
+		}
+		return $this->db->count_all_results($this->table);
+	}
+
+	public function get_all_active()
+	{
+		return $this->db->where('is_active', 1)->order_by('competitor_name', 'ASC')->get($this->table)->result_array();
 	}
 
 	public function find($id)

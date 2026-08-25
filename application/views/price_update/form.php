@@ -18,11 +18,13 @@
 <?php endif; ?>
 
 <?php if (!empty($available_vendors)): ?>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
 <div class="card card-stat p-3 mb-3">
 	<form method="post" action="<?= base_url('price-update/add-vendor/' . $product['id']) ?>" class="d-flex align-items-end gap-2">
-		<div>
+		<div style="min-width:280px;">
 			<label class="form-label mb-1">Tambah Vendor</label>
-			<select name="vendor_id" class="form-select" required>
+			<select name="vendor_id" id="vendorSelect" class="form-select" style="width:100%" required>
 				<option value="">-- Pilih Vendor --</option>
 				<?php foreach ($available_vendors as $v): ?>
 					<option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['vendor_code'] . ' - ' . $v['vendor_name']) ?></option>
@@ -118,12 +120,15 @@
 		</div>
 	</div>
 </div>
+<!-- Trigger tersembunyi: Tabler/Bootstrap membuka modal lewat atribut data-bs-toggle,
+     bukan lewat objek JS global `bootstrap` (Tabler tidak mengekspornya ke window). -->
+<button type="button" id="previewModalTrigger" class="d-none" data-bs-toggle="modal" data-bs-target="#previewModal" aria-hidden="true"></button>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 const calcUrl = "<?= base_url('price-update/calculate') ?>";
 const previewUrl = "<?= base_url('price-update/preview-email') ?>";
-const previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
+const previewTrigger = document.getElementById('previewModalTrigger');
 
 document.querySelectorAll('.price-form').forEach(form => {
 	const modal = form.querySelector('[name=modal]');
@@ -154,8 +159,23 @@ document.querySelectorAll('.price-form').forEach(form => {
 		const fd = new FormData(form);
 		fetch(previewUrl, { method: 'POST', body: fd })
 			.then(r => r.text())
-			.then(html => { document.getElementById('previewBody').innerHTML = html; previewModal.show(); });
+			.then(html => { document.getElementById('previewBody').innerHTML = html; previewTrigger.click(); });
 	});
 });
 });
 </script>
+
+<?php if (!empty($available_vendors)): ?>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+jQuery(function ($) {
+	$('#vendorSelect').select2({
+		theme: 'bootstrap-5',
+		width: '100%',
+		placeholder: '-- Pilih Vendor --',
+		allowClear: true
+	});
+});
+</script>
+<?php endif; ?>

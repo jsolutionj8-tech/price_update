@@ -1,8 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Users extends Admin_Controller
+class Users extends MY_Controller
 {
+	protected $menu_key = 'users';
+
 	public function __construct()
 	{
 		parent::__construct();

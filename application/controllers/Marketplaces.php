@@ -6,8 +6,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Master data marketplace / kanal penjualan (dipakai oleh modul Update Harga
  * & Grup Notifikasi). Data disimpan pada tabel `price_channels`.
  */
-class Marketplaces extends Editor_Controller
+class Marketplaces extends MY_Controller
 {
+	const PER_PAGE = 25;
+	protected $menu_key = 'marketplaces';
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -17,10 +20,22 @@ class Marketplaces extends Editor_Controller
 	public function index()
 	{
 		$filters = array('keyword' => $this->input->get('keyword'));
+
+		$total = $this->marketplace_model->count_all($filters);
+		$total_pages = max(1, (int) ceil($total / self::PER_PAGE));
+		$page = max(1, min($total_pages, (int) $this->input->get('page')));
+		$offset = ($page - 1) * self::PER_PAGE;
+
 		$data = array(
 			'title'        => 'Master Marketplace',
-			'marketplaces' => $this->marketplace_model->get_all($filters),
+			'marketplaces' => $this->marketplace_model->get_all($filters, self::PER_PAGE, $offset),
 			'filters'      => $filters,
+			'pagination'   => array(
+				'page'        => $page,
+				'total_pages' => $total_pages,
+				'total'       => $total,
+				'per_page'    => self::PER_PAGE,
+			),
 		);
 		$this->render_view('marketplaces/index', $data);
 	}

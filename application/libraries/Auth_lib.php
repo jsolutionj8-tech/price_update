@@ -53,6 +53,20 @@ class Auth_lib
 		}
 	}
 
+	/**
+	 * Wajib punya akses ke menu tertentu, sesuai konfigurasi di menu
+	 * Administrasi -> Hak Akses (tabel role_menu_access). Role ADMIN selalu
+	 * lolos (lihat Menu_access_model::can_access()).
+	 */
+	public function require_menu_access($menu_key)
+	{
+		$this->require_login();
+		$this->CI->load->model('menu_access_model');
+		if (!$this->CI->menu_access_model->can_access($this->role(), $menu_key)) {
+			show_error('Anda tidak memiliki akses ke menu ini. Hubungi Administrator jika ini seharusnya bisa diakses.', 403, 'Akses Ditolak');
+		}
+	}
+
 	public function login_session($user)
 	{
 		$this->CI->session->set_userdata(array(

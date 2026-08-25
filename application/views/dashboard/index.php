@@ -1,42 +1,66 @@
-<div class="row g-3 mb-4">
-	<div class="col-md-3">
-		<div class="card card-stat p-3">
-			<small class="text-muted">Total Produk Aktif</small>
-			<h3 class="fw-bold mb-0"><?= $total_products ?></h3>
+<div class="row row-cards mb-3">
+	<div class="col-6 col-md-3">
+		<div class="card">
+			<div class="card-body d-flex align-items-center gap-3">
+				<span class="stat-icon tone-accent"><i class="bi bi-box-seam"></i></span>
+				<div>
+					<div class="subheader">Total Produk Aktif</div>
+					<div class="h1 mb-0"><?= number_format($total_products, 0, ',', '.') ?></div>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="col-md-3">
-		<div class="card card-stat p-3">
-			<small class="text-muted">Update Minggu Ini</small>
-			<h3 class="fw-bold mb-0"><?= $updates_this_week ?></h3>
+	<div class="col-6 col-md-3">
+		<div class="card">
+			<div class="card-body d-flex align-items-center gap-3">
+				<span class="stat-icon tone-accent"><i class="bi bi-currency-exchange"></i></span>
+				<div>
+					<div class="subheader">Update Minggu Ini</div>
+					<div class="h1 mb-0"><?= number_format($updates_this_week, 0, ',', '.') ?></div>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="col-md-3">
-		<div class="card card-stat p-3">
-			<small class="text-muted">Email Terkirim (Bulan Ini)</small>
-			<h3 class="fw-bold mb-0 text-success"><?= $emails_sent ?></h3>
+	<div class="col-6 col-md-3">
+		<div class="card">
+			<div class="card-body d-flex align-items-center gap-3">
+				<span class="stat-icon tone-good"><i class="bi bi-envelope-check"></i></span>
+				<div>
+					<div class="subheader">Email Terkirim (Bulan Ini)</div>
+					<div class="h1 mb-0"><?= number_format($emails_sent, 0, ',', '.') ?></div>
+				</div>
+			</div>
 		</div>
 	</div>
-	<div class="col-md-3">
-		<div class="card card-stat p-3">
-			<small class="text-muted">Email Gagal (Bulan Ini)</small>
-			<h3 class="fw-bold mb-0 text-danger"><?= $emails_failed ?></h3>
+	<div class="col-6 col-md-3">
+		<div class="card">
+			<div class="card-body d-flex align-items-center gap-3">
+				<span class="stat-icon tone-bad"><i class="bi bi-envelope-exclamation"></i></span>
+				<div>
+					<div class="subheader">Email Gagal (Bulan Ini)</div>
+					<div class="h1 mb-0"><?= number_format($emails_failed, 0, ',', '.') ?></div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
 
-<div class="row g-3">
+<div class="row row-cards">
 	<div class="col-md-5">
-		<div class="card card-stat p-3">
-			<h6 class="fw-bold mb-3">Tren Perubahan Harga (6 Bulan Terakhir)</h6>
-			<canvas id="trendChart" height="220"></canvas>
+		<div class="card">
+			<div class="card-body">
+				<h3 class="card-title">Tren Perubahan Harga (6 Bulan Terakhir)</h3>
+				<canvas id="trendChart" height="220"></canvas>
+			</div>
 		</div>
 	</div>
 	<div class="col-md-7">
-		<div class="card card-stat p-3">
-			<h6 class="fw-bold mb-3">Perubahan Harga Terbaru</h6>
+		<div class="card">
+			<div class="card-body">
+				<h3 class="card-title">Perubahan Harga Terbaru</h3>
+			</div>
 			<div class="table-responsive">
-				<table class="table table-sm align-middle">
+				<table class="table table-vcenter card-table">
 					<thead><tr><th>Produk</th><th>Tanggal Efektif</th><th>Status</th><th></th></tr></thead>
 					<tbody>
 					<?php foreach ($recent_batches as $b): ?>
@@ -48,7 +72,7 @@
 						</tr>
 					<?php endforeach; ?>
 					<?php if (empty($recent_batches)): ?>
-						<tr><td colspan="4" class="text-center text-muted py-3">Belum ada perubahan harga.</td></tr>
+						<tr><td colspan="4" class="text-center text-secondary py-3">Belum ada perubahan harga.</td></tr>
 					<?php endif; ?>
 					</tbody>
 				</table>

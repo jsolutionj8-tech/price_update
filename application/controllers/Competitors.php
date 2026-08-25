@@ -5,8 +5,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Competitors
  * Master data kompetitor (dipakai oleh modul Harga Kompetitor & Update Harga).
  */
-class Competitors extends Editor_Controller
+class Competitors extends MY_Controller
 {
+	const PER_PAGE = 25;
+	protected $menu_key = 'competitors';
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -16,10 +19,22 @@ class Competitors extends Editor_Controller
 	public function index()
 	{
 		$filters = array('keyword' => $this->input->get('keyword'));
+
+		$total = $this->competitor_model->count_all($filters);
+		$total_pages = max(1, (int) ceil($total / self::PER_PAGE));
+		$page = max(1, min($total_pages, (int) $this->input->get('page')));
+		$offset = ($page - 1) * self::PER_PAGE;
+
 		$data = array(
 			'title'       => 'Master Kompetitor',
-			'competitors' => $this->competitor_model->get_all($filters),
+			'competitors' => $this->competitor_model->get_all($filters, self::PER_PAGE, $offset),
 			'filters'     => $filters,
+			'pagination'  => array(
+				'page'        => $page,
+				'total_pages' => $total_pages,
+				'total'       => $total,
+				'per_page'    => self::PER_PAGE,
+			),
 		);
 		$this->render_view('competitors/index', $data);
 	}

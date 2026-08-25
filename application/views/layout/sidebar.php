@@ -1,59 +1,205 @@
-<?php $seg = $this->uri->segment(1) ?: 'dashboard'; $role = $logged_in_user['role'] ?? ''; ?>
-<div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-<div class="app-sidebar" id="appSidebar">
-	<div class="brand"><i class="bi bi-tags-fill"></i> Update Harga</div>
-	<nav class="pt-2">
-		<a href="<?= base_url('dashboard') ?>" class="<?= $seg === 'dashboard' ? 'active' : '' ?>"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+<?php
+	$seg = $this->uri->segment(1) ?: 'dashboard';
+	$role = $logged_in_user['role'] ?? '';
+	$accessible_menus = $accessible_menus ?? array();
+	// Dashboard & Keluar selalu tampil untuk siapa pun yang login; menu lain
+	// mengikuti konfigurasi Administrasi -> Hak Akses (ADMIN selalu penuh).
+	$can = function ($key) use ($role, $accessible_menus) {
+		return $role === 'ADMIN' || in_array($key, $accessible_menus, TRUE);
+	};
+	$show_master_data = $can('products') || $can('categories') || $can('vendors') || $can('competitors') || $can('marketplaces');
+	$show_transaksi   = $can('price-update') || $can('competitor-price') || $can('price-history');
+	$show_admin       = $role === 'ADMIN' || $can('users') || $can('notification-groups') || $can('reports');
+?>
+<aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
+	<div class="container-fluid">
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<h1 class="navbar-brand navbar-brand-autodark">
+			<a href="<?= base_url('dashboard') ?>" class="d-flex align-items-center gap-2 text-decoration-none">
+				<span class="navbar-brand-mark"><i class="bi bi-tags-fill"></i></span>
+				<span class="fw-bold">Update Harga</span>
+			</a>
+		</h1>
+		<div class="collapse navbar-collapse" id="sidebar-menu">
+			<ul class="navbar-nav pt-lg-3">
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'dashboard' ? 'active' : '' ?>" href="<?= base_url('dashboard') ?>">
+						<span class="nav-link-icon"><i class="bi bi-speedometer2"></i></span>
+						<span class="nav-link-title">Dashboard</span>
+					</a>
+				</li>
 
-		<div class="nav-section-title">Master Data</div>
-		<a href="<?= base_url('products') ?>" class="<?= $seg === 'products' ? 'active' : '' ?>"><i class="bi bi-box-seam me-2"></i>Produk</a>
-		<a href="<?= base_url('categories') ?>" class="<?= $seg === 'categories' ? 'active' : '' ?>"><i class="bi bi-tags me-2"></i>Kategori Barang</a>
-		<a href="<?= base_url('vendors') ?>" class="<?= $seg === 'vendors' ? 'active' : '' ?>"><i class="bi bi-truck me-2"></i>Vendor</a>
-		<a href="<?= base_url('competitors') ?>" class="<?= $seg === 'competitors' ? 'active' : '' ?>"><i class="bi bi-shop-window me-2"></i>Kompetitor</a>
-		<a href="<?= base_url('marketplaces') ?>" class="<?= $seg === 'marketplaces' ? 'active' : '' ?>"><i class="bi bi-bag-check me-2"></i>Marketplace</a>
+				<?php if ($show_master_data): ?>
+				<li class="nav-item"><span class="nav-section-title">Master Data</span></li>
+				<?php endif; ?>
+				<?php if ($can('products')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'products' ? 'active' : '' ?>" href="<?= base_url('products') ?>">
+						<span class="nav-link-icon"><i class="bi bi-box-seam"></i></span>
+						<span class="nav-link-title">Produk</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('categories')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'categories' ? 'active' : '' ?>" href="<?= base_url('categories') ?>">
+						<span class="nav-link-icon"><i class="bi bi-tags"></i></span>
+						<span class="nav-link-title">Kategori Barang</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('vendors')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'vendors' ? 'active' : '' ?>" href="<?= base_url('vendors') ?>">
+						<span class="nav-link-icon"><i class="bi bi-truck"></i></span>
+						<span class="nav-link-title">Vendor</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('competitors')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'competitors' ? 'active' : '' ?>" href="<?= base_url('competitors') ?>">
+						<span class="nav-link-icon"><i class="bi bi-shop-window"></i></span>
+						<span class="nav-link-title">Kompetitor</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('marketplaces')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'marketplaces' ? 'active' : '' ?>" href="<?= base_url('marketplaces') ?>">
+						<span class="nav-link-icon"><i class="bi bi-bag-check"></i></span>
+						<span class="nav-link-title">Marketplace</span>
+					</a>
+				</li>
+				<?php endif; ?>
 
-		<div class="nav-section-title">Transaksi</div>
-		<a href="<?= base_url('price-update') ?>" class="<?= $seg === 'price-update' ? 'active' : '' ?>"><i class="bi bi-currency-exchange me-2"></i>Update Harga</a>
-		<a href="<?= base_url('competitor-price') ?>" class="<?= $seg === 'competitor-price' ? 'active' : '' ?>"><i class="bi bi-graph-up-arrow me-2"></i>Harga Kompetitor</a>
-		<a href="<?= base_url('price-history') ?>" class="<?= $seg === 'price-history' ? 'active' : '' ?>"><i class="bi bi-clock-history me-2"></i>Riwayat Perubahan</a>
+				<?php if ($show_transaksi): ?>
+				<li class="nav-item"><span class="nav-section-title">Transaksi</span></li>
+				<?php endif; ?>
+				<?php if ($can('price-update')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'price-update' ? 'active' : '' ?>" href="<?= base_url('price-update') ?>">
+						<span class="nav-link-icon"><i class="bi bi-currency-exchange"></i></span>
+						<span class="nav-link-title">Update Harga</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('competitor-price')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'competitor-price' ? 'active' : '' ?>" href="<?= base_url('competitor-price') ?>">
+						<span class="nav-link-icon"><i class="bi bi-graph-up-arrow"></i></span>
+						<span class="nav-link-title">Harga Kompetitor</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('price-history')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'price-history' ? 'active' : '' ?>" href="<?= base_url('price-history') ?>">
+						<span class="nav-link-icon"><i class="bi bi-clock-history"></i></span>
+						<span class="nav-link-title">Riwayat Perubahan</span>
+					</a>
+				</li>
+				<?php endif; ?>
 
-		<?php if (in_array($role, array('ADMIN', 'EDITOR'), TRUE)): ?>
-		<div class="nav-section-title">Administrasi</div>
-		<?php endif; ?>
-		<?php if ($role === 'ADMIN'): ?>
-		<a href="<?= base_url('users') ?>" class="<?= $seg === 'users' ? 'active' : '' ?>"><i class="bi bi-people me-2"></i>Manajemen User</a>
-		<a href="<?= base_url('notification-groups') ?>" class="<?= $seg === 'notification-groups' ? 'active' : '' ?>"><i class="bi bi-bell me-2"></i>Grup Notifikasi</a>
-		<?php endif; ?>
-		<?php if (in_array($role, array('ADMIN', 'EDITOR'), TRUE)): ?>
-		<a href="<?= base_url('reports/import') ?>" class="<?= $seg === 'reports' ? 'active' : '' ?>"><i class="bi bi-file-earmark-arrow-up me-2"></i>Import / Export</a>
-		<?php endif; ?>
-		<a href="<?= base_url('logout') ?>" class="mt-3 border-top border-secondary-subtle"><i class="bi bi-box-arrow-right me-2"></i>Keluar</a>
-	</nav>
-</div>
-<div class="app-main">
-	<div class="app-topbar">
-		<div class="d-flex align-items-center gap-2">
-			<button type="button" class="btn-menu-toggle" id="sidebarToggle" aria-label="Buka menu"><i class="bi bi-list"></i></button>
-			<h4 class="mb-0 fw-bold text-dark"><?= isset($title) ? $title : '' ?></h4>
-		</div>
-		<div class="text-end">
-			<div class="fw-semibold"><?= isset($logged_in_user['name']) ? htmlspecialchars($logged_in_user['name']) : '' ?></div>
-			<small class="text-muted"><?= isset($logged_in_user['role']) ? htmlspecialchars($logged_in_user['role']) : '' ?></small>
+				<?php if ($show_admin): ?>
+				<li class="nav-item"><span class="nav-section-title">Administrasi</span></li>
+				<?php endif; ?>
+				<?php if ($can('users')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'users' ? 'active' : '' ?>" href="<?= base_url('users') ?>">
+						<span class="nav-link-icon"><i class="bi bi-people"></i></span>
+						<span class="nav-link-title">Manajemen User</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('notification-groups')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'notification-groups' ? 'active' : '' ?>" href="<?= base_url('notification-groups') ?>">
+						<span class="nav-link-icon"><i class="bi bi-bell"></i></span>
+						<span class="nav-link-title">Grup Notifikasi</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('reports')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'reports' ? 'active' : '' ?>" href="<?= base_url('reports/import') ?>">
+						<span class="nav-link-icon"><i class="bi bi-file-earmark-arrow-up"></i></span>
+						<span class="nav-link-title">Import / Export</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($role === 'ADMIN'): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'access-control' ? 'active' : '' ?>" href="<?= base_url('access-control') ?>">
+						<span class="nav-link-icon"><i class="bi bi-shield-lock"></i></span>
+						<span class="nav-link-title">Hak Akses</span>
+					</a>
+				</li>
+				<?php endif; ?>
+
+				<li class="nav-item mt-2 border-top border-secondary-subtle pt-2">
+					<a class="nav-link" href="<?= base_url('dokumentasi.html') ?>" target="_blank" rel="noopener">
+						<span class="nav-link-icon"><i class="bi bi-book"></i></span>
+						<span class="nav-link-title">Dokumentasi</span>
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="<?= base_url('logout') ?>">
+						<span class="nav-link-icon"><i class="bi bi-box-arrow-right"></i></span>
+						<span class="nav-link-title">Keluar</span>
+					</a>
+				</li>
+			</ul>
 		</div>
 	</div>
-	<?php $flash_success = $this->session->flashdata('success'); $flash_error = $this->session->flashdata('error'); ?>
-	<?php if ($flash_success): ?>
-		<div class="alert alert-success alert-dismissible fade show"><?= $flash_success ?><button class="btn-close" data-bs-dismiss="alert"></button></div>
-	<?php endif; ?>
-	<?php if ($flash_error): ?>
-		<div class="alert alert-danger alert-dismissible fade show"><?= $flash_error ?><button class="btn-close" data-bs-dismiss="alert"></button></div>
-	<?php endif; ?>
-	<?php $pending_notify_count = $pending_notify_count ?? 0; ?>
-	<?php if ($pending_notify_count > 0 && in_array($role, array('ADMIN', 'EDITOR'), TRUE)): ?>
-		<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
-			<div><i class="bi bi-envelope-exclamation-fill me-1"></i><?= $pending_notify_count ?> perubahan harga menunggu dikirim notifikasi.</div>
-			<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
-				<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk <?= $pending_notify_count ?> perubahan harga sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
-			</form>
+</aside>
+
+<div class="page-wrapper">
+	<div class="page-header d-print-none">
+		<div class="container-fluid">
+			<div class="row g-2 align-items-center">
+				<div class="col">
+					<h2 class="page-title"><?= isset($title) ? htmlspecialchars($title) : '' ?></h2>
+				</div>
+				<div class="col-auto">
+					<?php
+						$user_name = $logged_in_user['name'] ?? '';
+						$name_parts = $user_name !== '' ? preg_split('/\s+/', trim($user_name)) : array();
+						$initials = '';
+						if (!empty($name_parts)) {
+							$initials = mb_strtoupper(mb_substr($name_parts[0], 0, 1) . (isset($name_parts[1]) ? mb_substr($name_parts[1], 0, 1) : ''));
+						}
+					?>
+					<div class="d-flex align-items-center gap-2">
+						<div class="text-end d-none d-sm-block">
+							<div class="fw-semibold"><?= htmlspecialchars($user_name) ?></div>
+							<div class="text-secondary small"><?= isset($logged_in_user['role']) ? htmlspecialchars($logged_in_user['role']) : '' ?></div>
+						</div>
+						<?php if ($initials !== ''): ?>
+							<div class="user-avatar"><?= htmlspecialchars($initials) ?></div>
+						<?php endif; ?>
+					</div>
+				</div>
+			</div>
 		</div>
-	<?php endif; ?>
+	</div>
+	<div class="page-body">
+		<div class="container-xl">
+			<?php $flash_success = $this->session->flashdata('success'); $flash_error = $this->session->flashdata('error'); ?>
+			<?php if ($flash_success): ?>
+				<div class="alert alert-success alert-dismissible fade show"><?= $flash_success ?><button class="btn-close" data-bs-dismiss="alert"></button></div>
+			<?php endif; ?>
+			<?php if ($flash_error): ?>
+				<div class="alert alert-danger alert-dismissible fade show"><?= $flash_error ?><button class="btn-close" data-bs-dismiss="alert"></button></div>
+			<?php endif; ?>
+			<?php $pending_notify_count = $pending_notify_count ?? 0; ?>
+			<?php if ($pending_notify_count > 0 && $can('price-update')): ?>
+				<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
+					<div><i class="bi bi-envelope-exclamation-fill me-1"></i><?= $pending_notify_count ?> perubahan harga menunggu dikirim notifikasi.</div>
+					<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
+						<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk <?= $pending_notify_count ?> perubahan harga sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
+					</form>
+				</div>
+			<?php endif; ?>

@@ -6,9 +6,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Controller inti aplikasi: form update Modal/HPP/harga per kanal, kalkulasi otomatis,
  * simpan sebagai batch riwayat, dan memicu pengiriman notifikasi email.
  */
-class Price_update extends Editor_Controller
+class Price_update extends MY_Controller
 {
 	const PER_PAGE = 25;
+	protected $menu_key = 'price-update';
 
 	public function __construct()
 	{

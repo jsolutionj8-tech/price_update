@@ -69,6 +69,23 @@ class Price_change_batch_model extends CI_Model
 		return $this->db->from($this->table)->count_all_results();
 	}
 
+	/**
+	 * Ambil seluruh baris (tanpa limit) yang cocok dengan filter — dipakai untuk
+	 * export Excel supaya hasil unduhan mengikuti filter yang sedang aktif di
+	 * halaman Riwayat Perubahan, bukan sekadar N baris pertama.
+	 */
+	public function get_all_filtered($filters = array())
+	{
+		$this->_apply_filters($filters);
+		return $this->db->select('price_change_batches.*, products.product_name, products.product_code, vendors.vendor_code, users.full_name as changed_by_name')
+			->from($this->table)
+			->join('products', 'products.id = price_change_batches.product_id')
+			->join('vendors', 'vendors.id = price_change_batches.vendor_id')
+			->join('users', 'users.id = price_change_batches.changed_by')
+			->order_by('price_change_batches.created_at', 'DESC')
+			->get()->result_array();
+	}
+
 	protected function _apply_filters($filters)
 	{
 		if (!empty($filters['product_id'])) $this->db->where('price_change_batches.product_id', $filters['product_id']);

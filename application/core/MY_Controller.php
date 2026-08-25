@@ -9,11 +9,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class MY_Controller extends CI_Controller
 {
 	protected $allowed_roles = array('ADMIN', 'EDITOR', 'VIEWER'); // override di child controller bila perlu dibatasi
+	protected $menu_key = null; // override di child controller: kunci menu yang aksesnya diatur lewat Administrasi -> Hak Akses
 
 	public function __construct()
 	{
 		parent::__construct();
 		$this->auth_lib->require_role($this->allowed_roles);
+		if ($this->menu_key !== null) {
+			$this->auth_lib->require_menu_access($this->menu_key);
+		}
 
 		$this->load->model('user_model');
 		$this->data['logged_in_user'] = current_user();
@@ -22,6 +26,11 @@ class MY_Controller extends CI_Controller
 		// supaya tetap akurat lintas user/sesi (lihat Price_change_batch_model::count_pending()).
 		$this->load->model('price_change_batch_model');
 		$this->data['pending_notify_count'] = $this->price_change_batch_model->count_pending();
+
+		// Daftar menu yang boleh dilihat user saat ini (dipakai sidebar.php supaya
+		// link yang tidak bisa diakses tidak ditampilkan sama sekali).
+		$this->load->model('menu_access_model');
+		$this->data['accessible_menus'] = $this->menu_access_model->get_accessible_keys(current_user()['role']);
 	}
 
 	/**

@@ -6,45 +6,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Import data awal dari Excel/CSV (migrasi dari spreadsheet lama) & export laporan.
  * Menggunakan PhpSpreadsheet (via Composer) — lihat dokumentasi instalasi.
  */
-class Reports extends Editor_Controller
+class Reports extends MY_Controller
 {
-	public function __construct()
-	{
-		parent::__construct();
-		$this->load->model('price_change_batch_model');
-	}
+	protected $menu_key = 'reports';
 
+	/**
+	 * Export Riwayat Perubahan Harga ke Excel lewat menu Import/Export (khusus
+	 * ADMIN/EDITOR, mengikuti hak akses menu 'reports'). Untuk tombol Export Excel
+	 * langsung di halaman Riwayat Perubahan — yang terbuka untuk semua role yang
+	 * bisa melihat halaman tsb — lihat Price_history::export().
+	 */
 	public function export()
 	{
-		if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
-			show_error('Library PhpSpreadsheet belum terpasang. Jalankan "composer install" pada root project.');
-		}
-
-		$batches = $this->price_change_batch_model->get_paginated(1000, 0, array());
-
-		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-		$sheet = $spreadsheet->getActiveSheet();
-		$sheet->setTitle('Riwayat Harga');
-		$headers = array('Tanggal Efektif', 'Kode Produk', 'Produk', 'Vendor', 'Diubah Oleh', 'Status Notifikasi', 'Dibuat Pada');
-		$sheet->fromArray($headers, NULL, 'A1');
-
-		$row = 2;
-		foreach ($batches as $b) {
-			$sheet->fromArray(array(
-				$b['effective_date'], $b['product_code'], $b['product_name'], $b['vendor_code'],
-				$b['changed_by_name'], $b['notify_status'], $b['created_at'],
-			), NULL, 'A' . $row);
-			$row++;
-		}
-
-		$filename = 'laporan_harga_' . date('Ymd_His') . '.xlsx';
-		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		header('Content-Disposition: attachment;filename="' . $filename . '"');
-		header('Cache-Control: max-age=0');
-
-		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-		$writer->save('php://output');
-		exit;
+		$filters = array(
+			'product_id' => $this->input->get('product_id'),
+			'status'     => $this->input->get('status'),
+			'date_from'  => $this->input->get('date_from'),
+			'date_to'    => $this->input->get('date_to'),
+		);
+		$this->load->library('price_history_exporter');
+		$this->price_history_exporter->export_to_browser($filters);
 	}
 
 	public function import()

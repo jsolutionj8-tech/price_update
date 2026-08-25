@@ -1,8 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Notification_groups extends Admin_Controller
+class Notification_groups extends MY_Controller
 {
+	protected $menu_key = 'notification-groups';
+
 	public function __construct()
 	{
 		parent::__construct();

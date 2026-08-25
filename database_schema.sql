@@ -117,6 +117,21 @@ CREATE TABLE `email_templates` (
   UNIQUE KEY `template_code` (`template_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `menus` */
+
+DROP TABLE IF EXISTS `menus`;
+
+CREATE TABLE `menus` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `menu_key` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `menu_label` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `menu_group` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `menu_icon` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sort_order` smallint(6) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `menu_key` (`menu_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `notification_group_channels` */
 
 DROP TABLE IF EXISTS `notification_group_channels`;
@@ -285,6 +300,20 @@ CREATE TABLE `products` (
   CONSTRAINT `fk_products_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `role_menu_access` */
+
+DROP TABLE IF EXISTS `role_menu_access`;
+
+CREATE TABLE `role_menu_access` (
+  `role_id` int(10) unsigned NOT NULL,
+  `menu_id` int(10) unsigned NOT NULL,
+  `can_access` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`role_id`,`menu_id`),
+  KEY `fk_rma_menu` (`menu_id`),
+  CONSTRAINT `fk_rma_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_rma_menu` FOREIGN KEY (`menu_id`) REFERENCES `menus` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `roles` */
 
 DROP TABLE IF EXISTS `roles`;
@@ -328,6 +357,7 @@ CREATE TABLE `vendors` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `vendor_code` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `vendor_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `vendor_category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `contact_info` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),

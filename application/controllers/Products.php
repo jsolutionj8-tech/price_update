@@ -1,8 +1,10 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Products extends Editor_Controller
+class Products extends MY_Controller
 {
+	protected $menu_key = 'products';
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -99,6 +101,23 @@ class Products extends Editor_Controller
 		$this->product_model->delete($id);
 		$this->session->set_flashdata('success', 'Produk berhasil dinonaktifkan.');
 		redirect('products');
+	}
+
+	/**
+	 * Endpoint AJAX bersama: cari produk (kode/nama) untuk dropdown pencarian
+	 * Select2 di berbagai modul (Harga Kompetitor, Riwayat Perubahan, dst).
+	 * Dibatasi 20 hasil — katalog produk terlalu besar untuk <select> biasa.
+	 */
+	public function search()
+	{
+		$keyword = trim((string) $this->input->get('q'));
+		$results = $keyword === '' ? array() : $this->product_model->get_all(array('keyword' => $keyword), 20, 0);
+
+		$out = array();
+		foreach ($results as $p) {
+			$out[] = array('id' => (int) $p['id'], 'code' => $p['product_code'], 'name' => $p['product_name']);
+		}
+		$this->output->set_content_type('application/json')->set_output(json_encode($out));
 	}
 
 	protected function _validate()

@@ -5,14 +5,23 @@ class Category_model extends CI_Model
 {
 	protected $table = 'product_categories';
 
-	public function get_all($filters = array())
+	public function get_all($filters = array(), $limit = NULL, $offset = 0)
 	{
 		$this->db->from($this->table);
 		if (!empty($filters['keyword'])) {
 			$this->db->like('category_name', $filters['keyword']);
 		}
 		$this->db->order_by('category_name', 'ASC');
+		if ($limit !== NULL) $this->db->limit($limit, $offset);
 		return $this->db->get()->result_array();
+	}
+
+	public function count_all($filters = array())
+	{
+		if (!empty($filters['keyword'])) {
+			$this->db->like('category_name', $filters['keyword']);
+		}
+		return $this->db->count_all_results($this->table);
 	}
 
 	public function get_all_active()

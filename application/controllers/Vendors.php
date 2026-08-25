@@ -5,8 +5,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  * Vendors
  * Master data vendor (dipakai oleh modul Produk, Update Harga, dan Riwayat Perubahan).
  */
-class Vendors extends Editor_Controller
+class Vendors extends MY_Controller
 {
+	const PER_PAGE = 25;
+	protected $menu_key = 'vendors';
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -16,10 +19,22 @@ class Vendors extends Editor_Controller
 	public function index()
 	{
 		$filters = array('keyword' => $this->input->get('keyword'));
+
+		$total = $this->vendor_model->count_all($filters);
+		$total_pages = max(1, (int) ceil($total / self::PER_PAGE));
+		$page = max(1, min($total_pages, (int) $this->input->get('page')));
+		$offset = ($page - 1) * self::PER_PAGE;
+
 		$data = array(
-			'title'   => 'Master Vendor',
-			'vendors' => $this->vendor_model->get_all($filters),
-			'filters' => $filters,
+			'title'      => 'Master Vendor',
+			'vendors'    => $this->vendor_model->get_all($filters, self::PER_PAGE, $offset),
+			'filters'    => $filters,
+			'pagination' => array(
+				'page'        => $page,
+				'total_pages' => $total_pages,
+				'total'       => $total,
+				'per_page'    => self::PER_PAGE,
+			),
 		);
 		$this->render_view('vendors/index', $data);
 	}
@@ -45,10 +60,11 @@ class Vendors extends Editor_Controller
 		}
 
 		$this->vendor_model->create(array(
-			'vendor_code'   => $code,
-			'vendor_name'   => $name ?: NULL,
-			'contact_info'  => $this->input->post('contact_info', TRUE) ?: NULL,
-			'is_active'     => 1,
+			'vendor_code'     => $code,
+			'vendor_name'     => $name ?: NULL,
+			'vendor_category' => $this->input->post('vendor_category', TRUE) ?: NULL,
+			'contact_info'    => $this->input->post('contact_info', TRUE) ?: NULL,
+			'is_active'       => 1,
 		));
 		$this->session->set_flashdata('success', 'Vendor berhasil ditambahkan.');
 		redirect('vendors');
@@ -64,9 +80,10 @@ class Vendors extends Editor_Controller
 	public function update($id)
 	{
 		$this->vendor_model->update($id, array(
-			'vendor_name'  => trim((string) $this->input->post('vendor_name', TRUE)) ?: NULL,
-			'contact_info' => $this->input->post('contact_info', TRUE) ?: NULL,
-			'is_active'    => $this->input->post('is_active') ? 1 : 0,
+			'vendor_name'     => trim((string) $this->input->post('vendor_name', TRUE)) ?: NULL,
+			'vendor_category' => $this->input->post('vendor_category', TRUE) ?: NULL,
+			'contact_info'    => $this->input->post('contact_info', TRUE) ?: NULL,
+			'is_active'       => $this->input->post('is_active') ? 1 : 0,
 		));
 		$this->session->set_flashdata('success', 'Vendor berhasil diperbarui.');
 		redirect('vendors');

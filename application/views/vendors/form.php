@@ -17,6 +17,15 @@
 			<input type="text" name="vendor_name" class="form-control" value="<?= htmlspecialchars($vendor['vendor_name'] ?? '') ?>">
 		</div>
 		<div class="mb-3">
+			<label class="form-label">Kategori (opsional)</label>
+			<input type="text" name="vendor_category" class="form-control" list="vendorCategoryList" placeholder="mis. Supplier CK, Supplier NCK, Umum" value="<?= htmlspecialchars($vendor['vendor_category'] ?? '') ?>">
+			<datalist id="vendorCategoryList">
+				<option value="Supplier CK">
+				<option value="Supplier NCK">
+				<option value="Umum">
+			</datalist>
+		</div>
+		<div class="mb-3">
 			<label class="form-label">Kontak (opsional)</label>
 			<input type="text" name="contact_info" class="form-control" placeholder="No. telepon / email / alamat singkat" value="<?= htmlspecialchars($vendor['contact_info'] ?? '') ?>">
 		</div>

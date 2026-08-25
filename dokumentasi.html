@@ -200,7 +200,7 @@
 		<span>CodeIgniter 3</span>
 		<span>PHP 8.x</span>
 		<span>MySQL 8 / MariaDB</span>
-		<span>Bootstrap 5</span>
+		<span>Tabler UI (Bootstrap 5)</span>
 		<span>Responsive Desktop &amp; Mobile</span>
 	</div>
 	<div class="meta">Dokumen ini dibuka langsung di browser — tidak memerlukan server tambahan. Diperbarui: 25 Agustus 2026.</div>
@@ -222,6 +222,7 @@
 		<a href="#modul-kompetitor" class="sub">6.4 Master Kompetitor <span class="badge-new">BARU</span></a>
 		<a href="#modul-marketplace" class="sub">6.5 Master Marketplace <span class="badge-new">BARU</span></a>
 		<a href="#modul-update-harga" class="sub">6.6 Update Harga</a>
+		<a href="#modul-hak-akses" class="sub">6.11 Hak Akses <span class="badge-new">BARU</span></a>
 		<a href="#responsif">7. Tampilan Desktop &amp; Mobile</a>
 		<a href="#notifikasi">8. Notifikasi Email &amp; Cron</a>
 		<a href="#troubleshooting">9. Troubleshooting</a>
@@ -250,7 +251,7 @@
 
 		<section id="arsitektur">
 			<h2><span class="num">2</span> Arsitektur Teknis</h2>
-			<p>Dibangun di atas <strong>CodeIgniter 3</strong> (pola MVC klasik), dengan tampilan menggunakan <strong>Bootstrap 5</strong> dan <strong>Bootstrap Icons</strong> (dimuat via CDN). Data disimpan pada <strong>MySQL 8 / MariaDB</strong>.</p>
+			<p>Dibangun di atas <strong>CodeIgniter 3</strong> (pola MVC klasik), dengan tampilan menggunakan <a href="https://tabler.io" target="_blank" rel="noopener"><strong>Tabler</strong></a> — template admin open-source (MIT License, gratis) yang dibangun di atas <strong>Bootstrap 5</strong> — plus <strong>Bootstrap Icons</strong> dan font <strong>Inter</strong> (semua dimuat via CDN, tanpa proses build tambahan). Data disimpan pada <strong>MySQL 8 / MariaDB</strong>.</p>
 
 			<h3>Struktur Folder Penting</h3>
 			<div class="table-wrap">
@@ -259,14 +260,14 @@
 				<tr><td><code>application/controllers</code></td><td>Logika tiap modul (Dashboard, Products, Competitors, Marketplaces, Price_update, dst.)</td></tr>
 				<tr><td><code>application/models</code></td><td>Akses database per entitas (Product_model, Competitor_model, Marketplace_model, dst.)</td></tr>
 				<tr><td><code>application/views</code></td><td>Template tampilan, dikelompokkan per modul + <code>layout/</code> untuk header/sidebar/footer bersama</td></tr>
-				<tr><td><code>application/core/MY_Controller.php</code></td><td>Controller dasar: proteksi login otomatis + pembatasan role (<code>Admin_Controller</code>, <code>Editor_Controller</code>)</td></tr>
+				<tr><td><code>application/core/MY_Controller.php</code></td><td>Controller dasar: proteksi login otomatis, properti <code>$menu_key</code> untuk hak akses per menu (lihat §6.11 Hak Akses), dan <code>Admin_Controller</code> (khusus ADMIN, dipakai halaman Hak Akses sendiri agar tidak bisa terkunci)</td></tr>
 				<tr><td><code>application/libraries</code></td><td>Auth_lib (session &amp; role), Price_calculator, Notifier (pengiriman email)</td></tr>
 				<tr><td><code>application/helpers</code></td><td>Fungsi bantu tampilan: <code>rupiah()</code>, <code>status_badge()</code>, <code>tgl_indo()</code>, dsb.</td></tr>
 				<tr><td><code>application/config/routes.php</code></td><td>Pemetaan URL ramah-pengguna ke controller/method</td></tr>
 			</table>
 			</div>
 
-			<div class="callout info">Setiap controller (kecuali <code>Auth</code>) meng-extend <code>MY_Controller</code> sehingga otomatis memerlukan login. Controller yang menggunakan <code>Admin_Controller</code> hanya bisa diakses role <strong>ADMIN</strong>; yang menggunakan <code>Editor_Controller</code> bisa diakses <strong>ADMIN</strong> dan <strong>EDITOR</strong>.</div>
+			<div class="callout info">Setiap controller (kecuali <code>Auth</code>) meng-extend <code>MY_Controller</code> sehingga otomatis memerlukan login. Hak akses per menu (Produk, Update Harga, dst.) kini <strong>dikonfigurasi lewat database</strong> (tabel <code>menus</code> &amp; <code>role_menu_access</code>, diatur lewat menu <strong>Administrasi → Hak Akses</strong>) alih-alih hardcode di kode — lihat §6.11. Halaman Hak Akses itu sendiri, serta hal-hal yang butuh jaminan tidak bisa terkunci, tetap pakai <code>Admin_Controller</code> (khusus ADMIN, fixed).</div>
 		</section>
 
 		<section id="instalasi">
@@ -313,24 +314,29 @@ SOURCE seed_sample_data.sql;</code></pre>
 
 		<section id="role">
 			<h2><span class="num">5</span> Role &amp; Hak Akses</h2>
+			<div class="callout good">
+				✅ <strong>Kini bisa diatur lewat UI <span class="badge-new">BARU</span></strong> — menu <strong>Administrasi → Hak Akses</strong> (khusus ADMIN) menampilkan matriks centang: baris = menu, kolom = role EDITOR &amp; VIEWER. Menu yang tidak dicentang untuk suatu role otomatis <strong>hilang dari sidebar</strong> role tsb, dan tidak bisa dibuka langsung lewat URL (percobaan akses menampilkan halaman 403 Akses Ditolak). Perubahan berlaku <em>seketika</em> — user yang sedang login tidak perlu logout/login ulang. Role <strong>ADMIN selalu punya akses penuh</strong> ke seluruh menu dan sengaja tidak bisa dibatasi lewat halaman ini (mencegah admin mengunci dirinya sendiri secara tidak sengaja).
+			</div>
+			<p>Tabel di bawah menunjukkan <strong>pengaturan bawaan (default)</strong> saat fitur ini pertama kali dipasang — persis meniru perilaku lama sebelum bisa dikonfigurasi, jadi tidak ada akses siapa pun yang berubah sampai ADMIN sengaja mengubahnya lewat menu Hak Akses.</p>
 			<div class="table-wrap">
 			<table>
 				<tr><th>Modul</th><th><span class="pill admin">ADMIN</span></th><th><span class="pill editor">EDITOR</span></th><th><span class="pill viewer">VIEWER</span></th></tr>
 				<tr><td>Dashboard</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-yes">✔</td></tr>
 				<tr><td>Master Produk</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
-				<tr><td>Master Kategori Barang <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
-				<tr><td>Master Vendor <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
-				<tr><td>Master Kompetitor <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
-				<tr><td>Master Marketplace <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Kategori Barang</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Vendor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Kompetitor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Marketplace</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Update Harga</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Harga Kompetitor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
-				<tr><td>Riwayat Perubahan</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-yes">✔ (lihat saja)</td></tr>
+				<tr><td>Riwayat Perubahan</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-yes">✔</td></tr>
 				<tr><td>Import / Export</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Manajemen User</td><td class="role-yes">✔</td><td class="role-no">—</td><td class="role-no">—</td></tr>
 				<tr><td>Grup Notifikasi</td><td class="role-yes">✔</td><td class="role-no">—</td><td class="role-no">—</td></tr>
+				<tr><td>Hak Akses <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-no">— (tetap, tidak bisa diatur)</td><td class="role-no">— (tetap, tidak bisa diatur)</td></tr>
 			</table>
 			</div>
-			<p class="lead">Pembatasan diterapkan otomatis di level controller (<code>Admin_Controller</code> / <code>Editor_Controller</code>) dan menu sidebar menyesuaikan role pengguna yang sedang login.</p>
+			<p class="lead">Semua kombinasi ✔/— di atas (kecuali baris Dashboard &amp; Hak Akses) sekarang bisa diubah ADMIN kapan saja lewat menu Hak Akses — tabel ini hanya starting point, bukan aturan tetap lagi.</p>
 		</section>
 
 		<section id="modul">
@@ -350,11 +356,11 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<div class="callout good">✅ Kategori bersifat opsional pada Produk — field ini tersedia sebagai dropdown "Kategori Barang" di form Tambah/Edit Produk (menu <strong>Master Data → Produk</strong>), lengkap dengan filter kategori pada daftar produk.</div>
 
 			<h3 id="modul-vendor">6.3 Master Vendor <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Master Data → Vendor</strong>. Halaman CRUD penuh untuk tabel <code>vendors</code> — sebelumnya vendor hanya bisa ditambahkan lewat query SQL manual.</p>
+			<p>Menu <strong>Master Data → Vendor</strong>. Halaman CRUD penuh untuk tabel <code>vendors</code> — sebelumnya vendor hanya bisa ditambahkan lewat query SQL manual. Berisi <strong>121 vendor/pemasok asli</strong> yang diimpor dari data <code>vendor_upload</code>.</p>
 			<ul>
-				<li><strong>Tambah Vendor</strong>: isi Kode (huruf/angka/tanda "-", otomatis huruf besar — mis. <code>VENDOR-A</code>), Nama, dan Kontak (opsional, mis. no. telepon/email).</li>
+				<li><strong>Tambah Vendor</strong>: isi Kode (huruf/angka/tanda "-", otomatis huruf besar — mis. <code>V.00033-NCK</code>), Nama, Kategori (opsional — mis. <code>Supplier CK</code>, <code>Supplier NCK</code>, <code>Umum</code>), dan Kontak (opsional, mis. no. telepon/email).</li>
 				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan kode/nama.</li>
-				<li><strong>Edit</strong>: ubah nama, kontak, dan status aktif. Kode bersifat permanen setelah dibuat.</li>
+				<li><strong>Edit</strong>: ubah nama, kategori, kontak, dan status aktif. Kode bersifat permanen setelah dibuat.</li>
 				<li><strong>Nonaktifkan / Aktifkan</strong>: vendor yang sudah punya riwayat biaya/harga tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi di form input, dan bisa diaktifkan kembali kapan saja.</li>
 			</ul>
 			<div class="callout good">✅ Vendor yang aktif otomatis muncul sebagai pilihan tab vendor baru di modul <strong>Produk</strong> (Cost per Vendor) dan <strong>Update Harga</strong>.</div>
@@ -384,18 +390,49 @@ SOURCE seed_sample_data.sql;</code></pre>
 				✅ <strong>Notifikasi digabung, bukan langsung terkirim per produk <span class="badge-new">BARU</span>.</strong> Menyimpan harga <em>tidak lagi</em> langsung mengirim email — batch tersimpan berstatus "Pending". Selama masih ada batch berstatus Pending <em>di database</em> (dihitung ulang setiap halaman dimuat, <strong>bukan</strong> disimpan di sesi login), muncul kotak kuning di bagian atas <em>setiap halaman</em> aplikasi — <b>untuk siapa pun yang login</b> sebagai ADMIN/EDITOR, bukan cuma yang membuat perubahannya: <b>"N perubahan harga menunggu dikirim notifikasi"</b> dengan tombol <strong>Kirim Notifikasi Sekarang</strong>, yang mengirim <em>satu</em> email per penerima merangkum <em>semua</em> produk Pending yang ada (misal update 10 produk berurutan → 1 email berisi 10 produk per penerima, bukan 10 email terpisah).
 			</div>
 			<p class="lead">Setiap penyimpanan tetap tercatat sebagai batch riwayat (status awal "Pending"); isi email tiap penerima otomatis disaring hanya menampilkan marketplace yang benar-benar mereka langgani di menu Grup Notifikasi — sama seperti sebelumnya, hanya cara pengirimannya yang kini digabung. Karena sumber datanya database (bukan sesi), jumlah "menunggu" tetap akurat walau Anda logout lalu login lagi, atau login sebagai user lain.</p>
+			<div class="callout warn">
+				🛠️ <strong>Perbaikan bug — kalkulasi otomatis &amp; Preview Email sempat tidak berfungsi.</strong> Saat template diganti ke Tabler, skrip halaman ini memanggil <code>new bootstrap.Modal(...)</code> untuk tombol Preview Email — padahal JS bundel Tabler tidak menyediakan objek global <code>bootstrap</code>, sehingga baris itu gagal (<code>ReferenceError</code>) dan MEMATIKAN seluruh skrip di baliknya, termasuk listener kalkulasi otomatis SRP Suggest/Markup %/Margin % (jadi field Modal/Target HPP terlihat tidak menghitung apa-apa) dan tombol Preview Email (klik tidak bereaksi). Sudah diperbaiki dengan mengganti pemicu modal ke atribut <code>data-bs-toggle</code> bawaan Tabler — sudah diverifikasi langsung lewat browser otomatis (bukan cuma baca kode): kalkulasi live update dengan benar, modal Preview Email terbuka/tertutup normal, dan tidak ada error di console.
+			</div>
+			<div class="callout good">
+				✅ <strong>Dropdown Tambah Vendor kini Select2 <span class="badge-new">BARU</span>.</strong> Sama seperti pola pencarian di Harga Kompetitor — mempermudah memilih vendor dari daftar 100+ vendor master. Kolom "Harga Baru per Kanal" sendiri memang <em>sudah</em> mengambil data dari <strong>Master Data → Marketplace</strong> sejak awal (dikonfirmasi ulang saat perbaikan ini) — daftar kanal yang tampil otomatis mengikuti marketplace aktif di master, termasuk urutan tampilnya.
+			</div>
 
 			<h3 id="modul-harga-kompetitor">6.7 Harga Kompetitor</h3>
-			<p>Menu <strong>Transaksi → Harga Kompetitor</strong>. Pilih produk, lalu input harga terkini untuk setiap kompetitor aktif beserta tanggal pantau. Data ini menjadi referensi visual saat menentukan harga jual di modul Update Harga.</p>
+			<p>Menu <strong>Transaksi → Harga Kompetitor</strong>. Kini bergaya menu master (sama seperti Master Kompetitor/Vendor): daftar berpaging (25 baris/halaman) dengan pencarian, tombol <strong>Tambah Harga Kompetitor</strong>, dan form tambah/edit satu entri per submit — menggantikan form matriks lama (satu produk × semua kompetitor sekaligus).</p>
+			<ul>
+				<li><strong>Tambah</strong>: cari Produk lewat dropdown pencarian <a href="https://select2.org" target="_blank" rel="noopener">Select2</a> (mengetik minimal 2 huruf memicu pencarian AJAX ke katalog — dipakai karena jumlah produk terlalu besar untuk dropdown biasa), pilih <strong>Kompetitor</strong> dari dropdown yang datanya selalu diambil langsung dari <strong>Master Data → Kompetitor</strong> (hanya yang berstatus aktif), isi Harga dan Tanggal Pantau.</li>
+				<li>Jika kombinasi Produk + Kompetitor + Tanggal Pantau yang sama sudah pernah dicatat, sistem otomatis <strong>memperbarui</strong> harga tersebut alih-alih membuat duplikat.</li>
+				<li><strong>Edit</strong>: Produk bersifat tetap (tidak bisa diganti), tapi Kompetitor, Harga, dan Tanggal Pantau bisa diubah.</li>
+				<li><strong>Hapus</strong>: data harga kompetitor bisa dihapus permanen (bukan nonaktifkan) — catatan ini bersifat log observasi, bukan master data.</li>
+			</ul>
+			<p class="lead">Data ini menjadi referensi visual saat menentukan harga jual di modul Update Harga.</p>
 
 			<h3 id="modul-riwayat">6.8 Riwayat Perubahan</h3>
 			<p>Menu <strong>Transaksi → Riwayat Perubahan</strong>. Menampilkan seluruh batch perubahan harga beserta status pengiriman notifikasi (Terkirim/Sebagian/Gagal), dengan detail nilai lama vs baru per marketplace.</p>
+			<ul>
+				<li><strong>Filter Produk kini <a href="https://select2.org" target="_blank" rel="noopener">Select2</a> <span class="badge-new">BARU</span></strong> — dropdown pencarian (ketik minimal 2 huruf) menggantikan <code>&lt;select&gt;</code> berisi seluruh katalog produk.</li>
+				<li><strong>Paging diperbaiki <span class="badge-new">BARU</span></strong> — sebelumnya daftar nomor halaman polos tanpa navigasi Prev/Next dan <em>kehilangan filter aktif</em> saat pindah halaman. Sekarang 25 baris/halaman dengan navigasi First/Prev/Next/Last, kotak lompat ke halaman, dan seluruh filter (Produk, Status, rentang tanggal) tetap terjaga saat berpindah halaman.</li>
+				<li><strong>Tombol "Export Excel" — terbuka untuk semua role <span class="badge-new">BARU</span></strong> — mengunduh riwayat yang sedang tampil (mengikuti filter aktif) sebagai file <code>.xlsx</code> lewat <code>price-history/export</code>. Tersedia untuk <strong>ADMIN, EDITOR, maupun VIEWER</strong> yang bisa membuka halaman ini. Termasuk kolom <strong>Marketplace</strong>, <strong>Harga Lama</strong>, dan <strong>Harga Baru</strong> — karena satu batch bisa mengubah harga di beberapa marketplace sekaligus, setiap marketplace yang benar-benar berubah diekspor sebagai baris tersendiri (bukan digabung dalam satu sel) supaya angkanya tetap murni angka (bisa dijumlah/diurutkan di Excel). Marketplace yang harganya tidak berubah pada batch tsb tidak ikut dibuat baris. Batch tanpa perubahan harga marketplace (mis. hanya ubah Modal) tetap muncul satu baris dengan kolom Marketplace bertanda "-".</li>
+				<li><strong>Tombol "Detail" — hanya aktif untuk ADMIN &amp; EDITOR <span class="badge-new">BARU</span></strong> — halaman detail menampilkan aksi "Kirim Ulang Notifikasi", jadi sengaja dibatasi. Untuk role <strong>VIEWER</strong>, tombol Detail tetap tampil di daftar tapi berupa tombol nonaktif (abu-abu, tidak bisa diklik) — bukan disembunyikan, supaya VIEWER tahu fitur ini ada tapi bukan untuk perannya. Percobaan membuka URL detail secara langsung oleh VIEWER tetap diblokir (403), bukan cuma disamarkan di tampilan.</li>
+			</ul>
+			<p class="lead">Pembatasan tombol Detail ini bersifat tetap (hardcode di controller), berbeda dengan menu-menu lain yang aksesnya bisa diatur lewat <strong>Administrasi → Hak Akses</strong> — lihat §6.11.</p>
 
 			<h3 id="modul-user">6.9 Manajemen User &amp; Grup Notifikasi</h3>
 			<p>Khusus role ADMIN. Kelola akun pengguna beserta role-nya, dan kelola grup notifikasi (siapa menerima email untuk marketplace apa saja).</p>
 
 			<h3 id="modul-import">6.10 Import / Export</h3>
 			<p>Menu <strong>Administrasi → Import/Export</strong> untuk memasukkan data produk/harga secara massal dan mengekspor laporan.</p>
+
+			<h3 id="modul-hak-akses">6.11 Hak Akses <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Administrasi → Hak Akses</strong>, khusus role ADMIN. Matriks centang untuk menentukan menu apa saja yang bisa diakses role <strong>EDITOR</strong> dan <strong>VIEWER</strong>, dikelompokkan sama seperti sidebar (Master Data / Transaksi / Administrasi).</p>
+			<ul>
+				<li>Centang sebuah kotak untuk <strong>mengizinkan</strong> role tsb membuka menu terkait; kosongkan untuk <strong>melarang</strong>.</li>
+				<li>Klik <strong>Simpan Hak Akses</strong> untuk menerapkan seluruh perubahan sekaligus (satu form menyimpan kolom EDITOR &amp; VIEWER bersamaan).</li>
+				<li>Menu yang tidak dicentang untuk suatu role otomatis <strong>hilang dari sidebar</strong> role tsb — sesuai permintaan awal fitur ini: "kalau user tidak punya akses, menu di navbar jangan diaktifkan".</li>
+				<li>Perubahan berlaku <strong>seketika</strong> untuk user yang sedang login — tidak perlu logout/login ulang untuk melihat efeknya.</li>
+				<li>Percobaan membuka URL menu yang tidak diizinkan langsung (tanpa lewat sidebar) akan menampilkan halaman <strong>403 Akses Ditolak</strong>, bukan cuma disembunyikan dari tampilan — jadi benar-benar diblokir, bukan sekadar disamarkan.</li>
+			</ul>
+			<div class="callout warn">⚠️ Role ADMIN <strong>tidak muncul</strong> di matriks ini dan selalu punya akses penuh ke seluruh menu, termasuk halaman Hak Akses itu sendiri — supaya ADMIN tidak bisa mengunci dirinya sendiri lewat kesalahan konfigurasi.</div>
 		</section>
 
 		<section id="responsif">
@@ -462,6 +499,78 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<div class="table-wrap">
 			<table>
 				<tr><th>Tanggal</th><th>Perubahan</th></tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 17)</td>
+					<td>
+						Menambahkan link <strong>Dokumentasi</strong> di sidebar (dekat tombol Keluar), membuka file <code>dokumentasi.html</code> ini di tab baru. Tersedia untuk <strong>semua role</strong> — bukan bagian dari matriks Hak Akses, karena file ini memang file statis di root project yang selalu bisa diakses langsung lewat URL (tidak lewat autentikasi aplikasi), jadi link ini sekadar mempermudah menemukannya tanpa perlu tahu alamatnya.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 16)</td>
+					<td>
+						Menu Riwayat Perubahan: tombol <strong>Export Excel</strong> kini terbuka untuk <strong>semua role</strong> (sebelumnya khusus ADMIN/EDITOR) lewat endpoint baru <code>price-history/export</code> yang mengikuti hak akses halaman itu sendiri, bukan menu <code>reports</code> yang terpisah. Sebaliknya, tombol <strong>Detail</strong> per baris kini <strong>hanya aktif untuk ADMIN &amp; EDITOR</strong> (VIEWER melihat tombol nonaktif, bukan disembunyikan) karena halaman detail berisi aksi "Kirim Ulang Notifikasi" — dijaga di level controller (<code>Price_history::detail()</code>/<code>resend()</code>) sehingga percobaan akses URL langsung oleh VIEWER tetap ditolak (403), bukan cuma disamarkan di tampilan. Logika export (kolom Marketplace/Harga Lama/Harga Baru) diekstrak ke library bersama <code>Price_history_exporter</code> supaya dipakai ulang oleh <code>Reports::export()</code> (menu Import/Export) dan <code>Price_history::export()</code> tanpa duplikasi kode, masing-masing dengan aturan akses sendiri.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 15)</td>
+					<td>
+						Menambahkan menu <strong>Administrasi → Hak Akses</strong>: ADMIN kini bisa mengatur lewat UI menu apa saja yang boleh diakses role EDITOR/VIEWER (tabel baru <code>menus</code> &amp; <code>role_menu_access</code>). Sidebar &amp; akses langsung lewat URL kini sama-sama mengikuti konfigurasi ini (sebelumnya beberapa menu — Produk, Vendor, Kompetitor, Marketplace, Update Harga, Harga Kompetitor — tampil di sidebar untuk semua role padahal VIEWER akan ditolak saat mengklik; sekarang menu yang tidak bisa diakses benar-benar tidak ditampilkan). Pengaturan bawaan dibuat identik dengan perilaku lama sehingga tidak ada akses siapa pun yang berubah sampai ADMIN mengubahnya sendiri. ADMIN selalu bypass (akses penuh, tidak bisa dikunci sendiri). Ditemukan &amp; diperbaiki bug saat pengembangan: perbandingan strict <code>in_array(..., TRUE)</code> pada penyimpanan matriks gagal karena ID menu dari database berupa string sedangkan ID yang dicentang berupa integer — sempat membuat percobaan simpan menghapus seluruh hak akses alih-alih memperbaruinya. Diverifikasi menyeluruh dengan 3 akun uji (ADMIN/EDITOR/VIEWER): sidebar, akses URL langsung, dan efek seketika setelah menyimpan perubahan — semua sesuai konfigurasi, tanpa mengubah akses user asli.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 14)</td>
+					<td>
+						Export Excel di Riwayat Perubahan kini menyertakan kolom <strong>Marketplace</strong>, <strong>Harga Lama</strong>, dan <strong>Harga Baru</strong>. Karena satu batch riwayat bisa mencakup perubahan harga di beberapa marketplace sekaligus, setiap marketplace yang benar-benar berubah diekspor sebagai baris terpisah (bukan digabung dalam satu sel teks) — nama marketplace diambil dari master (termasuk yang sudah nonaktif, untuk data riwayat lama). Diverifikasi dengan membaca ulang isi file .xlsx: marketplace yang harganya tidak berubah pada suatu batch benar tidak ikut muncul, dan batch tanpa perubahan harga marketplace (mis. hanya Modal) tetap muncul satu baris tanpa hilang dari laporan.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 13)</td>
+					<td>
+						Menu <strong>Riwayat Perubahan</strong>: filter Produk diganti ke Select2, paging dirombak (versi lama kehilangan filter aktif saat pindah halaman — sudah diperbaiki), dan ditambahkan tombol <strong>Export Excel</strong> yang mengikuti filter aktif (method baru <code>Price_change_batch_model::get_all_filtered()</code>; <code>Reports::export()</code> kini membaca querystring filter alih-alih selalu mengambil 1.000 baris pertama). Endpoint pencarian produk untuk Select2 dikonsolidasikan jadi satu (<code>products/search</code>, di controller <code>Products</code>), dipakai bersama oleh Riwayat Perubahan dan form Tambah Harga Kompetitor — endpoint duplikat lama di <code>Competitor_price</code> dihapus. Diverifikasi lewat database (hitungan baris file .xlsx dibaca ulang dengan PhpSpreadsheet) untuk memastikan hasil export benar-benar mengikuti filter, bukan cuma cek ukuran file.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 12)</td>
+					<td>
+						<strong>Perbaikan bug penting</strong> di halaman Update Harga: kalkulasi otomatis SRP Suggest/Markup %/Margin % dan tombol Preview Email berhenti berfungsi sejak template diganti ke Tabler, karena skrip halaman memanggil <code>new bootstrap.Modal(...)</code> yang gagal (objek global <code>bootstrap</code> tidak ada di bundel JS Tabler) dan mematikan seluruh skrip di baliknya. Diperbaiki dengan memicu modal lewat atribut <code>data-bs-toggle</code> asli Tabler. Ditambahkan juga dropdown <strong>Select2</strong> untuk "Tambah Vendor" (menyamai pola di Harga Kompetitor). Dikonfirmasi ulang: kolom "Harga Baru per Kanal" memang sudah mengambil data dari Master Marketplace sejak awal, bukan bug. Diverifikasi langsung dengan browser otomatis (Playwright) — bukan hanya baca kode — memastikan kalkulasi live, modal, dan Select2 benar-benar berfungsi tanpa error di console.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 11)</td>
+					<td>
+						Kotak pencarian produk custom pada form Tambah Harga Kompetitor diganti dengan <strong><a href="https://select2.org" target="_blank" rel="noopener">Select2</a></strong> (jQuery, dimuat via CDN khusus di halaman ini saja — tidak memengaruhi halaman lain yang tetap tanpa jQuery) memakai tema <code>select2-bootstrap-5-theme</code> agar menyatu dengan tampilan Tabler. Endpoint pencarian AJAX (<code>competitor-price/search-products</code>) tidak berubah, hanya cara menampilkannya di form.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 10)</td>
+					<td>
+						Merombak <strong>Harga Kompetitor</strong> dari form matriks (satu produk × semua kompetitor) menjadi bergaya menu master: daftar berpaging + tombol Tambah + form tambah/edit satu entri, dengan dropdown Kompetitor yang datanya diambil langsung dari <strong>Master Data → Kompetitor</strong> (bukan hardcode). Model baru <code>Competitor_price_model</code>. Ditambahkan endpoint pencarian produk berbasis AJAX (<code>competitor-price/search-products</code>) untuk memilih produk di form Tambah, karena katalog produk terlalu besar untuk dropdown biasa. Turut diperbaiki: method <code>Competitor_model::get_all_active()</code> yang ternyata belum ada padahal sudah dipakai di beberapa tempat.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 9)</td>
+					<td>
+						Menambahkan <strong>paging</strong> (25 baris/halaman) pada 4 menu master yang tersisa: <strong>Kategori Barang</strong>, <strong>Vendor</strong>, <strong>Kompetitor</strong>, dan <strong>Marketplace</strong> — menyamai pola yang sudah ada di menu Produk &amp; Update Harga (info "Menampilkan X–Y dari Z", navigasi First/Prev/Next/Last, kotak lompat ke halaman, kata kunci pencarian tetap terjaga saat pindah halaman).
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 8)</td>
+					<td>
+						<strong>Ganti template tampilan ke <a href="https://tabler.io" target="_blank" rel="noopener">Tabler</a></strong> (MIT License, gratis, dibangun di atas Bootstrap 5 asli — dipilih setelah dievaluasi lebih relevan dibanding <a href="https://github.com/colorlibhq/gentelella" target="_blank" rel="noopener">Gentelella v4</a> yang ternyata tanpa Bootstrap &amp; wajib build Vite). Layout diubah ke struktur resmi Tabler: sidebar <code>navbar-vertical</code>, <code>page-header</code>/<code>page-body</code>, kartu statistik Dashboard bergaya <code>subheader</code>+ikon berwarna, avatar inisial di header halaman, dan halaman Login dirombak total memakai pola auth card Tabler (sekaligus memperbaiki bug lama: ikon Bootstrap Icons di halaman Login sebelumnya tidak pernah tampil karena stylesheet-nya tidak dimuat). Toggle menu mobile kini memakai mekanisme <em>collapse</em> bawaan Tabler/Bootstrap, menggantikan skrip custom sebelumnya. Seluruh 16 modul CRUD tidak perlu ditulis ulang — cukup lapisan layout &amp; CSS yang diganti karena markup Bootstrap standar (<code>card</code>, <code>table</code>, <code>btn</code>, <code>form-control</code>, <code>badge</code>) tetap kompatibel dengan Tabler.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 7)</td>
+					<td>
+						<strong>Pembaruan visual</strong> di seluruh aplikasi tanpa mengganti arsitektur (tetap Bootstrap 5 + CodeIgniter 3, tanpa build tool tambahan): font <a href="https://fonts.google.com/specimen/Inter" target="_blank" rel="noopener">Inter</a>, palet warna &amp; bayangan diperhalus, kartu/tabel/tombol/badge dirapikan, sidebar dengan indikator aktif bergaya garis kiri, avatar inisial nama di topbar, dan kartu statistik Dashboard kini memakai ikon berwarna (gaya "stat tile") alih-alih teks polos. Perubahan ini dipicu evaluasi template <a href="https://github.com/colorlibhq/gentelella" target="_blank" rel="noopener">Gentelella v4</a> — ternyata template tsb tanpa Bootstrap/backend dan wajib build Vite, sehingga tidak cocok dipakai sebagai pengganti langsung; sebagai gantinya, sejumlah ide visualnya (avatar inisial, kartu ikon berwarna) diadaptasi ke dalam struktur Bootstrap 5 yang sudah ada.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 6)</td>
+					<td>
+						Tabel <code>vendors</code> dikosongkan lalu diisi ulang dengan <strong>121 vendor/pemasok asli</strong> dari data <code>vendor_upload</code> (kolom kategori: Supplier CK, Supplier NCK, Umum). Karena 3 vendor placeholder lama masih terhubung ke riwayat harga nyata (2 batch, sudah terkirim emailnya), riwayat &amp; data biaya/harga yang menempel pada vendor lama tersebut turut dihapus sebagai bagian dari penggantian ini (dikonfirmasi lebih dulu). Kolom <code>vendors.vendor_category</code> kini juga tampil &amp; bisa diedit di menu <strong>Master Data → Vendor</strong>.
+					</td>
+				</tr>
 				<tr>
 					<td>25 Agu 2026 (lanjutan 5)</td>
 					<td>

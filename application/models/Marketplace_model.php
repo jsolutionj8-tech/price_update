@@ -10,7 +10,7 @@ class Marketplace_model extends CI_Model
 {
 	protected $table = 'price_channels';
 
-	public function get_all($filters = array())
+	public function get_all($filters = array(), $limit = NULL, $offset = 0)
 	{
 		$this->db->from($this->table);
 		if (!empty($filters['keyword'])) {
@@ -20,7 +20,19 @@ class Marketplace_model extends CI_Model
 				->group_end();
 		}
 		$this->db->order_by('sort_order', 'ASC')->order_by('channel_name', 'ASC');
+		if ($limit !== NULL) $this->db->limit($limit, $offset);
 		return $this->db->get()->result_array();
+	}
+
+	public function count_all($filters = array())
+	{
+		if (!empty($filters['keyword'])) {
+			$this->db->group_start()
+				->like('channel_name', $filters['keyword'])
+				->or_like('channel_code', $filters['keyword'])
+				->group_end();
+		}
+		return $this->db->count_all_results($this->table);
 	}
 
 	public function find($id)

@@ -4,36 +4,42 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title><?= isset($title) ? $title . ' - ' : '' ?>Sistem Update Harga</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 	<style>
-		:root { --navy: #1F3864; --accent: #2E74B5; }
-		body { background:#F4F6F9; font-family: 'Segoe UI', Arial, sans-serif; }
-		.app-sidebar { background: var(--navy); width: 230px; position: fixed; top:0; left:0; bottom:0; z-index:1045; overflow-y:auto; -webkit-overflow-scrolling:touch; transition: transform .25s ease; }
-		.app-sidebar a { color: #cfd9e8; display:block; padding:.65rem 1.1rem; text-decoration:none; font-size:.92rem; }
-		.app-sidebar a.active, .app-sidebar a:hover { background: var(--accent); color:#fff; }
-		.app-sidebar .brand { color:#fff; font-weight:700; padding:1.1rem; border-bottom:1px solid rgba(255,255,255,.15); font-size:1.05rem; }
-		.app-sidebar .nav-section-title { color:#8fa3c4; text-transform:uppercase; font-size:.72rem; letter-spacing:.06em; font-weight:600; padding:1rem 1.1rem .35rem; }
-		.app-main { margin-left:230px; padding:1.6rem 2rem; transition: margin-left .25s ease; }
-		.app-topbar { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:.75rem; margin-bottom:1.4rem; position:sticky; top:0; background:#F4F6F9; z-index:5; padding:.4rem 0; }
-		.card-stat { border:none; border-radius:.6rem; box-shadow:0 2px 8px rgba(0,0,0,.06); }
-		.table thead { background: var(--navy); color:#fff; }
-		.btn-primary { background: var(--accent); border-color: var(--accent); }
-		.btn-primary:hover { background: var(--navy); border-color: var(--navy); }
-		.btn-menu-toggle { display:none; background:#fff; border:1px solid #d7dee8; border-radius:.4rem; width:38px; height:38px; align-items:center; justify-content:center; font-size:1.2rem; color:var(--navy); flex:none; }
-		.sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(15,25,45,.45); z-index:1040; }
-		.sidebar-backdrop.show { display:block; }
+		body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
-		@media (max-width: 991.98px) {
-			.app-sidebar { transform: translateX(-100%); box-shadow:0 0 28px rgba(0,0,0,.3); }
-			.app-sidebar.show { transform: translateX(0); }
-			.app-main { margin-left:0; padding:1.1rem 1.1rem 2rem; }
-			.btn-menu-toggle { display:inline-flex; }
+		/* Brand mark + section titles inside the vertical sidebar */
+		.navbar-brand-mark {
+			width: 2rem; height: 2rem; border-radius: .55rem; background: rgba(255,255,255,.14);
+			display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; flex: none;
 		}
-		@media (max-width: 575.98px) {
-			.app-main { padding:1rem .75rem 2rem; }
-			.app-topbar { align-items:flex-start; }
+		.navbar-vertical .nav-section-title {
+			display: block; color: #7f93b8; text-transform: uppercase; font-size: .68rem;
+			letter-spacing: .08em; font-weight: 700; padding: 1rem 1rem .35rem;
 		}
+
+		/* Logged-in user chip in the page header */
+		.user-avatar {
+			width: 2.25rem; height: 2.25rem; border-radius: 50%; background: var(--tblr-primary, #2E74B5); color: #fff;
+			display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: .8rem; flex: none;
+		}
+
+		/* Dashboard stat tiles */
+		.stat-icon {
+			width: 2.75rem; height: 2.75rem; border-radius: .65rem; display: inline-flex; align-items: center;
+			justify-content: center; font-size: 1.2rem; flex: none;
+		}
+		.stat-icon.tone-accent { background: rgba(46,116,181,.12); color: var(--tblr-primary, #2E74B5); }
+		.stat-icon.tone-good { background: rgba(45,181,105,.14); color: #2fb344; }
+		.stat-icon.tone-bad { background: rgba(214,44,64,.12); color: #d63939; }
+
+		/* Wider content area for data-heavy tables */
+		.page-body > .container-xl { max-width: 100%; }
 	</style>
 </head>
 <body>
+<div class="page">
