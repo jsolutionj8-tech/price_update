@@ -8,6 +8,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
  */
 class Price_update extends Editor_Controller
 {
+	const PER_PAGE = 25;
+
 	public function __construct()
 	{
 		parent::__construct();
@@ -20,9 +22,23 @@ class Price_update extends Editor_Controller
 
 	public function index()
 	{
+		$filters = array('keyword' => $this->input->get('keyword'));
+
+		$total = $this->product_model->count_all($filters);
+		$total_pages = max(1, (int) ceil($total / self::PER_PAGE));
+		$page = max(1, min($total_pages, (int) $this->input->get('page')));
+		$offset = ($page - 1) * self::PER_PAGE;
+
 		$data = array(
 			'title'    => 'Update Harga',
-			'products' => $this->product_model->get_all(),
+			'products' => $this->product_model->get_all($filters, self::PER_PAGE, $offset),
+			'filters'  => $filters,
+			'pagination' => array(
+				'page'        => $page,
+				'total_pages' => $total_pages,
+				'total'       => $total,
+				'per_page'    => self::PER_PAGE,
+			),
 		);
 		$this->render_view('price_update/index', $data);
 	}
@@ -188,17 +204,64 @@ class Price_update extends Editor_Controller
 			)),
 		));
 
-		// --- kirim notifikasi email (synchronous; untuk volume tinggi lihat dokumentasi mode queue/cron) ---
-		$this->load->library('notifier');
-		$result = $this->notifier->dispatch($batch_id);
+		// --- masukkan ke "keranjang notifikasi" sesi, BELUM langsung dikirim ---
+		// Supaya update banyak produk berurutan bisa dikirim jadi SATU email lewat
+		// tombol "Kirim Notifikasi Sekarang" (lihat send_pending()), bukan satu
+		// email terpisah per produk.
+		$pending = $this->session->userdata('pending_notify_batches') ?: array();
+		$pending[] = $batch_id;
+		$pending = array_values(array_unique($pending));
+		$this->session->set_userdata('pending_notify_batches', $pending);
 
-		if ($result['success']) {
-			$this->session->set_flashdata('success', "Harga berhasil disimpan. Notifikasi terkirim ke {$result['sent']} penerima" . ($result['failed'] > 0 ? ", {$result['failed']} gagal." : '.'));
-		} else {
-			$this->session->set_flashdata('error', 'Harga tersimpan, namun notifikasi gagal diproses: ' . $result['message']);
-		}
+		$this->session->set_flashdata('success', 'Harga berhasil disimpan. Total ' . count($pending) . ' perubahan menunggu dikirim notifikasi — lanjutkan update produk lain, lalu klik "Kirim Notifikasi Sekarang" di atas jika sudah selesai.');
 
 		redirect('price-history/detail/' . $batch_id);
+	}
+
+	/**
+	 * Kirim SATU email konsolidasi untuk seluruh perubahan harga yang menunggu
+	 * di keranjang notifikasi sesi saat ini, lalu kosongkan keranjangnya.
+	 */
+	public function send_pending()
+	{
+		$pending = $this->session->userdata('pending_notify_batches') ?: array();
+
+		if (empty($pending)) {
+			$this->session->set_flashdata('error', 'Tidak ada perubahan harga yang menunggu dikirim.');
+			redirect($this->_safe_referer());
+		}
+
+		$this->load->library('notifier');
+		$result = $this->notifier->dispatch_group($pending);
+		$this->session->unset_userdata('pending_notify_batches');
+
+		if ($result['success']) {
+			$msg = "Notifikasi terkirim: {$result['batches']} produk ke {$result['recipients']} penerima ({$result['sent']} email berhasil";
+			$msg .= $result['failed'] > 0 ? ", {$result['failed']} gagal)." : ').';
+			$this->session->set_flashdata('success', $msg);
+		} else {
+			$this->session->set_flashdata('error', $result['message']);
+		}
+
+		redirect('price-history');
+	}
+
+	/**
+	 * Kosongkan keranjang notifikasi TANPA mengirim email. Perubahan harga yang
+	 * sudah tersimpan tetap ada (status tetap 'pending'); bisa dikirim manual
+	 * satu-satu lewat tombol "Kirim Ulang Notifikasi" di Riwayat Perubahan.
+	 */
+	public function clear_pending()
+	{
+		$this->session->unset_userdata('pending_notify_batches');
+		$this->session->set_flashdata('success', 'Antrian notifikasi dikosongkan. Perubahan harga tetap tersimpan sebagai "Pending" dan bisa dikirim manual lewat menu Riwayat Perubahan.');
+		redirect($this->_safe_referer());
+	}
+
+	protected function _safe_referer()
+	{
+		$referer = $this->input->server('HTTP_REFERER');
+		return $referer ?: 'price-update';
 	}
 
 	/**

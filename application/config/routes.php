@@ -73,6 +73,42 @@ $route['products/edit/(:num)']         = 'products/edit/$1';
 $route['products/update/(:num)']       = 'products/update/$1';
 $route['products/delete/(:num)']       = 'products/delete/$1';
 
+// Kategori barang (master data)
+$route['categories']                   = 'categories/index';
+$route['categories/create']            = 'categories/create';
+$route['categories/store']             = 'categories/store';
+$route['categories/edit/(:num)']       = 'categories/edit/$1';
+$route['categories/update/(:num)']     = 'categories/update/$1';
+$route['categories/delete/(:num)']     = 'categories/delete/$1';
+$route['categories/activate/(:num)']   = 'categories/activate/$1';
+
+// Vendor (master data)
+$route['vendors']                      = 'vendors/index';
+$route['vendors/create']               = 'vendors/create';
+$route['vendors/store']                = 'vendors/store';
+$route['vendors/edit/(:num)']          = 'vendors/edit/$1';
+$route['vendors/update/(:num)']        = 'vendors/update/$1';
+$route['vendors/delete/(:num)']        = 'vendors/delete/$1';
+$route['vendors/activate/(:num)']      = 'vendors/activate/$1';
+
+// Kompetitor (master data)
+$route['competitors']                  = 'competitors/index';
+$route['competitors/create']           = 'competitors/create';
+$route['competitors/store']            = 'competitors/store';
+$route['competitors/edit/(:num)']      = 'competitors/edit/$1';
+$route['competitors/update/(:num)']    = 'competitors/update/$1';
+$route['competitors/delete/(:num)']    = 'competitors/delete/$1';
+$route['competitors/activate/(:num)']  = 'competitors/activate/$1';
+
+// Marketplace / kanal penjualan (master data)
+$route['marketplaces']                 = 'marketplaces/index';
+$route['marketplaces/create']          = 'marketplaces/create';
+$route['marketplaces/store']           = 'marketplaces/store';
+$route['marketplaces/edit/(:num)']     = 'marketplaces/edit/$1';
+$route['marketplaces/update/(:num)']   = 'marketplaces/update/$1';
+$route['marketplaces/delete/(:num)']   = 'marketplaces/delete/$1';
+$route['marketplaces/activate/(:num)'] = 'marketplaces/activate/$1';
+
 // Update Harga (modul inti)
 $route['price-update']                 = 'price_update/index';
 $route['price-update/form/(:num)']     = 'price_update/form/$1';
@@ -80,6 +116,8 @@ $route['price-update/calculate']       = 'price_update/calculate';
 $route['price-update/save']            = 'price_update/save';
 $route['price-update/add-vendor/(:num)'] = 'price_update/add_vendor/$1';
 $route['price-update/preview-email']   = 'price_update/preview_email';
+$route['price-update/send-pending']    = 'price_update/send_pending';
+$route['price-update/clear-pending']   = 'price_update/clear_pending';
 
 // Harga kompetitor
 $route['competitor-price']             = 'competitor_price/index';

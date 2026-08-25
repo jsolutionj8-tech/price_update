@@ -10,17 +10,33 @@ class Products extends Editor_Controller
 		$this->load->model('product_vendor_cost_model');
 	}
 
+	const PER_PAGE = 25;
+
 	public function index()
 	{
 		$filters = array(
-			'brand_id' => $this->input->get('brand_id'),
-			'keyword'  => $this->input->get('keyword'),
+			'brand_id'    => $this->input->get('brand_id'),
+			'category_id' => $this->input->get('category_id'),
+			'keyword'     => $this->input->get('keyword'),
 		);
+
+		$total = $this->product_model->count_all($filters);
+		$total_pages = max(1, (int) ceil($total / self::PER_PAGE));
+		$page = max(1, min($total_pages, (int) $this->input->get('page')));
+		$offset = ($page - 1) * self::PER_PAGE;
+
 		$data = array(
-			'title'    => 'Daftar Produk',
-			'products' => $this->product_model->get_all($filters),
-			'brands'   => $this->product_model->get_all_brands(),
-			'filters'  => $filters,
+			'title'      => 'Daftar Produk',
+			'products'   => $this->product_model->get_all($filters, self::PER_PAGE, $offset),
+			'brands'     => $this->product_model->get_all_brands(),
+			'categories' => $this->product_model->get_all_categories(),
+			'filters'    => $filters,
+			'pagination' => array(
+				'page'        => $page,
+				'total_pages' => $total_pages,
+				'total'       => $total,
+				'per_page'    => self::PER_PAGE,
+			),
 		);
 		$this->render_view('products/index', $data);
 	}
@@ -28,9 +44,10 @@ class Products extends Editor_Controller
 	public function create()
 	{
 		$data = array(
-			'title'   => 'Tambah Produk',
-			'brands'  => $this->product_model->get_all_brands(),
-			'vendors' => $this->product_model->get_all_vendors(),
+			'title'      => 'Tambah Produk',
+			'brands'     => $this->product_model->get_all_brands(),
+			'categories' => $this->product_model->get_all_categories(),
+			'vendors'    => $this->product_model->get_all_vendors(),
 		);
 		$this->render_view('products/form', $data);
 	}
@@ -42,6 +59,7 @@ class Products extends Editor_Controller
 			'product_code' => $this->input->post('product_code', TRUE),
 			'product_name' => $this->input->post('product_name', TRUE),
 			'brand_id'     => $this->input->post('brand_id', TRUE),
+			'category_id'  => $this->input->post('category_id', TRUE) ?: NULL,
 			'unit'         => $this->input->post('unit', TRUE) ?: 'pcs',
 			'created_by'   => $this->auth_lib->user_id(),
 		));
@@ -52,11 +70,12 @@ class Products extends Editor_Controller
 	public function edit($id)
 	{
 		$data = array(
-			'title'   => 'Edit Produk',
-			'product' => $this->product_model->find($id),
-			'brands'  => $this->product_model->get_all_brands(),
-			'vendors' => $this->product_model->get_all_vendors(),
-			'costs'   => $this->product_vendor_cost_model->get_for_product($id),
+			'title'      => 'Edit Produk',
+			'product'    => $this->product_model->find($id),
+			'brands'     => $this->product_model->get_all_brands(),
+			'categories' => $this->product_model->get_all_categories(),
+			'vendors'    => $this->product_model->get_all_vendors(),
+			'costs'      => $this->product_vendor_cost_model->get_for_product($id),
 		);
 		if (!$data['product']) show_404();
 		$this->render_view('products/form', $data);
@@ -68,6 +87,7 @@ class Products extends Editor_Controller
 		$this->product_model->update($id, array(
 			'product_name' => $this->input->post('product_name', TRUE),
 			'brand_id'     => $this->input->post('brand_id', TRUE),
+			'category_id'  => $this->input->post('category_id', TRUE) ?: NULL,
 			'unit'         => $this->input->post('unit', TRUE) ?: 'pcs',
 		));
 		$this->session->set_flashdata('success', 'Produk berhasil diperbarui.');

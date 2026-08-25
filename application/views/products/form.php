@@ -21,6 +21,15 @@
 			</select>
 		</div>
 		<div class="mb-3">
+			<label class="form-label">Kategori Barang</label>
+			<select name="category_id" class="form-select">
+				<option value="">-- Tanpa Kategori --</option>
+				<?php foreach ($categories as $cat): ?>
+					<option value="<?= $cat['id'] ?>" <?= (isset($product) && $product['category_id'] == $cat['id']) ? 'selected' : '' ?>><?= htmlspecialchars($cat['category_name']) ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+		<div class="mb-3">
 			<label class="form-label">Satuan</label>
 			<input type="text" name="unit" class="form-control" value="<?= htmlspecialchars($product['unit'] ?? 'pcs') ?>">
 		</div>

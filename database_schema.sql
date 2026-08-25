@@ -196,6 +196,18 @@ CREATE TABLE `price_channels` (
   UNIQUE KEY `channel_code` (`channel_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `product_categories` */
+
+DROP TABLE IF EXISTS `product_categories`;
+
+CREATE TABLE `product_categories` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `category_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `category_name` (`category_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `product_prices` */
 
 DROP TABLE IF EXISTS `product_prices`;
@@ -256,6 +268,7 @@ CREATE TABLE `products` (
   `product_code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `product_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
   `brand_id` int(10) unsigned NOT NULL,
+  `category_id` int(10) unsigned DEFAULT NULL,
   `unit` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT 'pcs',
   `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_by` int(10) unsigned DEFAULT NULL,
@@ -264,8 +277,10 @@ CREATE TABLE `products` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `product_code` (`product_code`),
   KEY `fk_products_brand` (`brand_id`),
+  KEY `fk_products_category` (`category_id`),
   KEY `fk_products_creator` (`created_by`),
   CONSTRAINT `fk_products_brand` FOREIGN KEY (`brand_id`) REFERENCES `brands` (`id`),
+  CONSTRAINT `fk_products_category` FOREIGN KEY (`category_id`) REFERENCES `product_categories` (`id`),
   CONSTRAINT `fk_products_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -4,6 +4,27 @@
 -- =====================================================================
 USE db_price_update;
 
+-- Role dasar aplikasi (wajib ada sebelum insert user, lihat application/libraries/Auth_lib.php)
+INSERT INTO roles (role_code, role_name, description) VALUES
+('ADMIN', 'Administrator', 'Akses penuh: seluruh modul termasuk manajemen user & grup notifikasi'),
+('EDITOR', 'Editor', 'Mengelola produk, kompetitor, marketplace, dan update harga'),
+('VIEWER', 'Viewer', 'Hanya dapat melihat dashboard, riwayat perubahan, dan laporan');
+
+-- Master Marketplace / kanal penjualan. Kode OFFLINE WAJIB ada karena dipakai
+-- sebagai acuan perhitungan Markup%/Margin% (lihat Price_update controller & Price_calculator).
+INSERT INTO price_channels (channel_code, channel_name, sort_order, is_active) VALUES
+('OFFLINE', 'Toko Offline', 10, 1),
+('WEBSITE', 'Website Resmi', 20, 1),
+('TOKOPEDIA', 'Tokopedia', 30, 1),
+('SHOPEE', 'Shopee', 40, 1),
+('LAZADA', 'Lazada', 50, 1);
+
+-- Master Kompetitor contoh — silakan ganti nama sesuai kompetitor riil melalui menu Master > Kompetitor.
+INSERT INTO competitors (competitor_code, competitor_name, website_url, is_active) VALUES
+('KOMPETITOR_A', 'Kompetitor A', NULL, 1),
+('KOMPETITOR_B', 'Kompetitor B', NULL, 1),
+('KOMPETITOR_C', 'Kompetitor C', NULL, 1);
+
 INSERT INTO brands (brand_name) VALUES ('Espolon');
 
 INSERT INTO vendors (vendor_code, vendor_name) VALUES

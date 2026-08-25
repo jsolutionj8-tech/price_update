@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dokumentasi - Sistem Update Harga Produk</title>
+<style>
+	:root {
+		--navy: #1F3864;
+		--navy-dark: #142647;
+		--accent: #2E74B5;
+		--accent-light: #eaf2fa;
+		--ink: #1c2733;
+		--muted: #5b6b7d;
+		--border: #e2e8f0;
+		--bg: #f4f6f9;
+		--surface: #ffffff;
+		--good: #1a7f4e;
+		--good-bg: #e7f7ee;
+		--warn: #9a6300;
+		--warn-bg: #fff4e0;
+		--new-bg: #fdecef;
+		--new-fg: #b3123b;
+	}
+	* { box-sizing: border-box; }
+	body {
+		margin: 0;
+		background: var(--bg);
+		color: var(--ink);
+		font-family: 'Segoe UI', Arial, sans-serif;
+		line-height: 1.55;
+	}
+	a { color: var(--accent); }
+	code, pre {
+		font-family: 'Consolas', 'SFMono-Regular', Menlo, monospace;
+		font-size: .88rem;
+	}
+	code {
+		background: var(--accent-light);
+		color: var(--navy-dark);
+		padding: .1rem .4rem;
+		border-radius: .3rem;
+	}
+	pre {
+		background: var(--navy-dark);
+		color: #e7edf6;
+		padding: .9rem 1.1rem;
+		border-radius: .5rem;
+		overflow-x: auto;
+	}
+	pre code { background: none; color: inherit; padding: 0; }
+
+	/* ---------- Header ---------- */
+	.hero {
+		background: linear-gradient(135deg, var(--navy) 0%, var(--navy-dark) 100%);
+		color: #fff;
+		padding: 2.4rem 1.5rem 3.2rem;
+		text-align: center;
+	}
+	.hero h1 { margin: 0 0 .5rem; font-size: clamp(1.5rem, 4vw, 2.1rem); }
+	.hero p { margin: 0; color: #cddaee; max-width: 640px; margin-inline: auto; }
+	.hero .meta { margin-top: 1rem; font-size: .82rem; color: #9db3d4; }
+	.hero .badges { margin-top: 1.1rem; display: flex; gap: .5rem; justify-content: center; flex-wrap: wrap; }
+	.hero .badges span {
+		background: rgba(255,255,255,.12);
+		border: 1px solid rgba(255,255,255,.25);
+		padding: .3rem .75rem;
+		border-radius: 999px;
+		font-size: .78rem;
+	}
+
+	/* ---------- Layout ---------- */
+	.layout {
+		max-width: 1180px;
+		margin: -1.6rem auto 3rem;
+		padding: 0 1.2rem;
+		display: grid;
+		grid-template-columns: 250px 1fr;
+		gap: 1.5rem;
+		align-items: start;
+	}
+	.toc {
+		position: sticky;
+		top: 1rem;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: .7rem;
+		padding: .9rem;
+		box-shadow: 0 4px 14px rgba(20,38,71,.08);
+		max-height: calc(100vh - 2rem);
+		overflow-y: auto;
+	}
+	.toc-title { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; padding: .3rem .5rem .6rem; }
+	.toc a {
+		display: block;
+		padding: .4rem .5rem;
+		border-radius: .4rem;
+		color: var(--ink);
+		text-decoration: none;
+		font-size: .87rem;
+	}
+	.toc a:hover { background: var(--accent-light); color: var(--accent); }
+	.toc a.sub { padding-left: 1.2rem; font-size: .82rem; color: var(--muted); }
+
+	.menu-toggle {
+		display: none;
+		width: 100%;
+		background: var(--surface);
+		border: 1px solid var(--border);
+		border-radius: .5rem;
+		padding: .65rem 1rem;
+		font-weight: 600;
+		color: var(--navy);
+		align-items: center;
+		justify-content: space-between;
+		cursor: pointer;
+	}
+
+	.content { min-width: 0; }
+	section { background: var(--surface); border: 1px solid var(--border); border-radius: .8rem; padding: 1.6rem 1.8rem; margin-bottom: 1.4rem; box-shadow: 0 2px 10px rgba(20,38,71,.05); scroll-margin-top: 1rem; }
+	section h2 { margin-top: 0; color: var(--navy); font-size: 1.3rem; display: flex; align-items: center; gap: .55rem; }
+	section h2 .num { background: var(--accent); color: #fff; width: 1.9rem; height: 1.9rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: .85rem; flex: none; }
+	section h3 { color: var(--navy-dark); font-size: 1.02rem; margin: 1.4rem 0 .5rem; }
+	section p { color: var(--ink); }
+	.lead { color: var(--muted); font-size: 1rem; }
+
+	.badge-new { background: var(--new-bg); color: var(--new-fg); font-size: .68rem; font-weight: 700; letter-spacing: .03em; padding: .15rem .5rem; border-radius: 999px; vertical-align: middle; margin-left: .4rem; }
+
+	table { width: 100%; border-collapse: collapse; margin: .8rem 0 1.2rem; font-size: .87rem; }
+	th, td { border: 1px solid var(--border); padding: .55rem .7rem; text-align: left; vertical-align: top; }
+	th { background: var(--navy); color: #fff; font-weight: 600; }
+	tr:nth-child(even) td { background: #f8fafc; }
+	.table-wrap { overflow-x: auto; }
+
+	.grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: .9rem; margin: 1rem 0; }
+	.card { border: 1px solid var(--border); border-radius: .6rem; padding: 1rem 1.1rem; background: #fbfcfe; }
+	.card h4 { margin: 0 0 .4rem; font-size: .95rem; color: var(--navy-dark); display: flex; align-items: center; gap: .4rem; }
+	.card p { margin: 0; font-size: .85rem; color: var(--muted); }
+
+	.callout { border-radius: .6rem; padding: .9rem 1.1rem; margin: 1rem 0; font-size: .89rem; border: 1px solid; }
+	.callout.info { background: var(--accent-light); border-color: #bcd7ee; color: #16456e; }
+	.callout.warn { background: var(--warn-bg); border-color: #f0cf94; color: var(--warn); }
+	.callout.good { background: var(--good-bg); border-color: #a9dcbf; color: var(--good); }
+
+	.steps { counter-reset: step; list-style: none; padding: 0; margin: .8rem 0; }
+	.steps li { counter-increment: step; position: relative; padding: .35rem 0 .35rem 2.4rem; margin-bottom: .35rem; }
+	.steps li::before {
+		content: counter(step);
+		position: absolute; left: 0; top: .25rem;
+		width: 1.65rem; height: 1.65rem; border-radius: 50%;
+		background: var(--accent); color: #fff; font-size: .8rem; font-weight: 700;
+		display: flex; align-items: center; justify-content: center;
+	}
+
+	.pill { display: inline-block; font-size: .75rem; font-weight: 600; padding: .18rem .55rem; border-radius: 999px; }
+	.pill.admin { background: #fde3e3; color: #a4222c; }
+	.pill.editor { background: #fdf0d6; color: #8a5c00; }
+	.pill.viewer { background: #dbe9f7; color: #1c527e; }
+
+	.role-yes { color: var(--good); font-weight: 700; }
+	.role-no { color: #c2c9d1; }
+
+	.device-shots { display: flex; gap: 1.2rem; flex-wrap: wrap; align-items: flex-start; margin: 1rem 0; }
+	.mock { border: 1px solid var(--border); border-radius: .7rem; overflow: hidden; background: #fff; box-shadow: 0 4px 14px rgba(20,38,71,.08); }
+	.mock-desktop { width: 100%; max-width: 460px; }
+	.mock-mobile { width: 150px; }
+	.mock-bar { background: var(--navy); color: #fff; font-size: .68rem; padding: .3rem .5rem; display: flex; gap: .3rem; align-items: center; }
+	.mock-bar span.dot { width: .45rem; height: .45rem; border-radius: 50%; background: rgba(255,255,255,.5); }
+	.mock-body { display: flex; height: 130px; }
+	.mock-desktop .mock-body { height: 150px; }
+	.mock-side { width: 30%; background: var(--navy-dark); }
+	.mock-mobile .mock-side { width: 22%; }
+	.mock-main { flex: 1; padding: .4rem; }
+	.mock-main .bar { height: 8px; background: var(--accent-light); border-radius: 3px; margin-bottom: 5px; }
+	.mock-main .bar.short { width: 60%; }
+	.mock-line { font-size: .68rem; color: var(--muted); max-width: 190px; }
+
+	footer.doc-footer { text-align: center; color: var(--muted); font-size: .82rem; padding: 1.5rem 1rem 2.5rem; }
+
+	.kbd { border: 1px solid var(--border); border-bottom-width: 2px; border-radius: .3rem; padding: .05rem .4rem; font-size: .78rem; font-family: monospace; background: #fff; }
+
+	@media (max-width: 900px) {
+		.layout { grid-template-columns: 1fr; margin-top: -1.2rem; }
+		.menu-toggle { display: flex; }
+		.toc { position: static; max-height: none; display: none; }
+		.toc.open { display: block; }
+	}
+	@media (max-width: 520px) {
+		section { padding: 1.2rem 1.1rem; }
+		.hero { padding: 1.8rem 1rem 2.6rem; }
+	}
+</style>
+</head>
+<body>
+
+<header class="hero">
+	<h1>📊 Sistem Update Harga Produk &amp; Notifikasi Email Otomatis</h1>
+	<p>Dokumentasi teknis &amp; panduan penggunaan — PHP CodeIgniter 3 + MySQL/MariaDB. Mencakup modul Master Kategori Barang, Master Vendor, Master Kompetitor, dan Master Marketplace, serta tampilan aplikasi yang responsif untuk desktop maupun handphone.</p>
+	<div class="badges">
+		<span>CodeIgniter 3</span>
+		<span>PHP 8.x</span>
+		<span>MySQL 8 / MariaDB</span>
+		<span>Bootstrap 5</span>
+		<span>Responsive Desktop &amp; Mobile</span>
+	</div>
+	<div class="meta">Dokumen ini dibuka langsung di browser — tidak memerlukan server tambahan. Diperbarui: 25 Agustus 2026.</div>
+</header>
+
+<div class="layout">
+	<button class="menu-toggle" id="tocToggle">☰ Daftar Isi <span id="tocChevron">▾</span></button>
+
+	<nav class="toc" id="tocNav">
+		<div class="toc-title">Daftar Isi</div>
+		<a href="#overview">1. Ringkasan Aplikasi</a>
+		<a href="#arsitektur">2. Arsitektur Teknis</a>
+		<a href="#instalasi">3. Instalasi &amp; Konfigurasi</a>
+		<a href="#database">4. Struktur Basis Data</a>
+		<a href="#role">5. Role &amp; Hak Akses</a>
+		<a href="#modul">6. Panduan Modul</a>
+		<a href="#modul-kategori" class="sub">6.2 Master Kategori Barang <span class="badge-new">BARU</span></a>
+		<a href="#modul-vendor" class="sub">6.3 Master Vendor <span class="badge-new">BARU</span></a>
+		<a href="#modul-kompetitor" class="sub">6.4 Master Kompetitor <span class="badge-new">BARU</span></a>
+		<a href="#modul-marketplace" class="sub">6.5 Master Marketplace <span class="badge-new">BARU</span></a>
+		<a href="#modul-update-harga" class="sub">6.6 Update Harga</a>
+		<a href="#responsif">7. Tampilan Desktop &amp; Mobile</a>
+		<a href="#notifikasi">8. Notifikasi Email &amp; Cron</a>
+		<a href="#troubleshooting">9. Troubleshooting</a>
+		<a href="#changelog">10. Changelog</a>
+	</nav>
+
+	<main class="content">
+
+		<section id="overview">
+			<h2><span class="num">1</span> Ringkasan Aplikasi</h2>
+			<p class="lead">Aplikasi internal untuk mengelola harga jual produk di berbagai marketplace/kanal penjualan, memantau harga kompetitor sebagai referensi, mencatat riwayat setiap perubahan harga, dan mengirim notifikasi email otomatis ke tim terkait setiap kali harga berubah.</p>
+
+			<div class="grid-cards">
+				<div class="card"><h4>📦 Master Produk</h4><p>Kelola daftar produk, brand, dan biaya per vendor (modal, target HPP, SRP).</p></div>
+				<div class="card"><h4>🏷️ Master Kategori Barang <span class="badge-new">BARU</span></h4><p>Kelompokkan produk berdasarkan kategori (mis. Minuman, Elektronik) untuk memudahkan pencarian &amp; filter.</p></div>
+				<div class="card"><h4>🚚 Master Vendor <span class="badge-new">BARU</span></h4><p>Kelola daftar vendor/pemasok beserta kontak, dipakai saat mengisi biaya produk dan Update Harga.</p></div>
+				<div class="card"><h4>🏬 Master Kompetitor <span class="badge-new">BARU</span></h4><p>Kelola daftar kompetitor yang harganya dipantau sebagai referensi saat menentukan harga jual.</p></div>
+				<div class="card"><h4>🛒 Master Marketplace <span class="badge-new">BARU</span></h4><p>Kelola daftar kanal/marketplace penjualan (Offline, Website, Tokopedia, Shopee, dsb) beserta urutan tampil.</p></div>
+				<div class="card"><h4>💱 Update Harga</h4><p>Form input Modal/HPP dan harga per kanal, dengan kalkulasi SRP, Markup%, dan Margin% otomatis.</p></div>
+				<div class="card"><h4>📈 Harga Kompetitor</h4><p>Catat harga kompetitor per produk sebagai pembanding sebelum menetapkan harga jual.</p></div>
+				<div class="card"><h4>🕒 Riwayat Perubahan</h4><p>Snapshot lengkap nilai lama vs baru setiap kali harga diubah, beserta status pengiriman notifikasi.</p></div>
+				<div class="card"><h4>📧 Notifikasi Email</h4><p>Email otomatis ke grup penerima yang berlangganan kanal tertentu setiap ada perubahan harga.</p></div>
+				<div class="card"><h4>👥 User &amp; Role</h4><p>Manajemen akun dan hak akses berbasis role: Administrator, Editor, Viewer.</p></div>
+			</div>
+		</section>
+
+		<section id="arsitektur">
+			<h2><span class="num">2</span> Arsitektur Teknis</h2>
+			<p>Dibangun di atas <strong>CodeIgniter 3</strong> (pola MVC klasik), dengan tampilan menggunakan <strong>Bootstrap 5</strong> dan <strong>Bootstrap Icons</strong> (dimuat via CDN). Data disimpan pada <strong>MySQL 8 / MariaDB</strong>.</p>
+
+			<h3>Struktur Folder Penting</h3>
+			<div class="table-wrap">
+			<table>
+				<tr><th>Folder</th><th>Isi</th></tr>
+				<tr><td><code>application/controllers</code></td><td>Logika tiap modul (Dashboard, Products, Competitors, Marketplaces, Price_update, dst.)</td></tr>
+				<tr><td><code>application/models</code></td><td>Akses database per entitas (Product_model, Competitor_model, Marketplace_model, dst.)</td></tr>
+				<tr><td><code>application/views</code></td><td>Template tampilan, dikelompokkan per modul + <code>layout/</code> untuk header/sidebar/footer bersama</td></tr>
+				<tr><td><code>application/core/MY_Controller.php</code></td><td>Controller dasar: proteksi login otomatis + pembatasan role (<code>Admin_Controller</code>, <code>Editor_Controller</code>)</td></tr>
+				<tr><td><code>application/libraries</code></td><td>Auth_lib (session &amp; role), Price_calculator, Notifier (pengiriman email)</td></tr>
+				<tr><td><code>application/helpers</code></td><td>Fungsi bantu tampilan: <code>rupiah()</code>, <code>status_badge()</code>, <code>tgl_indo()</code>, dsb.</td></tr>
+				<tr><td><code>application/config/routes.php</code></td><td>Pemetaan URL ramah-pengguna ke controller/method</td></tr>
+			</table>
+			</div>
+
+			<div class="callout info">Setiap controller (kecuali <code>Auth</code>) meng-extend <code>MY_Controller</code> sehingga otomatis memerlukan login. Controller yang menggunakan <code>Admin_Controller</code> hanya bisa diakses role <strong>ADMIN</strong>; yang menggunakan <code>Editor_Controller</code> bisa diakses <strong>ADMIN</strong> dan <strong>EDITOR</strong>.</div>
+		</section>
+
+		<section id="instalasi">
+			<h2><span class="num">3</span> Instalasi &amp; Konfigurasi</h2>
+			<ol class="steps">
+				<li>Install dependency PHP: <pre><code>composer install</code></pre></li>
+				<li>Buat database lalu import struktur, kemudian data referensi:
+					<pre><code>-- 1) struktur tabel
+SOURCE database_schema.sql;
+-- 2) data contoh (role, marketplace, kompetitor, produk, admin)
+SOURCE seed_sample_data.sql;</code></pre>
+					<div class="callout warn">⚠️ Tabel <code>roles</code>, <code>price_channels</code> (Marketplace), dan <code>competitors</code> <strong>wajib</strong> berisi data sebelum login/penggunaan modul harga bisa berjalan normal. Jika tidak memakai <code>seed_sample_data.sql</code>, isi ketiga master ini secara manual — Marketplace &amp; Kompetitor kini bisa diisi langsung lewat menu <strong>Master Data</strong> di aplikasi.</div>
+				</li>
+				<li>Sesuaikan koneksi database di <code>application/config/database.php</code> dan pengaturan SMTP di <code>application/config/email.php</code>.</li>
+				<li>Set <code>base_url</code> pada <code>application/config/config.php</code> (mis. <code>http://localhost/price_update/</code>).</li>
+				<li>Arahkan document root web server ke folder proyek ini, pastikan modul <code>mod_rewrite</code> aktif (berkas <code>.htaccess</code> sudah disediakan).</li>
+				<li>Login pertama kali menggunakan akun admin dari <code>seed_sample_data.sql</code>, lalu <strong>segera ganti password</strong> lewat menu Manajemen User.</li>
+			</ol>
+		</section>
+
+		<section id="database">
+			<h2><span class="num">4</span> Struktur Basis Data</h2>
+			<p>Tabel inti dan fungsinya. Tabel yang kini punya halaman pengelolaan penuh di aplikasi (sebelumnya hanya bisa diisi lewat SQL manual) ditandai <span class="badge-new">BARU</span>.</p>
+			<div class="table-wrap">
+			<table>
+				<tr><th>Tabel</th><th>Fungsi</th></tr>
+				<tr><td><code>roles</code>, <code>users</code></td><td>Akun pengguna dan tingkat akses (ADMIN/EDITOR/VIEWER)</td></tr>
+				<tr><td><code>brands</code>, <code>products</code></td><td>Master merek dan produk</td></tr>
+				<tr><td><code>product_categories</code> <span class="badge-new">BARU</span></td><td>Master kategori barang (struktur sesederhana <code>brands</code>: id, nama, status aktif) — dikelola lewat menu <strong>Master Data → Kategori Barang</strong>. Terhubung ke <code>products.category_id</code> (opsional, boleh kosong)</td></tr>
+				<tr><td><code>vendors</code> <span class="badge-new">BARU</span></td><td>Master vendor/pemasok — dikelola lewat menu <strong>Master Data → Vendor</strong></td></tr>
+				<tr><td><code>competitors</code> <span class="badge-new">BARU</span></td><td>Master kompetitor — dikelola lewat menu <strong>Master Data → Kompetitor</strong></td></tr>
+				<tr><td><code>competitor_prices</code></td><td>Riwayat harga kompetitor per produk per tanggal pantau</td></tr>
+				<tr><td><code>price_channels</code> <span class="badge-new">BARU</span></td><td>Master marketplace/kanal penjualan — dikelola lewat menu <strong>Master Data → Marketplace</strong></td></tr>
+				<tr><td><code>product_vendor_costs</code></td><td>Modal, target HPP, dan SRP suggest per produk × vendor</td></tr>
+				<tr><td><code>product_prices</code></td><td>Harga jual aktif per produk × vendor × marketplace</td></tr>
+				<tr><td><code>price_change_batches</code></td><td>Snapshot setiap kali harga disimpan (nilai lama vs baru, status notifikasi)</td></tr>
+				<tr><td><code>notification_groups</code>, <code>notification_group_members</code>, <code>notification_group_channels</code></td><td>Grup penerima notifikasi dan langganan per marketplace</td></tr>
+				<tr><td><code>email_templates</code>, <code>email_logs</code></td><td>Template email dan riwayat pengiriman (status terkirim/gagal)</td></tr>
+				<tr><td><code>audit_logs</code></td><td>Jejak audit perubahan data penting</td></tr>
+			</table>
+			</div>
+			<div class="callout info">Marketplace dengan kode <code>OFFLINE</code> memiliki peran khusus: harga di kanal ini dipakai sebagai acuan utama perhitungan <strong>Markup %</strong> dan <strong>Margin %</strong> pada modul Update Harga. Pastikan selalu ada satu marketplace aktif dengan kode tersebut.</div>
+		</section>
+
+		<section id="role">
+			<h2><span class="num">5</span> Role &amp; Hak Akses</h2>
+			<div class="table-wrap">
+			<table>
+				<tr><th>Modul</th><th><span class="pill admin">ADMIN</span></th><th><span class="pill editor">EDITOR</span></th><th><span class="pill viewer">VIEWER</span></th></tr>
+				<tr><td>Dashboard</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-yes">✔</td></tr>
+				<tr><td>Master Produk</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Kategori Barang <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Vendor <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Kompetitor <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Marketplace <span class="badge-new">BARU</span></td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Update Harga</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Harga Kompetitor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Riwayat Perubahan</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-yes">✔ (lihat saja)</td></tr>
+				<tr><td>Import / Export</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Manajemen User</td><td class="role-yes">✔</td><td class="role-no">—</td><td class="role-no">—</td></tr>
+				<tr><td>Grup Notifikasi</td><td class="role-yes">✔</td><td class="role-no">—</td><td class="role-no">—</td></tr>
+			</table>
+			</div>
+			<p class="lead">Pembatasan diterapkan otomatis di level controller (<code>Admin_Controller</code> / <code>Editor_Controller</code>) dan menu sidebar menyesuaikan role pengguna yang sedang login.</p>
+		</section>
+
+		<section id="modul">
+			<h2><span class="num">6</span> Panduan Modul</h2>
+
+			<h3 id="modul-produk">6.1 Master Produk</h3>
+			<p>Menu <strong>Master Data → Produk</strong>. Kelola kode produk, nama, brand, dan satuan. Tombol nonaktifkan menyembunyikan produk dari daftar aktif tanpa menghapus riwayat harga terkait.</p>
+
+			<h3 id="modul-kategori">6.2 Master Kategori Barang <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Master Data → Kategori Barang</strong>. Halaman CRUD untuk tabel <code>product_categories</code>, dipakai untuk mengelompokkan produk. Sengaja dibuat sesederhana master <strong>Brand</strong> (tabel <code>brands</code>) — hanya kolom <strong>ID</strong>, <strong>Nama Kategori</strong>, dan <strong>Status</strong>, tanpa kode/deskripsi terpisah.</p>
+			<ul>
+				<li><strong>Tambah Kategori</strong>: isi Nama Kategori saja (mis. <code>Minuman Keras</code>, <code>Elektronik</code>). Nama harus unik.</li>
+				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan nama.</li>
+				<li><strong>Edit</strong>: ubah nama dan status aktif.</li>
+				<li><strong>Nonaktifkan / Aktifkan</strong>: kategori yang sudah dipakai produk tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi sebagai pilihan baru, dan bisa diaktifkan kembali kapan saja.</li>
+			</ul>
+			<div class="callout good">✅ Kategori bersifat opsional pada Produk — field ini tersedia sebagai dropdown "Kategori Barang" di form Tambah/Edit Produk (menu <strong>Master Data → Produk</strong>), lengkap dengan filter kategori pada daftar produk.</div>
+
+			<h3 id="modul-vendor">6.3 Master Vendor <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Master Data → Vendor</strong>. Halaman CRUD penuh untuk tabel <code>vendors</code> — sebelumnya vendor hanya bisa ditambahkan lewat query SQL manual.</p>
+			<ul>
+				<li><strong>Tambah Vendor</strong>: isi Kode (huruf/angka/tanda "-", otomatis huruf besar — mis. <code>VENDOR-A</code>), Nama, dan Kontak (opsional, mis. no. telepon/email).</li>
+				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan kode/nama.</li>
+				<li><strong>Edit</strong>: ubah nama, kontak, dan status aktif. Kode bersifat permanen setelah dibuat.</li>
+				<li><strong>Nonaktifkan / Aktifkan</strong>: vendor yang sudah punya riwayat biaya/harga tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi di form input, dan bisa diaktifkan kembali kapan saja.</li>
+			</ul>
+			<div class="callout good">✅ Vendor yang aktif otomatis muncul sebagai pilihan tab vendor baru di modul <strong>Produk</strong> (Cost per Vendor) dan <strong>Update Harga</strong>.</div>
+
+			<h3 id="modul-kompetitor">6.4 Master Kompetitor <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Master Data → Kompetitor</strong>. Halaman CRUD penuh untuk tabel <code>competitors</code> — sebelumnya kompetitor hanya bisa ditambahkan lewat query SQL manual.</p>
+			<ul>
+				<li><strong>Tambah Kompetitor</strong>: isi Kode (huruf/angka, otomatis huruf besar — mis. <code>AMAZON</code>, <code>TOKO_RIVAL</code>), Nama, dan Website (opsional).</li>
+				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan kode/nama.</li>
+				<li><strong>Edit</strong>: ubah nama, website, dan status aktif. Kode bersifat permanen setelah dibuat (dipakai sebagai identitas field harga pada modul Harga Kompetitor).</li>
+				<li><strong>Nonaktifkan / Aktifkan</strong>: kompetitor yang sudah punya riwayat harga tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi di form input, dan bisa diaktifkan kembali kapan saja.</li>
+			</ul>
+			<div class="callout good">✅ Kompetitor yang aktif otomatis muncul sebagai kolom input di modul <strong>Harga Kompetitor</strong> dan sebagai referensi harga di modul <strong>Update Harga</strong>.</div>
+
+			<h3 id="modul-marketplace">6.5 Master Marketplace <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Master Data → Marketplace</strong>. Halaman CRUD penuh untuk tabel <code>price_channels</code> (kanal penjualan / marketplace) — sebelumnya hanya bisa dikonfigurasi lewat query SQL manual.</p>
+			<ul>
+				<li><strong>Tambah Marketplace</strong>: isi Kode (mis. <code>TOKOPEDIA</code>, <code>SHOPEE</code>, <code>OFFLINE</code>), Nama tampilan, dan Urutan Tampil (angka kecil tampil lebih dulu di form Update Harga).</li>
+				<li><strong>Edit</strong>: ubah nama, urutan, dan status aktif.</li>
+				<li><strong>Nonaktifkan / Aktifkan</strong>: marketplace yang sudah dipakai transaksi harga tidak dihapus permanen, hanya dinonaktifkan agar tidak muncul di form input baru.</li>
+			</ul>
+			<div class="callout warn">⚠️ Jangan menonaktifkan marketplace berkode <code>OFFLINE</code> kecuali Anda tahu konsekuensinya — kanal ini menjadi acuan perhitungan Markup%/Margin% di seluruh modul Update Harga.</div>
+
+			<h3 id="modul-update-harga">6.6 Update Harga</h3>
+			<p>Menu <strong>Transaksi → Update Harga</strong>. Daftar produk kini memakai <strong>paging</strong> (25 produk/halaman) plus pencarian kode/nama, sama seperti menu Produk. Pilih produk, lalu isi Modal &amp; Target HPP per vendor — SRP Suggest, Markup%, dan Margin% terhitung otomatis (real-time via AJAX). Isi harga jual baru untuk tiap marketplace aktif, bandingkan dengan harga kompetitor yang tampil sebagai referensi, lalu klik <strong>Simpan Perubahan Harga</strong>.</p>
+			<div class="callout good">
+				✅ <strong>Notifikasi digabung, bukan langsung terkirim per produk <span class="badge-new">BARU</span>.</strong> Menyimpan harga <em>tidak lagi</em> langsung mengirim email — perubahan masuk ke "keranjang notifikasi" sesi Anda. Selama masih ada perubahan yang menunggu, muncul kotak kuning di bagian atas <em>setiap halaman</em> aplikasi: <b>"N perubahan harga menunggu dikirim notifikasi"</b> dengan dua tombol:
+				<ul class="mb-0 mt-2">
+					<li><strong>Kirim Notifikasi Sekarang</strong> — mengirim <em>satu</em> email per penerima yang merangkum <em>semua</em> produk yang menunggu (misal update 10 produk berurutan → 1 email berisi 10 produk per penerima, bukan 10 email terpisah), lalu mengosongkan keranjang.</li>
+					<li><strong>Batalkan Antrian</strong> — mengosongkan keranjang <em>tanpa</em> mengirim email; data harga yang sudah tersimpan tetap ada berstatus "Pending" dan bisa dikirim satu-satu nanti lewat tombol "Kirim Ulang Notifikasi" di menu Riwayat Perubahan.</li>
+				</ul>
+			</div>
+			<p class="lead">Setiap penyimpanan tetap tercatat sebagai batch riwayat (status awal "Pending"); isi email tiap penerima otomatis disaring hanya menampilkan marketplace yang benar-benar mereka langgani di menu Grup Notifikasi — sama seperti sebelumnya, hanya cara pengirimannya yang kini digabung.</p>
+
+			<h3 id="modul-harga-kompetitor">6.7 Harga Kompetitor</h3>
+			<p>Menu <strong>Transaksi → Harga Kompetitor</strong>. Pilih produk, lalu input harga terkini untuk setiap kompetitor aktif beserta tanggal pantau. Data ini menjadi referensi visual saat menentukan harga jual di modul Update Harga.</p>
+
+			<h3 id="modul-riwayat">6.8 Riwayat Perubahan</h3>
+			<p>Menu <strong>Transaksi → Riwayat Perubahan</strong>. Menampilkan seluruh batch perubahan harga beserta status pengiriman notifikasi (Terkirim/Sebagian/Gagal), dengan detail nilai lama vs baru per marketplace.</p>
+
+			<h3 id="modul-user">6.9 Manajemen User &amp; Grup Notifikasi</h3>
+			<p>Khusus role ADMIN. Kelola akun pengguna beserta role-nya, dan kelola grup notifikasi (siapa menerima email untuk marketplace apa saja).</p>
+
+			<h3 id="modul-import">6.10 Import / Export</h3>
+			<p>Menu <strong>Administrasi → Import/Export</strong> untuk memasukkan data produk/harga secara massal dan mengekspor laporan.</p>
+		</section>
+
+		<section id="responsif">
+			<h2><span class="num">7</span> Tampilan Desktop &amp; Mobile</h2>
+			<p>Seluruh halaman aplikasi — termasuk dua modul master baru — memakai layout responsif yang sama:</p>
+			<div class="device-shots">
+				<div class="mock mock-desktop">
+					<div class="mock-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>&nbsp;Tampilan Desktop</div>
+					<div class="mock-body">
+						<div class="mock-side"></div>
+						<div class="mock-main">
+							<div class="bar short"></div>
+							<div class="bar"></div>
+							<div class="bar"></div>
+							<div class="bar short"></div>
+						</div>
+					</div>
+				</div>
+				<div class="mock mock-mobile">
+					<div class="mock-bar">☰&nbsp;Mobile</div>
+					<div class="mock-body">
+						<div class="mock-main">
+							<div class="bar short"></div>
+							<div class="bar"></div>
+							<div class="bar"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<ul>
+				<li><strong>Desktop (≥ 992px):</strong> sidebar navigasi selalu tampil di kiri, dikelompokkan per bagian (Master Data, Transaksi, Administrasi).</li>
+				<li><strong>Tablet &amp; Handphone (&lt; 992px):</strong> sidebar tersembunyi secara default dan dibuka lewat tombol menu (☰) di pojok kiri atas; area konten otomatis melebar penuh, dan tabel data bisa digeser (scroll) horizontal bila kolom terlalu banyak.</li>
+				<li><strong>Menu sidebar bisa di-scroll:</strong> jika daftar menu lebih panjang dari tinggi layar (mis. di layar pendek/handphone landscape), sidebar akan menampilkan scrollbar vertikal internal sehingga menu paling bawah (Import/Export, Keluar) tetap bisa dijangkau tanpa menggeser seluruh halaman.</li>
+				<li>Form, kartu statistik, dan tabel pada seluruh modul (termasuk Master Kategori Barang, Master Vendor, Master Kompetitor &amp; Master Marketplace) menyesuaikan lebar layar secara otomatis mengikuti grid Bootstrap 5.</li>
+			</ul>
+			<div class="callout info">Tidak perlu instalasi aplikasi terpisah — cukup buka alamat aplikasi dari browser HP (Chrome/Safari) untuk pengalaman yang setara dengan versi desktop.</div>
+		</section>
+
+		<section id="notifikasi">
+			<h2><span class="num">8</span> Notifikasi Email &amp; Cron</h2>
+			<p>Setelah harga disimpan, sistem mengirim email notifikasi secara sinkron ke seluruh anggota grup yang berlangganan marketplace yang berubah. Untuk volume perubahan tinggi, antrean email juga dapat diproses via CLI:</p>
+			<pre><code>php index.php cli send_email_queue</code></pre>
+			<p>Jadwalkan perintah ini lewat cron job / Task Scheduler sesuai kebutuhan volume notifikasi harian.</p>
+		</section>
+
+		<section id="troubleshooting">
+			<h2><span class="num">9</span> Troubleshooting</h2>
+			<div class="table-wrap">
+			<table>
+				<tr><th>Gejala</th><th>Penyebab Umum</th><th>Solusi</th></tr>
+				<tr><td>Tidak bisa login / halaman putih setelah login</td><td>Tabel <code>roles</code> kosong</td><td>Pastikan <code>seed_sample_data.sql</code> sudah dijalankan, atau isi manual minimal role ADMIN/EDITOR/VIEWER</td></tr>
+				<tr><td>Form Update Harga tidak menampilkan kolom marketplace</td><td>Tabel <code>price_channels</code> kosong / semua nonaktif</td><td>Buka menu <strong>Master Data → Marketplace</strong> dan tambahkan minimal satu marketplace aktif berkode <code>OFFLINE</code></td></tr>
+				<tr><td>Markup%/Margin% selalu 0</td><td>Tidak ada marketplace berkode <code>OFFLINE</code></td><td>Tambahkan marketplace dengan kode persis <code>OFFLINE</code> lewat menu Master Marketplace</td></tr>
+				<tr><td>Kolom harga kompetitor kosong di form Update Harga</td><td>Belum ada kompetitor aktif</td><td>Tambahkan lewat menu <strong>Master Data → Kompetitor</strong></td></tr>
+				<tr><td>Sudah simpan harga tapi email belum terkirim</td><td>Ini perilaku normal (bukan bug) — lihat callout di modul Update Harga</td><td>Klik <strong>"Kirim Notifikasi Sekarang"</strong> pada kotak kuning di atas halaman setelah selesai update semua produk</td></tr>
+				<tr><td>Lupa klik kirim, sudah pindah menu/logout</td><td>Keranjang notifikasi tersimpan di sesi login, bukan permanen</td><td>Buka <strong>Riwayat Perubahan</strong>, cari batch berstatus "Pending", klik <strong>"Kirim Ulang Notifikasi"</strong> satu per satu</td></tr>
+				<tr><td>Menu di HP tidak muncul</td><td>Sidebar tertutup (mode mobile)</td><td>Ketuk ikon ☰ di pojok kiri atas untuk membuka menu</td></tr>
+			</table>
+			</div>
+		</section>
+
+		<section id="changelog">
+			<h2><span class="num">10</span> Changelog</h2>
+			<div class="table-wrap">
+			<table>
+				<tr><th>Tanggal</th><th>Perubahan</th></tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 4)</td>
+					<td>
+						Menambahkan <strong>paging</strong> pada menu Update Harga (25 produk/halaman + pencarian), menyamai menu Produk. Merombak alur notifikasi email: menyimpan perubahan harga kini <em>tidak langsung</em> mengirim email — masuk ke keranjang notifikasi sesi, ditampilkan sebagai kotak peringatan persisten di semua halaman, dan baru benar-benar dikirim (satu email gabungan per penerima untuk seluruh produk yang menunggu) saat tombol "Kirim Notifikasi Sekarang" ditekan. Method baru <code>Notifier::dispatch_group()</code> menangani penggabungan ini; method <code>dispatch()</code> lama tetap dipertahankan untuk fitur "Kirim Ulang Notifikasi" per-batch di Riwayat Perubahan.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 3)</td>
+					<td>
+						Menyederhanakan <strong>Master Kategori Barang</strong> agar sesederhana master Brand: kolom <code>category_code</code> dan <code>description</code> dihapus dari tabel <code>product_categories</code> (data nama kategori yang sudah ada tetap dipertahankan). Form &amp; daftar kini hanya menampilkan ID, Nama Kategori, dan Status.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan 2)</td>
+					<td>
+						Menambahkan modul <strong>Master Kategori Barang</strong> (CRUD penuh, tabel baru <code>product_categories</code>). Kolom baru <code>products.category_id</code> (nullable, FK ke <code>product_categories</code>) ditambahkan lewat migrasi non-destruktif — data produk yang sudah ada tidak terpengaruh. Form &amp; daftar Produk kini punya filter dan pilihan Kategori Barang (opsional).
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026 (lanjutan)</td>
+					<td>
+						Menambahkan modul <strong>Master Vendor</strong> (CRUD penuh, tabel <code>vendors</code>). Memperbaiki bug sidebar yang tidak bisa di-scroll — sebelumnya sidebar memakai <code>min-height</code> pada elemen <code>position: fixed</code> sehingga menu yang melebihi tinggi layar terpotong tanpa scrollbar; kini dikunci penuh ke tinggi viewport (<code>top:0; bottom:0</code>) dengan scroll internal aktif.
+					</td>
+				</tr>
+				<tr>
+					<td>25 Agu 2026</td>
+					<td>
+						Menambahkan modul <strong>Master Kompetitor</strong> dan <strong>Master Marketplace</strong> (CRUD penuh: tambah/edit/nonaktifkan/aktifkan, pencarian, validasi kode unik). Merombak sidebar menjadi tersegmentasi (Master Data / Transaksi / Administrasi) dan sepenuhnya responsif dengan menu hamburger untuk layar tablet/handphone. Menambahkan dokumentasi ini.
+					</td>
+				</tr>
+				<tr><td>23 Agu 2026</td><td>Rilis awal aplikasi: Produk, Update Harga, Harga Kompetitor, Riwayat Perubahan, User, Grup Notifikasi, Import/Export.</td></tr>
+			</table>
+			</div>
+		</section>
+
+	</main>
+</div>
+
+<footer class="doc-footer">Sistem Update Harga Produk &amp; Notifikasi Email Otomatis — Dokumentasi internal, dibuka langsung dari file <code>dokumentasi.html</code>.</footer>
+
+<script>
+(function () {
+	var toggle = document.getElementById('tocToggle');
+	var nav = document.getElementById('tocNav');
+	var chevron = document.getElementById('tocChevron');
+	if (!toggle || !nav) return;
+	toggle.addEventListener('click', function () {
+		nav.classList.toggle('open');
+		chevron.textContent = nav.classList.contains('open') ? '▴' : '▾';
+	});
+	nav.querySelectorAll('a').forEach(function (a) {
+		a.addEventListener('click', function () {
+			if (window.innerWidth <= 900) { nav.classList.remove('open'); chevron.textContent = '▾'; }
+		});
+	});
+})();
+</script>
+
+</body>
+</html>
