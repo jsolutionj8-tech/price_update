@@ -22,6 +22,24 @@ class Price_change_batch_model extends CI_Model
 		return $this->db->where('id', $id)->update($this->table, array('notify_status' => $status));
 	}
 
+	/**
+	 * Jumlah & daftar batch berstatus 'pending' secara global (lintas user/sesi) —
+	 * dipakai sebagai sumber kebenaran untuk banner "Kirim Notifikasi Sekarang",
+	 * bukan disimpan di session supaya tidak hilang saat logout/ganti user.
+	 */
+	public function count_pending()
+	{
+		return $this->db->where('notify_status', 'pending')->count_all_results($this->table);
+	}
+
+	public function get_pending_ids()
+	{
+		return array_column(
+			$this->db->select('id')->where('notify_status', 'pending')->get($this->table)->result_array(),
+			'id'
+		);
+	}
+
 	public function get_with_detail($id)
 	{
 		return $this->db->select('price_change_batches.*, products.product_name, products.product_code, users.full_name as changed_by_name')

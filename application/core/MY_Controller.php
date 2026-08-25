@@ -17,6 +17,11 @@ class MY_Controller extends CI_Controller
 
 		$this->load->model('user_model');
 		$this->data['logged_in_user'] = current_user();
+
+		// Sumber kebenaran untuk banner notifikasi tertunda = database (bukan session),
+		// supaya tetap akurat lintas user/sesi (lihat Price_change_batch_model::count_pending()).
+		$this->load->model('price_change_batch_model');
+		$this->data['pending_notify_count'] = $this->price_change_batch_model->count_pending();
 	}
 
 	/**

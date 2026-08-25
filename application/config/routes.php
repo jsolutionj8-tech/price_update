@@ -117,7 +117,6 @@ $route['price-update/save']            = 'price_update/save';
 $route['price-update/add-vendor/(:num)'] = 'price_update/add_vendor/$1';
 $route['price-update/preview-email']   = 'price_update/preview_email';
 $route['price-update/send-pending']    = 'price_update/send_pending';
-$route['price-update/clear-pending']   = 'price_update/clear_pending';
 
 // Harga kompetitor
 $route['competitor-price']             = 'competitor_price/index';

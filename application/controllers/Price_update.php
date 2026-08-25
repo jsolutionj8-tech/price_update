@@ -204,27 +204,23 @@ class Price_update extends Editor_Controller
 			)),
 		));
 
-		// --- masukkan ke "keranjang notifikasi" sesi, BELUM langsung dikirim ---
-		// Supaya update banyak produk berurutan bisa dikirim jadi SATU email lewat
-		// tombol "Kirim Notifikasi Sekarang" (lihat send_pending()), bukan satu
-		// email terpisah per produk.
-		$pending = $this->session->userdata('pending_notify_batches') ?: array();
-		$pending[] = $batch_id;
-		$pending = array_values(array_unique($pending));
-		$this->session->set_userdata('pending_notify_batches', $pending);
-
-		$this->session->set_flashdata('success', 'Harga berhasil disimpan. Total ' . count($pending) . ' perubahan menunggu dikirim notifikasi — lanjutkan update produk lain, lalu klik "Kirim Notifikasi Sekarang" di atas jika sudah selesai.');
+		// Batch tersimpan dengan notify_status default 'pending' (lihat kolom di database_schema.sql).
+		// Notifikasi TIDAK langsung dikirim di sini — lihat send_pending(), yang mengirim
+		// SATU email gabungan untuk SEMUA batch berstatus 'pending' di database (lintas
+		// user/sesi), dipicu lewat tombol "Kirim Notifikasi Sekarang" pada banner global.
+		$pending_count = $this->price_change_batch_model->count_pending();
+		$this->session->set_flashdata('success', 'Harga berhasil disimpan. Total ' . $pending_count . ' perubahan menunggu dikirim notifikasi — lanjutkan update produk lain, lalu klik "Kirim Notifikasi Sekarang" di atas jika sudah selesai.');
 
 		redirect('price-history/detail/' . $batch_id);
 	}
 
 	/**
-	 * Kirim SATU email konsolidasi untuk seluruh perubahan harga yang menunggu
-	 * di keranjang notifikasi sesi saat ini, lalu kosongkan keranjangnya.
+	 * Kirim SATU email konsolidasi untuk SEMUA batch berstatus 'pending' di database
+	 * (lintas user/sesi — lihat Price_change_batch_model::get_pending_ids()).
 	 */
 	public function send_pending()
 	{
-		$pending = $this->session->userdata('pending_notify_batches') ?: array();
+		$pending = $this->price_change_batch_model->get_pending_ids();
 
 		if (empty($pending)) {
 			$this->session->set_flashdata('error', 'Tidak ada perubahan harga yang menunggu dikirim.');
@@ -233,7 +229,6 @@ class Price_update extends Editor_Controller
 
 		$this->load->library('notifier');
 		$result = $this->notifier->dispatch_group($pending);
-		$this->session->unset_userdata('pending_notify_batches');
 
 		if ($result['success']) {
 			$msg = "Notifikasi terkirim: {$result['batches']} produk ke {$result['recipients']} penerima ({$result['sent']} email berhasil";
@@ -244,18 +239,6 @@ class Price_update extends Editor_Controller
 		}
 
 		redirect('price-history');
-	}
-
-	/**
-	 * Kosongkan keranjang notifikasi TANPA mengirim email. Perubahan harga yang
-	 * sudah tersimpan tetap ada (status tetap 'pending'); bisa dikirim manual
-	 * satu-satu lewat tombol "Kirim Ulang Notifikasi" di Riwayat Perubahan.
-	 */
-	public function clear_pending()
-	{
-		$this->session->unset_userdata('pending_notify_batches');
-		$this->session->set_flashdata('success', 'Antrian notifikasi dikosongkan. Perubahan harga tetap tersimpan sebagai "Pending" dan bisa dikirim manual lewat menu Riwayat Perubahan.');
-		redirect($this->_safe_referer());
 	}
 
 	protected function _safe_referer()

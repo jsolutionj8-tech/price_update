@@ -48,17 +48,12 @@
 	<?php if ($flash_error): ?>
 		<div class="alert alert-danger alert-dismissible fade show"><?= $flash_error ?><button class="btn-close" data-bs-dismiss="alert"></button></div>
 	<?php endif; ?>
-	<?php $pending_batches = $this->session->userdata('pending_notify_batches') ?: array(); ?>
-	<?php if (!empty($pending_batches) && in_array($role, array('ADMIN', 'EDITOR'), TRUE)): ?>
+	<?php $pending_notify_count = $pending_notify_count ?? 0; ?>
+	<?php if ($pending_notify_count > 0 && in_array($role, array('ADMIN', 'EDITOR'), TRUE)): ?>
 		<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
-			<div><i class="bi bi-envelope-exclamation-fill me-1"></i><?= count($pending_batches) ?> perubahan harga menunggu dikirim notifikasi.</div>
-			<div class="d-flex gap-2">
-				<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
-					<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk <?= count($pending_batches) ?> perubahan harga sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
-				</form>
-				<form method="post" action="<?= base_url('price-update/clear-pending') ?>" class="d-inline">
-					<button class="btn btn-sm btn-outline-secondary" onclick="return confirm('Kosongkan antrian tanpa mengirim email? Data harga tetap tersimpan.')">Batalkan Antrian</button>
-				</form>
-			</div>
+			<div><i class="bi bi-envelope-exclamation-fill me-1"></i><?= $pending_notify_count ?> perubahan harga menunggu dikirim notifikasi.</div>
+			<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
+				<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk <?= $pending_notify_count ?> perubahan harga sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
+			</form>
 		</div>
 	<?php endif; ?>

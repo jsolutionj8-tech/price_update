@@ -381,13 +381,9 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<h3 id="modul-update-harga">6.6 Update Harga</h3>
 			<p>Menu <strong>Transaksi → Update Harga</strong>. Daftar produk kini memakai <strong>paging</strong> (25 produk/halaman) plus pencarian kode/nama, sama seperti menu Produk. Pilih produk, lalu isi Modal &amp; Target HPP per vendor — SRP Suggest, Markup%, dan Margin% terhitung otomatis (real-time via AJAX). Isi harga jual baru untuk tiap marketplace aktif, bandingkan dengan harga kompetitor yang tampil sebagai referensi, lalu klik <strong>Simpan Perubahan Harga</strong>.</p>
 			<div class="callout good">
-				✅ <strong>Notifikasi digabung, bukan langsung terkirim per produk <span class="badge-new">BARU</span>.</strong> Menyimpan harga <em>tidak lagi</em> langsung mengirim email — perubahan masuk ke "keranjang notifikasi" sesi Anda. Selama masih ada perubahan yang menunggu, muncul kotak kuning di bagian atas <em>setiap halaman</em> aplikasi: <b>"N perubahan harga menunggu dikirim notifikasi"</b> dengan dua tombol:
-				<ul class="mb-0 mt-2">
-					<li><strong>Kirim Notifikasi Sekarang</strong> — mengirim <em>satu</em> email per penerima yang merangkum <em>semua</em> produk yang menunggu (misal update 10 produk berurutan → 1 email berisi 10 produk per penerima, bukan 10 email terpisah), lalu mengosongkan keranjang.</li>
-					<li><strong>Batalkan Antrian</strong> — mengosongkan keranjang <em>tanpa</em> mengirim email; data harga yang sudah tersimpan tetap ada berstatus "Pending" dan bisa dikirim satu-satu nanti lewat tombol "Kirim Ulang Notifikasi" di menu Riwayat Perubahan.</li>
-				</ul>
+				✅ <strong>Notifikasi digabung, bukan langsung terkirim per produk <span class="badge-new">BARU</span>.</strong> Menyimpan harga <em>tidak lagi</em> langsung mengirim email — batch tersimpan berstatus "Pending". Selama masih ada batch berstatus Pending <em>di database</em> (dihitung ulang setiap halaman dimuat, <strong>bukan</strong> disimpan di sesi login), muncul kotak kuning di bagian atas <em>setiap halaman</em> aplikasi — <b>untuk siapa pun yang login</b> sebagai ADMIN/EDITOR, bukan cuma yang membuat perubahannya: <b>"N perubahan harga menunggu dikirim notifikasi"</b> dengan tombol <strong>Kirim Notifikasi Sekarang</strong>, yang mengirim <em>satu</em> email per penerima merangkum <em>semua</em> produk Pending yang ada (misal update 10 produk berurutan → 1 email berisi 10 produk per penerima, bukan 10 email terpisah).
 			</div>
-			<p class="lead">Setiap penyimpanan tetap tercatat sebagai batch riwayat (status awal "Pending"); isi email tiap penerima otomatis disaring hanya menampilkan marketplace yang benar-benar mereka langgani di menu Grup Notifikasi — sama seperti sebelumnya, hanya cara pengirimannya yang kini digabung.</p>
+			<p class="lead">Setiap penyimpanan tetap tercatat sebagai batch riwayat (status awal "Pending"); isi email tiap penerima otomatis disaring hanya menampilkan marketplace yang benar-benar mereka langgani di menu Grup Notifikasi — sama seperti sebelumnya, hanya cara pengirimannya yang kini digabung. Karena sumber datanya database (bukan sesi), jumlah "menunggu" tetap akurat walau Anda logout lalu login lagi, atau login sebagai user lain.</p>
 
 			<h3 id="modul-harga-kompetitor">6.7 Harga Kompetitor</h3>
 			<p>Menu <strong>Transaksi → Harga Kompetitor</strong>. Pilih produk, lalu input harga terkini untuk setiap kompetitor aktif beserta tanggal pantau. Data ini menjadi referensi visual saat menentukan harga jual di modul Update Harga.</p>
@@ -455,7 +451,7 @@ SOURCE seed_sample_data.sql;</code></pre>
 				<tr><td>Markup%/Margin% selalu 0</td><td>Tidak ada marketplace berkode <code>OFFLINE</code></td><td>Tambahkan marketplace dengan kode persis <code>OFFLINE</code> lewat menu Master Marketplace</td></tr>
 				<tr><td>Kolom harga kompetitor kosong di form Update Harga</td><td>Belum ada kompetitor aktif</td><td>Tambahkan lewat menu <strong>Master Data → Kompetitor</strong></td></tr>
 				<tr><td>Sudah simpan harga tapi email belum terkirim</td><td>Ini perilaku normal (bukan bug) — lihat callout di modul Update Harga</td><td>Klik <strong>"Kirim Notifikasi Sekarang"</strong> pada kotak kuning di atas halaman setelah selesai update semua produk</td></tr>
-				<tr><td>Lupa klik kirim, sudah pindah menu/logout</td><td>Keranjang notifikasi tersimpan di sesi login, bukan permanen</td><td>Buka <strong>Riwayat Perubahan</strong>, cari batch berstatus "Pending", klik <strong>"Kirim Ulang Notifikasi"</strong> satu per satu</td></tr>
+				<tr><td>Lupa klik kirim, sudah pindah menu/logout</td><td>Tidak masalah — hitungan "menunggu" berasal dari database, bukan sesi</td><td>Login kembali (user mana pun dengan role ADMIN/EDITOR) → banner tetap muncul dengan jumlah yang benar. Atau buka <strong>Riwayat Perubahan</strong>, cari batch berstatus "Pending", klik <strong>"Kirim Ulang Notifikasi"</strong> satu per satu</td></tr>
 				<tr><td>Menu di HP tidak muncul</td><td>Sidebar tertutup (mode mobile)</td><td>Ketuk ikon ☰ di pojok kiri atas untuk membuka menu</td></tr>
 			</table>
 			</div>
@@ -467,9 +463,15 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<table>
 				<tr><th>Tanggal</th><th>Perubahan</th></tr>
 				<tr>
+					<td>25 Agu 2026 (lanjutan 5)</td>
+					<td>
+						<strong>Perbaikan bug:</strong> banner "N perubahan harga menunggu" bisa menampilkan jumlah salah setelah logout/ganti user, karena sebelumnya dihitung dari <em>sesi login</em> (per-user, hilang saat sesi berganti) alih-alih dari database. Sekarang jumlah &amp; daftar batch Pending selalu dihitung langsung dari tabel <code>price_change_batches</code> (method baru <code>Price_change_batch_model::count_pending()</code> / <code>get_pending_ids()</code>, dipanggil di <code>MY_Controller</code> setiap halaman dimuat) — akurat untuk siapa pun yang login, lintas sesi. Tombol "Batalkan Antrian" dihapus karena tidak relevan lagi di model berbasis database ini. Ditambahkan index <code>idx_notify_status</code> pada <code>price_change_batches</code> untuk menjaga performa query ini.
+					</td>
+				</tr>
+				<tr>
 					<td>25 Agu 2026 (lanjutan 4)</td>
 					<td>
-						Menambahkan <strong>paging</strong> pada menu Update Harga (25 produk/halaman + pencarian), menyamai menu Produk. Merombak alur notifikasi email: menyimpan perubahan harga kini <em>tidak langsung</em> mengirim email — masuk ke keranjang notifikasi sesi, ditampilkan sebagai kotak peringatan persisten di semua halaman, dan baru benar-benar dikirim (satu email gabungan per penerima untuk seluruh produk yang menunggu) saat tombol "Kirim Notifikasi Sekarang" ditekan. Method baru <code>Notifier::dispatch_group()</code> menangani penggabungan ini; method <code>dispatch()</code> lama tetap dipertahankan untuk fitur "Kirim Ulang Notifikasi" per-batch di Riwayat Perubahan.
+						Menambahkan <strong>paging</strong> pada menu Update Harga (25 produk/halaman + pencarian), menyamai menu Produk. Merombak alur notifikasi email: menyimpan perubahan harga kini <em>tidak langsung</em> mengirim email — masuk ke antrean notifikasi, ditampilkan sebagai kotak peringatan persisten di semua halaman, dan baru benar-benar dikirim (satu email gabungan per penerima untuk seluruh produk yang menunggu) saat tombol "Kirim Notifikasi Sekarang" ditekan. Method baru <code>Notifier::dispatch_group()</code> menangani penggabungan ini; method <code>dispatch()</code> lama tetap dipertahankan untuk fitur "Kirim Ulang Notifikasi" per-batch di Riwayat Perubahan.
 					</td>
 				</tr>
 				<tr>

@@ -177,6 +177,7 @@ CREATE TABLE `price_change_batches` (
   KEY `fk_pcb_product` (`product_id`),
   KEY `fk_pcb_vendor` (`vendor_id`),
   KEY `fk_pcb_user` (`changed_by`),
+  KEY `idx_notify_status` (`notify_status`),
   CONSTRAINT `fk_pcb_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
   CONSTRAINT `fk_pcb_user` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`),
   CONSTRAINT `fk_pcb_vendor` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`)
