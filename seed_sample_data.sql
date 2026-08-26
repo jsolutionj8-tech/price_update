@@ -16,7 +16,7 @@ INSERT INTO menus (menu_key, menu_label, menu_group, menu_icon, sort_order) VALU
 ('categories',          'Kategori Barang',     'Master Data',   'bi-tags',                  20),
 ('vendors',             'Vendor',              'Master Data',   'bi-truck',                 30),
 ('competitors',         'Kompetitor',          'Master Data',   'bi-shop-window',           40),
-('marketplaces',        'Marketplace',         'Master Data',   'bi-bag-check',             50),
+('marketplaces',        'Sales Channel',       'Master Data',   'bi-bag-check',             50),
 ('price-update',        'Update Harga',        'Transaksi',     'bi-currency-exchange',     60),
 ('competitor-price',    'Harga Kompetitor',    'Transaksi',     'bi-graph-up-arrow',        70),
 ('price-history',       'Riwayat Perubahan',   'Transaksi',     'bi-clock-history',         80),

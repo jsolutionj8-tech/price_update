@@ -63,7 +63,6 @@ class Vendors extends MY_Controller
 			'vendor_code'     => $code,
 			'vendor_name'     => $name ?: NULL,
 			'vendor_category' => $this->input->post('vendor_category', TRUE) ?: NULL,
-			'contact_info'    => $this->input->post('contact_info', TRUE) ?: NULL,
 			'is_active'       => 1,
 		));
 		$this->session->set_flashdata('success', 'Vendor berhasil ditambahkan.');
@@ -82,7 +81,6 @@ class Vendors extends MY_Controller
 		$this->vendor_model->update($id, array(
 			'vendor_name'     => trim((string) $this->input->post('vendor_name', TRUE)) ?: NULL,
 			'vendor_category' => $this->input->post('vendor_category', TRUE) ?: NULL,
-			'contact_info'    => $this->input->post('contact_info', TRUE) ?: NULL,
 			'is_active'       => $this->input->post('is_active') ? 1 : 0,
 		));
 		$this->session->set_flashdata('success', 'Vendor berhasil diperbarui.');

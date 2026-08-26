@@ -25,10 +25,6 @@
 				<option value="Umum">
 			</datalist>
 		</div>
-		<div class="mb-3">
-			<label class="form-label">Kontak (opsional)</label>
-			<input type="text" name="contact_info" class="form-control" placeholder="No. telepon / email / alamat singkat" value="<?= htmlspecialchars($vendor['contact_info'] ?? '') ?>">
-		</div>
 		<?php if (isset($vendor)): ?>
 		<div class="form-check mb-3">
 			<input type="checkbox" name="is_active" class="form-check-input" id="isActive" <?= $vendor['is_active'] ? 'checked' : '' ?>>

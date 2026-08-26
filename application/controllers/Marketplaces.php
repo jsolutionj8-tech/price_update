@@ -27,7 +27,7 @@ class Marketplaces extends MY_Controller
 		$offset = ($page - 1) * self::PER_PAGE;
 
 		$data = array(
-			'title'        => 'Master Marketplace',
+			'title'        => 'Sales Channel',
 			'marketplaces' => $this->marketplace_model->get_all($filters, self::PER_PAGE, $offset),
 			'filters'      => $filters,
 			'pagination'   => array(
@@ -43,7 +43,7 @@ class Marketplaces extends MY_Controller
 	public function create()
 	{
 		$data = array(
-			'title'            => 'Tambah Marketplace',
+			'title'            => 'Tambah Sales Channel',
 			'suggested_order'  => $this->marketplace_model->next_sort_order(),
 		);
 		$this->render_view('marketplaces/form', $data);
@@ -51,31 +51,26 @@ class Marketplaces extends MY_Controller
 
 	public function store()
 	{
-		$code = $this->_sanitize_code($this->input->post('channel_code', TRUE));
 		$name = trim((string) $this->input->post('channel_name', TRUE));
 
-		if ($code === '' || $name === '') {
-			$this->session->set_flashdata('error', 'Kode dan Nama Marketplace wajib diisi.');
-			redirect('marketplaces/create');
-		}
-		if ($this->marketplace_model->find_by_code($code)) {
-			$this->session->set_flashdata('error', 'Kode marketplace "' . $code . '" sudah digunakan.');
+		if ($name === '') {
+			$this->session->set_flashdata('error', 'Nama Sales Channel wajib diisi.');
 			redirect('marketplaces/create');
 		}
 
 		$this->marketplace_model->create(array(
-			'channel_code' => $code,
+			'channel_code' => $this->_generate_code($name),
 			'channel_name' => $name,
 			'sort_order'   => (int) $this->input->post('sort_order') ?: $this->marketplace_model->next_sort_order(),
 			'is_active'    => 1,
 		));
-		$this->session->set_flashdata('success', 'Marketplace berhasil ditambahkan.');
+		$this->session->set_flashdata('success', 'Sales Channel berhasil ditambahkan.');
 		redirect('marketplaces');
 	}
 
 	public function edit($id)
 	{
-		$data = array('title' => 'Edit Marketplace', 'marketplace' => $this->marketplace_model->find($id));
+		$data = array('title' => 'Edit Sales Channel', 'marketplace' => $this->marketplace_model->find($id));
 		if (!$data['marketplace']) show_404();
 		$this->render_view('marketplaces/form', $data);
 	}
@@ -84,7 +79,7 @@ class Marketplaces extends MY_Controller
 	{
 		$name = trim((string) $this->input->post('channel_name', TRUE));
 		if ($name === '') {
-			$this->session->set_flashdata('error', 'Nama Marketplace wajib diisi.');
+			$this->session->set_flashdata('error', 'Nama Sales Channel wajib diisi.');
 			redirect('marketplaces/edit/' . $id);
 		}
 
@@ -93,27 +88,38 @@ class Marketplaces extends MY_Controller
 			'sort_order'   => (int) $this->input->post('sort_order'),
 			'is_active'    => $this->input->post('is_active') ? 1 : 0,
 		));
-		$this->session->set_flashdata('success', 'Marketplace berhasil diperbarui.');
+		$this->session->set_flashdata('success', 'Sales Channel berhasil diperbarui.');
 		redirect('marketplaces');
 	}
 
 	public function delete($id)
 	{
 		$this->marketplace_model->set_active($id, 0);
-		$this->session->set_flashdata('success', 'Marketplace berhasil dinonaktifkan.');
+		$this->session->set_flashdata('success', 'Sales Channel berhasil dinonaktifkan.');
 		redirect('marketplaces');
 	}
 
 	public function activate($id)
 	{
 		$this->marketplace_model->set_active($id, 1);
-		$this->session->set_flashdata('success', 'Marketplace berhasil diaktifkan.');
+		$this->session->set_flashdata('success', 'Sales Channel berhasil diaktifkan.');
 		redirect('marketplaces');
 	}
 
-	protected function _sanitize_code($code)
+	protected function _generate_code($name)
 	{
-		$code = strtoupper(trim((string) $code));
-		return preg_replace('/[^A-Z0-9_]/', '_', $code);
+		$base = strtoupper(trim((string) $name));
+		$base = trim(preg_replace('/[^A-Z0-9]+/', '_', $base), '_');
+		if ($base === '') {
+			$base = 'CHANNEL';
+		}
+
+		$code = $base;
+		$i = 2;
+		while ($this->marketplace_model->find_by_code($code)) {
+			$code = $base . '_' . $i;
+			$i++;
+		}
+		return $code;
 	}
 }

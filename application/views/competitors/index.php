@@ -1,7 +1,7 @@
 <div class="card card-stat p-3 mb-3">
 	<form method="get" class="row g-2">
 		<div class="col-md-6">
-			<input type="text" name="keyword" class="form-control" placeholder="Cari kode / nama kompetitor..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
+			<input type="text" name="keyword" class="form-control" placeholder="Cari nama kompetitor..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
 		</div>
 		<div class="col-6 col-md-3"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Cari</button></div>
 		<div class="col-6 col-md-3">
@@ -13,11 +13,10 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Kode</th><th>Nama Kompetitor</th><th>Website</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>Nama Kompetitor</th><th>Website</th><th>Status</th><th></th></tr></thead>
 			<tbody>
 			<?php foreach ($competitors as $c): ?>
 				<tr>
-					<td><span class="badge bg-light text-dark border"><?= htmlspecialchars($c['competitor_code']) ?></span></td>
 					<td><?= htmlspecialchars($c['competitor_name']) ?></td>
 					<td>
 						<?php if (!empty($c['website_url'])): ?>
@@ -38,7 +37,7 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($competitors)): ?>
-				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada kompetitor ditemukan.</td></tr>
+				<tr><td colspan="4" class="text-center text-muted py-3">Tidak ada kompetitor ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

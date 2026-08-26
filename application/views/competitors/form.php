@@ -1,17 +1,5 @@
 <div class="card card-stat p-4" style="max-width:560px;">
 	<form method="post" action="<?= isset($competitor) ? base_url('competitors/update/' . $competitor['id']) : base_url('competitors/store') ?>">
-		<?php if (!isset($competitor)): ?>
-		<div class="mb-3">
-			<label class="form-label">Kode Kompetitor</label>
-			<input type="text" name="competitor_code" id="competitorCode" class="form-control" required maxlength="30" placeholder="mis. AMAZON, TOKO_RIVAL">
-			<div class="form-text">Huruf/angka tanpa spasi, otomatis diubah ke huruf besar. Dipakai sebagai identitas unik kompetitor.</div>
-		</div>
-		<?php else: ?>
-		<div class="mb-3">
-			<label class="form-label">Kode Kompetitor</label>
-			<input type="text" class="form-control" value="<?= htmlspecialchars($competitor['competitor_code']) ?>" disabled>
-		</div>
-		<?php endif; ?>
 		<div class="mb-3">
 			<label class="form-label">Nama Kompetitor</label>
 			<input type="text" name="competitor_name" class="form-control" required value="<?= htmlspecialchars($competitor['competitor_name'] ?? '') ?>">
@@ -30,14 +18,3 @@
 		<a href="<?= base_url('competitors') ?>" class="btn btn-outline-secondary">Batal</a>
 	</form>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-	var codeInput = document.getElementById('competitorCode');
-	if (codeInput) {
-		codeInput.addEventListener('input', function () {
-			this.value = this.value.toUpperCase().replace(/[^A-Z0-9_]/g, '_');
-		});
-	}
-});
-</script>

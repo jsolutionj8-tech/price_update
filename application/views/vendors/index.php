@@ -13,14 +13,13 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Kode</th><th>Nama Vendor</th><th>Kategori</th><th>Kontak</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>Kode</th><th>Nama Vendor</th><th>Kategori</th><th>Status</th><th></th></tr></thead>
 			<tbody>
 			<?php foreach ($vendors as $v): ?>
 				<tr>
 					<td><span class="badge bg-light text-dark border"><?= htmlspecialchars($v['vendor_code']) ?></span></td>
 					<td><?= htmlspecialchars($v['vendor_name'] ?: '-') ?></td>
 					<td><?= htmlspecialchars($v['vendor_category'] ?? '-') ?></td>
-					<td><?= htmlspecialchars($v['contact_info'] ?: '-') ?></td>
 					<td><?= status_badge($v['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
 						<a href="<?= base_url('vendors/edit/' . $v['id']) ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
@@ -33,7 +32,7 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($vendors)): ?>
-				<tr><td colspan="6" class="text-center text-muted py-3">Tidak ada vendor ditemukan.</td></tr>
+				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada vendor ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

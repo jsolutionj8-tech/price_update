@@ -47,20 +47,15 @@ class Competitors extends MY_Controller
 
 	public function store()
 	{
-		$code = $this->_sanitize_code($this->input->post('competitor_code', TRUE));
 		$name = trim((string) $this->input->post('competitor_name', TRUE));
 
-		if ($code === '' || $name === '') {
-			$this->session->set_flashdata('error', 'Kode dan Nama Kompetitor wajib diisi.');
-			redirect('competitors/create');
-		}
-		if ($this->competitor_model->find_by_code($code)) {
-			$this->session->set_flashdata('error', 'Kode kompetitor "' . $code . '" sudah digunakan.');
+		if ($name === '') {
+			$this->session->set_flashdata('error', 'Nama Kompetitor wajib diisi.');
 			redirect('competitors/create');
 		}
 
 		$this->competitor_model->create(array(
-			'competitor_code' => $code,
+			'competitor_code' => $this->_generate_code($name),
 			'competitor_name' => $name,
 			'website_url'     => $this->input->post('website_url', TRUE) ?: NULL,
 			'is_active'       => 1,
@@ -107,9 +102,20 @@ class Competitors extends MY_Controller
 		redirect('competitors');
 	}
 
-	protected function _sanitize_code($code)
+	protected function _generate_code($name)
 	{
-		$code = strtoupper(trim((string) $code));
-		return preg_replace('/[^A-Z0-9_]/', '_', $code);
+		$base = strtoupper(trim((string) $name));
+		$base = trim(preg_replace('/[^A-Z0-9]+/', '_', $base), '_');
+		if ($base === '') {
+			$base = 'KOMPETITOR';
+		}
+
+		$code = $base;
+		$i = 2;
+		while ($this->competitor_model->find_by_code($code)) {
+			$code = $base . '_' . $i;
+			$i++;
+		}
+		return $code;
 	}
 }

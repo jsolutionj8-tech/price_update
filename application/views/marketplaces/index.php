@@ -1,16 +1,16 @@
 <div class="alert alert-info d-flex align-items-start gap-2">
 	<i class="bi bi-info-circle-fill mt-1"></i>
-	<div>Kode marketplace <code>OFFLINE</code> dipakai sebagai acuan utama perhitungan <b>Markup %</b> dan <b>Margin %</b> pada modul Update Harga. Pastikan minimal satu marketplace memakai kode ini.</div>
+	<div>Sales channel bernama <code>Offline</code> dipakai sebagai acuan utama perhitungan <b>Markup %</b> dan <b>Margin %</b> pada modul Update Harga. Pastikan minimal satu sales channel memakai nama ini.</div>
 </div>
 
 <div class="card card-stat p-3 mb-3">
 	<form method="get" class="row g-2">
 		<div class="col-md-6">
-			<input type="text" name="keyword" class="form-control" placeholder="Cari kode / nama marketplace..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
+			<input type="text" name="keyword" class="form-control" placeholder="Cari nama sales channel..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
 		</div>
 		<div class="col-6 col-md-3"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Cari</button></div>
 		<div class="col-6 col-md-3">
-			<a href="<?= base_url('marketplaces/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Tambah Marketplace</a>
+			<a href="<?= base_url('marketplaces/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Tambah Sales Channel</a>
 		</div>
 	</form>
 </div>
@@ -18,12 +18,11 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Urutan</th><th>Kode</th><th>Nama Marketplace</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>Urutan</th><th>Nama Sales Channel</th><th>Status</th><th></th></tr></thead>
 			<tbody>
 			<?php foreach ($marketplaces as $m): ?>
 				<tr>
 					<td><?= (int) $m['sort_order'] ?></td>
-					<td><span class="badge bg-light text-dark border"><?= htmlspecialchars($m['channel_code']) ?></span></td>
 					<td><?= htmlspecialchars($m['channel_name']) ?></td>
 					<td><?= status_badge($m['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
@@ -37,7 +36,7 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($marketplaces)): ?>
-				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada marketplace ditemukan.</td></tr>
+				<tr><td colspan="4" class="text-center text-muted py-3">Tidak ada sales channel ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
@@ -54,9 +53,9 @@
 	?>
 	<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-3">
 		<div class="text-muted small">
-			Menampilkan <?= $start ?>–<?= $end ?> dari <?= number_format($pagination['total'], 0, ',', '.') ?> marketplace
+			Menampilkan <?= $start ?>–<?= $end ?> dari <?= number_format($pagination['total'], 0, ',', '.') ?> sales channel
 		</div>
-		<nav aria-label="Navigasi halaman marketplace">
+		<nav aria-label="Navigasi halaman sales channel">
 			<ul class="pagination pagination-sm mb-0 flex-wrap">
 				<li class="page-item <?= $pagination['page'] <= 1 ? 'disabled' : '' ?>">
 					<a class="page-link" href="<?= base_url('marketplaces') . '?' . http_build_query(array_merge($qs_base, array('page' => 1))) ?>">&laquo;&laquo;</a>

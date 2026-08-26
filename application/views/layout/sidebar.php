@@ -70,7 +70,7 @@
 				<li class="nav-item">
 					<a class="nav-link <?= $seg === 'marketplaces' ? 'active' : '' ?>" href="<?= base_url('marketplaces') ?>">
 						<span class="nav-link-icon"><i class="bi bi-bag-check"></i></span>
-						<span class="nav-link-title">Marketplace</span>
+						<span class="nav-link-title">Sales Channel</span>
 					</a>
 				</li>
 				<?php endif; ?>
