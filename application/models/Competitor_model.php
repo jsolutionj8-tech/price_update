@@ -65,4 +65,14 @@ class Competitor_model extends CI_Model
 	{
 		return $this->db->where('is_active', 1)->count_all_results($this->table);
 	}
+
+	public function count_usage($id)
+	{
+		return $this->db->where('competitor_id', $id)->count_all_results('competitor_prices');
+	}
+
+	public function delete($id)
+	{
+		return $this->db->where('id', $id)->delete($this->table);
+	}
 }

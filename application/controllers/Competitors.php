@@ -90,8 +90,16 @@ class Competitors extends MY_Controller
 
 	public function delete($id)
 	{
-		$this->competitor_model->set_active($id, 0);
-		$this->session->set_flashdata('success', 'Kompetitor berhasil dinonaktifkan.');
+		$competitor = $this->competitor_model->find($id);
+		if (!$competitor) show_404();
+
+		if ($this->competitor_model->count_usage($id) > 0) {
+			$this->session->set_flashdata('error', 'Kompetitor "' . $competitor['competitor_name'] . '" tidak bisa dihapus karena masih memiliki data harga kompetitor tercatat.');
+			redirect('competitors');
+		}
+
+		$this->competitor_model->delete($id);
+		$this->session->set_flashdata('success', 'Kompetitor berhasil dihapus.');
 		redirect('competitors');
 	}
 

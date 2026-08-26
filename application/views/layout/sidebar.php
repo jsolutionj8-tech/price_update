@@ -7,7 +7,7 @@
 	$can = function ($key) use ($role, $accessible_menus) {
 		return $role === 'ADMIN' || in_array($key, $accessible_menus, TRUE);
 	};
-	$show_master_data = $can('products') || $can('categories') || $can('vendors') || $can('competitors') || $can('marketplaces');
+	$show_master_data = $can('products') || $can('categories') || $can('vendors') || $can('competitors') || $can('costs') || $can('marketplaces');
 	$show_transaksi   = $can('price-update') || $can('competitor-price') || $can('price-history');
 	$show_admin       = $role === 'ADMIN' || $can('users') || $can('notification-groups') || $can('reports');
 ?>
@@ -66,6 +66,14 @@
 					</a>
 				</li>
 				<?php endif; ?>
+				<?php if ($can('costs')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'costs' ? 'active' : '' ?>" href="<?= base_url('costs') ?>">
+						<span class="nav-link-icon"><i class="bi bi-cash-coin"></i></span>
+						<span class="nav-link-title">Master Biaya</span>
+					</a>
+				</li>
+				<?php endif; ?>
 				<?php if ($can('marketplaces')): ?>
 				<li class="nav-item">
 					<a class="nav-link <?= $seg === 'marketplaces' ? 'active' : '' ?>" href="<?= base_url('marketplaces') ?>">
@@ -76,7 +84,7 @@
 				<?php endif; ?>
 
 				<?php if ($show_transaksi): ?>
-				<li class="nav-item"><span class="nav-section-title">Transaksi</span></li>
+				<li class="nav-item"><span class="nav-section-title">Draft Pricing</span></li>
 				<?php endif; ?>
 				<?php if ($can('price-update')): ?>
 				<li class="nav-item">

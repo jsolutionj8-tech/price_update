@@ -15,6 +15,7 @@ class Marketplaces extends MY_Controller
 	{
 		parent::__construct();
 		$this->load->model('marketplace_model');
+		$this->load->model('cost_model');
 	}
 
 	public function index()
@@ -26,9 +27,15 @@ class Marketplaces extends MY_Controller
 		$page = max(1, min($total_pages, (int) $this->input->get('page')));
 		$offset = ($page - 1) * self::PER_PAGE;
 
+		$marketplaces = $this->marketplace_model->get_all($filters, self::PER_PAGE, $offset);
+		foreach ($marketplaces as &$row) {
+			$row['costs'] = $this->marketplace_model->get_costs_for_channel($row['id']);
+		}
+		unset($row);
+
 		$data = array(
 			'title'        => 'Sales Channel',
-			'marketplaces' => $this->marketplace_model->get_all($filters, self::PER_PAGE, $offset),
+			'marketplaces' => $marketplaces,
 			'filters'      => $filters,
 			'pagination'   => array(
 				'page'        => $page,
@@ -45,6 +52,8 @@ class Marketplaces extends MY_Controller
 		$data = array(
 			'title'            => 'Tambah Sales Channel',
 			'suggested_order'  => $this->marketplace_model->next_sort_order(),
+			'costs'            => $this->cost_model->get_all_active(),
+			'selected_cost_ids' => array(),
 		);
 		$this->render_view('marketplaces/form', $data);
 	}
@@ -58,19 +67,25 @@ class Marketplaces extends MY_Controller
 			redirect('marketplaces/create');
 		}
 
-		$this->marketplace_model->create(array(
+		$channel_id = $this->marketplace_model->create(array(
 			'channel_code' => $this->_generate_code($name),
 			'channel_name' => $name,
 			'sort_order'   => (int) $this->input->post('sort_order') ?: $this->marketplace_model->next_sort_order(),
 			'is_active'    => 1,
 		));
+		$this->marketplace_model->sync_costs($channel_id, (array) $this->input->post('cost_ids'));
 		$this->session->set_flashdata('success', 'Sales Channel berhasil ditambahkan.');
 		redirect('marketplaces');
 	}
 
 	public function edit($id)
 	{
-		$data = array('title' => 'Edit Sales Channel', 'marketplace' => $this->marketplace_model->find($id));
+		$data = array(
+			'title'             => 'Edit Sales Channel',
+			'marketplace'       => $this->marketplace_model->find($id),
+			'costs'             => $this->cost_model->get_all_active(),
+			'selected_cost_ids' => $this->marketplace_model->get_cost_ids($id),
+		);
 		if (!$data['marketplace']) show_404();
 		$this->render_view('marketplaces/form', $data);
 	}
@@ -88,14 +103,28 @@ class Marketplaces extends MY_Controller
 			'sort_order'   => (int) $this->input->post('sort_order'),
 			'is_active'    => $this->input->post('is_active') ? 1 : 0,
 		));
+		$this->marketplace_model->sync_costs($id, (array) $this->input->post('cost_ids'));
 		$this->session->set_flashdata('success', 'Sales Channel berhasil diperbarui.');
 		redirect('marketplaces');
 	}
 
 	public function delete($id)
 	{
-		$this->marketplace_model->set_active($id, 0);
-		$this->session->set_flashdata('success', 'Sales Channel berhasil dinonaktifkan.');
+		$marketplace = $this->marketplace_model->find($id);
+		if (!$marketplace) show_404();
+
+		if ($marketplace['channel_code'] === 'OFFLINE') {
+			$this->session->set_flashdata('error', 'Sales Channel "' . $marketplace['channel_name'] . '" tidak bisa dihapus karena dipakai sebagai acuan utama perhitungan Markup % dan Margin % pada modul Update Harga.');
+			redirect('marketplaces');
+		}
+
+		if ($this->marketplace_model->count_usage($id) > 0) {
+			$this->session->set_flashdata('error', 'Sales Channel "' . $marketplace['channel_name'] . '" tidak bisa dihapus karena masih dipakai pada data update harga produk.');
+			redirect('marketplaces');
+		}
+
+		$this->marketplace_model->delete($id);
+		$this->session->set_flashdata('success', 'Sales Channel berhasil dihapus.');
 		redirect('marketplaces');
 	}
 

@@ -64,4 +64,9 @@ class Category_model extends CI_Model
 	{
 		return $this->db->where('category_id', $id)->count_all_results('products');
 	}
+
+	public function delete($id)
+	{
+		return $this->db->where('id', $id)->delete($this->table);
+	}
 }

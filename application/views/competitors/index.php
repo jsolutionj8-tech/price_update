@@ -13,10 +13,12 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Nama Kompetitor</th><th>Website</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>No</th><th>Nama Kompetitor</th><th>Website</th><th>Status</th><th></th></tr></thead>
 			<tbody>
+			<?php $no = $pagination['total'] > 0 ? (($pagination['page'] - 1) * $pagination['per_page']) + 1 : 1; ?>
 			<?php foreach ($competitors as $c): ?>
 				<tr>
+					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($c['competitor_name']) ?></td>
 					<td>
 						<?php if (!empty($c['website_url'])): ?>
@@ -28,16 +30,12 @@
 					<td><?= status_badge($c['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
 						<a href="<?= base_url('competitors/edit/' . $c['id']) ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-						<?php if ($c['is_active']): ?>
-							<a href="<?= base_url('competitors/delete/' . $c['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Nonaktifkan kompetitor ini?')"><i class="bi bi-trash"></i></a>
-						<?php else: ?>
-							<a href="<?= base_url('competitors/activate/' . $c['id']) ?>" class="btn btn-sm btn-outline-success" onclick="return confirm('Aktifkan kembali kompetitor ini?')"><i class="bi bi-arrow-counterclockwise"></i></a>
-						<?php endif; ?>
+						<a href="<?= base_url('competitors/delete/' . $c['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus kompetitor ini? Tindakan ini tidak dapat dibatalkan.')"><i class="bi bi-trash"></i></a>
 					</td>
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($competitors)): ?>
-				<tr><td colspan="4" class="text-center text-muted py-3">Tidak ada kompetitor ditemukan.</td></tr>
+				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada kompetitor ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

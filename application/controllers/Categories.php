@@ -92,8 +92,16 @@ class Categories extends MY_Controller
 
 	public function delete($id)
 	{
-		$this->category_model->set_active($id, 0);
-		$this->session->set_flashdata('success', 'Kategori barang berhasil dinonaktifkan.');
+		$category = $this->category_model->find($id);
+		if (!$category) show_404();
+
+		if ($this->category_model->count_products($id) > 0) {
+			$this->session->set_flashdata('error', 'Kategori "' . $category['category_name'] . '" tidak bisa dihapus karena masih dipakai pada data produk.');
+			redirect('categories');
+		}
+
+		$this->category_model->delete($id);
+		$this->session->set_flashdata('success', 'Kategori barang berhasil dihapus.');
 		redirect('categories');
 	}
 

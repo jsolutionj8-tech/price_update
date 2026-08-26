@@ -71,4 +71,44 @@ class Marketplace_model extends CI_Model
 	{
 		return $this->db->where('is_active', 1)->count_all_results($this->table);
 	}
+
+	public function count_usage($id)
+	{
+		return $this->db->where('channel_id', $id)->count_all_results('product_prices');
+	}
+
+	public function delete($id)
+	{
+		return $this->db->where('id', $id)->delete($this->table);
+	}
+
+	public function get_cost_ids($channel_id)
+	{
+		$rows = $this->db->select('cost_id')->where('channel_id', $channel_id)->get('price_channel_costs')->result_array();
+		return array_map(function ($r) { return (int) $r['cost_id']; }, $rows);
+	}
+
+	public function get_costs_for_channel($channel_id)
+	{
+		return $this->db->select('costs.*')
+			->from('costs')
+			->join('price_channel_costs', 'price_channel_costs.cost_id = costs.id')
+			->where('price_channel_costs.channel_id', $channel_id)
+			->order_by('costs.cost_name', 'ASC')
+			->get()->result_array();
+	}
+
+	public function sync_costs($channel_id, array $cost_ids)
+	{
+		$this->db->where('channel_id', $channel_id)->delete('price_channel_costs');
+
+		$cost_ids = array_unique(array_filter(array_map('intval', $cost_ids)));
+		if (empty($cost_ids)) return;
+
+		$rows = array();
+		foreach ($cost_ids as $cost_id) {
+			$rows[] = array('channel_id' => $channel_id, 'cost_id' => $cost_id);
+		}
+		$this->db->insert_batch('price_channel_costs', $rows);
+	}
 }

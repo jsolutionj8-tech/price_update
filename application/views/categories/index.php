@@ -13,20 +13,17 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>ID</th><th>Nama Kategori</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>No</th><th>Nama Kategori</th><th>Status</th><th></th></tr></thead>
 			<tbody>
+			<?php $no = $pagination['total'] > 0 ? (($pagination['page'] - 1) * $pagination['per_page']) + 1 : 1; ?>
 			<?php foreach ($categories as $c): ?>
 				<tr>
-					<td><?= (int) $c['id'] ?></td>
+					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($c['category_name']) ?></td>
 					<td><?= status_badge($c['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
 						<a href="<?= base_url('categories/edit/' . $c['id']) ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-						<?php if ($c['is_active']): ?>
-							<a href="<?= base_url('categories/delete/' . $c['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Nonaktifkan kategori ini?')"><i class="bi bi-trash"></i></a>
-						<?php else: ?>
-							<a href="<?= base_url('categories/activate/' . $c['id']) ?>" class="btn btn-sm btn-outline-success" onclick="return confirm('Aktifkan kembali kategori ini?')"><i class="bi bi-arrow-counterclockwise"></i></a>
-						<?php endif; ?>
+						<a href="<?= base_url('categories/delete/' . $c['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus kategori ini? Tindakan ini tidak dapat dibatalkan.')"><i class="bi bi-trash"></i></a>
 					</td>
 				</tr>
 			<?php endforeach; ?>

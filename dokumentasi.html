@@ -195,7 +195,7 @@
 
 <header class="hero">
 	<h1>📊 Sistem Update Harga Produk &amp; Notifikasi Email Otomatis</h1>
-	<p>Dokumentasi teknis &amp; panduan penggunaan — PHP CodeIgniter 3 + MySQL/MariaDB. Mencakup modul Master Kategori Barang, Master Vendor, Master Kompetitor, dan Master Marketplace, serta tampilan aplikasi yang responsif untuk desktop maupun handphone.</p>
+	<p>Dokumentasi teknis &amp; panduan penggunaan — PHP CodeIgniter 3 + MySQL/MariaDB. Mencakup modul Master Kategori Barang, Master Vendor, Master Kompetitor, dan Sales Channel, serta tampilan aplikasi yang responsif untuk desktop maupun handphone.</p>
 	<div class="badges">
 		<span>CodeIgniter 3</span>
 		<span>PHP 8.x</span>
@@ -203,7 +203,7 @@
 		<span>Tabler UI (Bootstrap 5)</span>
 		<span>Responsive Desktop &amp; Mobile</span>
 	</div>
-	<div class="meta">Dokumen ini dibuka langsung di browser — tidak memerlukan server tambahan. Diperbarui: 25 Agustus 2026.</div>
+	<div class="meta">Dokumen ini dibuka langsung di browser — tidak memerlukan server tambahan. Diperbarui: 26 Agustus 2026.</div>
 </header>
 
 <div class="layout">
@@ -220,9 +220,10 @@
 		<a href="#modul-kategori" class="sub">6.2 Master Kategori Barang <span class="badge-new">BARU</span></a>
 		<a href="#modul-vendor" class="sub">6.3 Master Vendor <span class="badge-new">BARU</span></a>
 		<a href="#modul-kompetitor" class="sub">6.4 Master Kompetitor <span class="badge-new">BARU</span></a>
-		<a href="#modul-marketplace" class="sub">6.5 Master Marketplace <span class="badge-new">BARU</span></a>
-		<a href="#modul-update-harga" class="sub">6.6 Update Harga</a>
-		<a href="#modul-hak-akses" class="sub">6.11 Hak Akses <span class="badge-new">BARU</span></a>
+		<a href="#modul-biaya" class="sub">6.5 Master Biaya <span class="badge-new">BARU</span></a>
+		<a href="#modul-marketplace" class="sub">6.6 Sales Channel <span class="badge-new">BARU</span></a>
+		<a href="#modul-update-harga" class="sub">6.7 Update Harga</a>
+		<a href="#modul-hak-akses" class="sub">6.12 Hak Akses <span class="badge-new">BARU</span></a>
 		<a href="#responsif">7. Tampilan Desktop &amp; Mobile</a>
 		<a href="#notifikasi">8. Notifikasi Email &amp; Cron</a>
 		<a href="#troubleshooting">9. Troubleshooting</a>
@@ -240,7 +241,8 @@
 				<div class="card"><h4>🏷️ Master Kategori Barang <span class="badge-new">BARU</span></h4><p>Kelompokkan produk berdasarkan kategori (mis. Minuman, Elektronik) untuk memudahkan pencarian &amp; filter.</p></div>
 				<div class="card"><h4>🚚 Master Vendor <span class="badge-new">BARU</span></h4><p>Kelola daftar vendor/pemasok beserta kontak, dipakai saat mengisi biaya produk dan Update Harga.</p></div>
 				<div class="card"><h4>🏬 Master Kompetitor <span class="badge-new">BARU</span></h4><p>Kelola daftar kompetitor yang harganya dipantau sebagai referensi saat menentukan harga jual.</p></div>
-				<div class="card"><h4>🛒 Master Marketplace <span class="badge-new">BARU</span></h4><p>Kelola daftar kanal/marketplace penjualan (Offline, Website, Tokopedia, Shopee, dsb) beserta urutan tampil.</p></div>
+				<div class="card"><h4>💰 Master Biaya <span class="badge-new">BARU</span></h4><p>Kelola daftar komponen biaya (nama + nominal Rupiah) yang bisa dikaitkan ke satu atau lebih Sales Channel.</p></div>
+				<div class="card"><h4>🛒 Sales Channel <span class="badge-new">BARU</span></h4><p>Kelola daftar kanal penjualan (Offline, Website, Tokopedia, Shopee, dsb) beserta urutan tampil dan biaya tambahan dari Master Biaya.</p></div>
 				<div class="card"><h4>💱 Update Harga</h4><p>Form input Modal/HPP dan harga per kanal, dengan kalkulasi SRP, Markup%, dan Margin% otomatis.</p></div>
 				<div class="card"><h4>📈 Harga Kompetitor</h4><p>Catat harga kompetitor per produk sebagai pembanding sebelum menetapkan harga jual.</p></div>
 				<div class="card"><h4>🕒 Riwayat Perubahan</h4><p>Snapshot lengkap nilai lama vs baru setiap kali harga diubah, beserta status pengiriman notifikasi.</p></div>
@@ -260,7 +262,7 @@
 				<tr><td><code>application/controllers</code></td><td>Logika tiap modul (Dashboard, Products, Competitors, Marketplaces, Price_update, dst.)</td></tr>
 				<tr><td><code>application/models</code></td><td>Akses database per entitas (Product_model, Competitor_model, Marketplace_model, dst.)</td></tr>
 				<tr><td><code>application/views</code></td><td>Template tampilan, dikelompokkan per modul + <code>layout/</code> untuk header/sidebar/footer bersama</td></tr>
-				<tr><td><code>application/core/MY_Controller.php</code></td><td>Controller dasar: proteksi login otomatis, properti <code>$menu_key</code> untuk hak akses per menu (lihat §6.11 Hak Akses), dan <code>Admin_Controller</code> (khusus ADMIN, dipakai halaman Hak Akses sendiri agar tidak bisa terkunci)</td></tr>
+				<tr><td><code>application/core/MY_Controller.php</code></td><td>Controller dasar: proteksi login otomatis, properti <code>$menu_key</code> untuk hak akses per menu (lihat §6.12 Hak Akses), dan <code>Admin_Controller</code> (khusus ADMIN, dipakai halaman Hak Akses sendiri agar tidak bisa terkunci)</td></tr>
 				<tr><td><code>application/libraries</code></td><td>Auth_lib (session &amp; role), Price_calculator, Notifier (pengiriman email)</td></tr>
 				<tr><td><code>application/helpers</code></td><td>Fungsi bantu tampilan: <code>rupiah()</code>, <code>status_badge()</code>, <code>tgl_indo()</code>, dsb.</td></tr>
 				<tr><td><code>application/config/routes.php</code></td><td>Pemetaan URL ramah-pengguna ke controller/method</td></tr>
@@ -279,7 +281,7 @@
 SOURCE database_schema.sql;
 -- 2) data contoh (role, marketplace, kompetitor, produk, admin)
 SOURCE seed_sample_data.sql;</code></pre>
-					<div class="callout warn">⚠️ Tabel <code>roles</code>, <code>price_channels</code> (Marketplace), dan <code>competitors</code> <strong>wajib</strong> berisi data sebelum login/penggunaan modul harga bisa berjalan normal. Jika tidak memakai <code>seed_sample_data.sql</code>, isi ketiga master ini secara manual — Marketplace &amp; Kompetitor kini bisa diisi langsung lewat menu <strong>Master Data</strong> di aplikasi.</div>
+					<div class="callout warn">⚠️ Tabel <code>roles</code>, <code>price_channels</code> (Sales Channel), dan <code>competitors</code> <strong>wajib</strong> berisi data sebelum login/penggunaan modul harga bisa berjalan normal. Jika tidak memakai <code>seed_sample_data.sql</code>, isi ketiga master ini secara manual — Sales Channel &amp; Kompetitor kini bisa diisi langsung lewat menu <strong>Master Data</strong> di aplikasi.</div>
 				</li>
 				<li>Sesuaikan koneksi database di <code>application/config/database.php</code> dan pengaturan SMTP di <code>application/config/email.php</code>.</li>
 				<li>Set <code>base_url</code> pada <code>application/config/config.php</code> (mis. <code>http://localhost/price_update/</code>).</li>
@@ -300,7 +302,9 @@ SOURCE seed_sample_data.sql;</code></pre>
 				<tr><td><code>vendors</code> <span class="badge-new">BARU</span></td><td>Master vendor/pemasok — dikelola lewat menu <strong>Master Data → Vendor</strong></td></tr>
 				<tr><td><code>competitors</code> <span class="badge-new">BARU</span></td><td>Master kompetitor — dikelola lewat menu <strong>Master Data → Kompetitor</strong></td></tr>
 				<tr><td><code>competitor_prices</code></td><td>Riwayat harga kompetitor per produk per tanggal pantau</td></tr>
-				<tr><td><code>price_channels</code> <span class="badge-new">BARU</span></td><td>Master marketplace/kanal penjualan — dikelola lewat menu <strong>Master Data → Marketplace</strong></td></tr>
+				<tr><td><code>price_channels</code> <span class="badge-new">BARU</span></td><td>Master kanal penjualan (Sales Channel) — dikelola lewat menu <strong>Master Data → Sales Channel</strong></td></tr>
+				<tr><td><code>costs</code> <span class="badge-new">BARU</span></td><td>Master biaya (nama biaya + nominal Rupiah) — dikelola lewat menu <strong>Master Data → Master Biaya</strong></td></tr>
+				<tr><td><code>price_channel_costs</code> <span class="badge-new">BARU</span></td><td>Tabel relasi many-to-many antara <code>price_channels</code> dan <code>costs</code> — biaya tambahan yang dikaitkan ke tiap sales channel, diatur lewat form Sales Channel</td></tr>
 				<tr><td><code>product_vendor_costs</code></td><td>Modal, target HPP, dan SRP suggest per produk × vendor</td></tr>
 				<tr><td><code>product_prices</code></td><td>Harga jual aktif per produk × vendor × marketplace</td></tr>
 				<tr><td><code>price_change_batches</code></td><td>Snapshot setiap kali harga disimpan (nilai lama vs baru, status notifikasi)</td></tr>
@@ -309,7 +313,7 @@ SOURCE seed_sample_data.sql;</code></pre>
 				<tr><td><code>audit_logs</code></td><td>Jejak audit perubahan data penting</td></tr>
 			</table>
 			</div>
-			<div class="callout info">Marketplace dengan kode <code>OFFLINE</code> memiliki peran khusus: harga di kanal ini dipakai sebagai acuan utama perhitungan <strong>Markup %</strong> dan <strong>Margin %</strong> pada modul Update Harga. Pastikan selalu ada satu marketplace aktif dengan kode tersebut.</div>
+			<div class="callout info">Sales Channel dengan kode <code>OFFLINE</code> memiliki peran khusus: harga di kanal ini dipakai sebagai acuan utama perhitungan <strong>Markup %</strong> dan <strong>Margin %</strong> pada modul Update Harga. Pastikan selalu ada satu sales channel aktif dengan kode tersebut — sistem kini menolak permintaan hapus kanal berkode <code>OFFLINE</code> secara otomatis (lihat §6.6).</div>
 		</section>
 
 		<section id="role">
@@ -326,7 +330,8 @@ SOURCE seed_sample_data.sql;</code></pre>
 				<tr><td>Master Kategori Barang</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Master Vendor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Master Kompetitor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
-				<tr><td>Master Marketplace</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Master Biaya</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
+				<tr><td>Sales Channel</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Update Harga</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Harga Kompetitor</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-no">—</td></tr>
 				<tr><td>Riwayat Perubahan</td><td class="role-yes">✔</td><td class="role-yes">✔</td><td class="role-yes">✔</td></tr>
@@ -346,46 +351,60 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<p>Menu <strong>Master Data → Produk</strong>. Kelola kode produk, nama, brand, dan satuan. Tombol nonaktifkan menyembunyikan produk dari daftar aktif tanpa menghapus riwayat harga terkait.</p>
 
 			<h3 id="modul-kategori">6.2 Master Kategori Barang <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Master Data → Kategori Barang</strong>. Halaman CRUD untuk tabel <code>product_categories</code>, dipakai untuk mengelompokkan produk. Sengaja dibuat sesederhana master <strong>Brand</strong> (tabel <code>brands</code>) — hanya kolom <strong>ID</strong>, <strong>Nama Kategori</strong>, dan <strong>Status</strong>, tanpa kode/deskripsi terpisah.</p>
+			<p>Menu <strong>Master Data → Kategori Barang</strong>. Halaman CRUD untuk tabel <code>product_categories</code>, dipakai untuk mengelompokkan produk. Daftar menampilkan kolom <strong>No</strong> (nomor urut tampilan, mengikuti halaman — bukan ID database), <strong>Nama Kategori</strong>, dan <strong>Status</strong>.</p>
 			<ul>
 				<li><strong>Tambah Kategori</strong>: isi Nama Kategori saja (mis. <code>Minuman Keras</code>, <code>Elektronik</code>). Nama harus unik.</li>
 				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan nama.</li>
-				<li><strong>Edit</strong>: ubah nama dan status aktif.</li>
-				<li><strong>Nonaktifkan / Aktifkan</strong>: kategori yang sudah dipakai produk tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi sebagai pilihan baru, dan bisa diaktifkan kembali kapan saja.</li>
+				<li><strong>Edit</strong>: ubah nama dan status aktif (checkbox "Aktif" — cara menyembunyikan kategori dari pilihan baru tanpa menghapusnya).</li>
+				<li><strong>Hapus</strong> <span class="badge-new">BARU</span>: tombol Hapus kini menghapus baris <em>permanen</em> dari tabel (sebelumnya hanya menonaktifkan). Jika kategori masih dipakai oleh satu atau lebih data Produk (<code>products.category_id</code>), penghapusan <strong>ditolak</strong> dan muncul notifikasi merah "Kategori "…" tidak bisa dihapus karena masih dipakai pada data produk." — lepaskan/kosongkan kategori dari produk terkait dulu bila memang perlu dihapus.</li>
 			</ul>
-			<div class="callout good">✅ Kategori bersifat opsional pada Produk — field ini tersedia sebagai dropdown "Kategori Barang" di form Tambah/Edit Produk (menu <strong>Master Data → Produk</strong>), lengkap dengan filter kategori pada daftar produk.</div>
+			<div class="callout good">✅ Kategori bersifat opsional pada Produk — field ini tersedia sebagai dropdown <strong>Select2</strong> "Kategori Barang" di form Tambah/Edit Produk (menu <strong>Master Data → Produk</strong>), lengkap dengan filter kategori pada daftar produk.</div>
 
 			<h3 id="modul-vendor">6.3 Master Vendor <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Master Data → Vendor</strong>. Halaman CRUD penuh untuk tabel <code>vendors</code> — sebelumnya vendor hanya bisa ditambahkan lewat query SQL manual. Berisi <strong>121 vendor/pemasok asli</strong> yang diimpor dari data <code>vendor_upload</code>.</p>
+			<p>Menu <strong>Master Data → Vendor</strong>. Halaman CRUD penuh untuk tabel <code>vendors</code>. Kolom <strong>Kode Vendor</strong> tidak lagi diminta/ditampilkan di form maupun daftar — sistem membuatnya otomatis dari Nama Vendor (huruf besar, spasi/simbol jadi <code>_</code>, ditambah angka urut jika terjadi duplikat) dan tetap dipakai secara internal sebagai identitas unik. Daftar menampilkan kolom <strong>No</strong> (nomor urut tampilan), <strong>Nama Vendor</strong>, <strong>Kategori</strong>, dan <strong>Status</strong>.</p>
 			<ul>
-				<li><strong>Tambah Vendor</strong>: isi Kode (huruf/angka/tanda "-", otomatis huruf besar — mis. <code>V.00033-NCK</code>), Nama, Kategori (opsional — mis. <code>Supplier CK</code>, <code>Supplier NCK</code>, <code>Umum</code>), dan Kontak (opsional, mis. no. telepon/email).</li>
-				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan kode/nama.</li>
-				<li><strong>Edit</strong>: ubah nama, kategori, kontak, dan status aktif. Kode bersifat permanen setelah dibuat.</li>
-				<li><strong>Nonaktifkan / Aktifkan</strong>: vendor yang sudah punya riwayat biaya/harga tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi di form input, dan bisa diaktifkan kembali kapan saja.</li>
+				<li><strong>Tambah Vendor</strong>: isi Nama dan Kategori (opsional — mis. <code>Supplier CK</code>, <code>Supplier NCK</code>, <code>Umum</code>).</li>
+				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan nama.</li>
+				<li><strong>Edit</strong>: ubah nama, kategori, dan status aktif.</li>
+				<li><strong>Hapus</strong> <span class="badge-new">BARU</span>: menghapus permanen. Ditolak dengan notifikasi jika vendor masih dipakai pada data <code>product_vendor_costs</code> (Cost per Vendor di modul Produk), <code>product_prices</code> (harga aktif di Update Harga), atau <code>price_change_batches</code> (riwayat perubahan harga).</li>
 			</ul>
 			<div class="callout good">✅ Vendor yang aktif otomatis muncul sebagai pilihan tab vendor baru di modul <strong>Produk</strong> (Cost per Vendor) dan <strong>Update Harga</strong>.</div>
 
 			<h3 id="modul-kompetitor">6.4 Master Kompetitor <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Master Data → Kompetitor</strong>. Halaman CRUD penuh untuk tabel <code>competitors</code> — sebelumnya kompetitor hanya bisa ditambahkan lewat query SQL manual.</p>
+			<p>Menu <strong>Master Data → Kompetitor</strong>. Halaman CRUD penuh untuk tabel <code>competitors</code>. Kolom <strong>Kode</strong> dibuat otomatis dari Nama Kompetitor dan tidak ditampilkan di form/daftar. Daftar menampilkan kolom <strong>No</strong> (nomor urut tampilan), <strong>Nama Kompetitor</strong>, <strong>Website</strong>, dan <strong>Status</strong>.</p>
 			<ul>
-				<li><strong>Tambah Kompetitor</strong>: isi Kode (huruf/angka, otomatis huruf besar — mis. <code>AMAZON</code>, <code>TOKO_RIVAL</code>), Nama, dan Website (opsional).</li>
-				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan kode/nama.</li>
-				<li><strong>Edit</strong>: ubah nama, website, dan status aktif. Kode bersifat permanen setelah dibuat (dipakai sebagai identitas field harga pada modul Harga Kompetitor).</li>
-				<li><strong>Nonaktifkan / Aktifkan</strong>: kompetitor yang sudah punya riwayat harga tidak dihapus permanen — cukup dinonaktifkan agar tidak muncul lagi di form input, dan bisa diaktifkan kembali kapan saja.</li>
+				<li><strong>Tambah Kompetitor</strong>: isi Nama dan Website (opsional).</li>
+				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan nama.</li>
+				<li><strong>Edit</strong>: ubah nama, website, dan status aktif.</li>
+				<li><strong>Hapus</strong> <span class="badge-new">BARU</span>: menghapus permanen. Ditolak dengan notifikasi jika kompetitor masih memiliki data harga tercatat di modul <strong>Harga Kompetitor</strong> (<code>competitor_prices</code>).</li>
 			</ul>
 			<div class="callout good">✅ Kompetitor yang aktif otomatis muncul sebagai kolom input di modul <strong>Harga Kompetitor</strong> dan sebagai referensi harga di modul <strong>Update Harga</strong>.</div>
 
-			<h3 id="modul-marketplace">6.5 Master Marketplace <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Master Data → Marketplace</strong>. Halaman CRUD penuh untuk tabel <code>price_channels</code> (kanal penjualan / marketplace) — sebelumnya hanya bisa dikonfigurasi lewat query SQL manual.</p>
+			<h3 id="modul-biaya">6.5 Master Biaya <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Master Data → Master Biaya</strong>. Halaman CRUD penuh untuk tabel baru <code>costs</code> — daftar komponen biaya (mis. Biaya Admin, Biaya Komisi Marketplace, Biaya Packing) yang nantinya dikaitkan ke satu atau lebih <strong>Sales Channel</strong> (§6.6) sebagai biaya tambahan per kanal. Daftar menampilkan kolom <strong>No</strong>, <strong>Nama Biaya</strong>, <strong>Amount</strong> (nominal Rupiah tetap), dan <strong>Status</strong>.</p>
 			<ul>
-				<li><strong>Tambah Marketplace</strong>: isi Kode (mis. <code>TOKOPEDIA</code>, <code>SHOPEE</code>, <code>OFFLINE</code>), Nama tampilan, dan Urutan Tampil (angka kecil tampil lebih dulu di form Update Harga).</li>
-				<li><strong>Edit</strong>: ubah nama, urutan, dan status aktif.</li>
-				<li><strong>Nonaktifkan / Aktifkan</strong>: marketplace yang sudah dipakai transaksi harga tidak dihapus permanen, hanya dinonaktifkan agar tidak muncul di form input baru.</li>
+				<li><strong>Tambah Biaya</strong>: isi Nama Biaya (harus unik) dan Amount dalam Rupiah (mis. <code>5000</code> untuk Rp 5.000).</li>
+				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan nama.</li>
+				<li><strong>Edit</strong>: ubah nama, amount, dan status aktif.</li>
+				<li><strong>Hapus</strong>: menghapus permanen. Ditolak dengan notifikasi jika biaya tsb masih dikaitkan ke satu atau lebih Sales Channel (tabel relasi <code>price_channel_costs</code>) — lepaskan kaitannya dulu lewat Edit Sales Channel yang bersangkutan.</li>
 			</ul>
-			<div class="callout warn">⚠️ Jangan menonaktifkan marketplace berkode <code>OFFLINE</code> kecuali Anda tahu konsekuensinya — kanal ini menjadi acuan perhitungan Markup%/Margin% di seluruh modul Update Harga.</div>
+			<div class="callout good">✅ Biaya yang aktif otomatis muncul sebagai pilihan multi-select "Biaya Tambahan" di form Tambah/Edit <strong>Sales Channel</strong> (§6.6). Satu sales channel bisa memakai lebih dari satu biaya sekaligus; satu biaya juga bisa dipakai ulang di banyak sales channel (relasi many-to-many lewat <code>price_channel_costs</code>).</div>
+			<div class="callout info">ℹ️ Saat ini Master Biaya &amp; relasinya ke Sales Channel bersifat data referensi (belum otomatis mengurangi/menambah perhitungan Markup%/Margin% di modul Update Harga) — integrasi ke kalkulasi harga akan menyusul.</div>
 
-			<h3 id="modul-update-harga">6.6 Update Harga</h3>
-			<p>Menu <strong>Transaksi → Update Harga</strong>. Daftar produk kini memakai <strong>paging</strong> (25 produk/halaman) plus pencarian kode/nama, sama seperti menu Produk. Pilih produk, lalu isi Modal &amp; Target HPP per vendor — SRP Suggest, Markup%, dan Margin% terhitung otomatis (real-time via AJAX). Isi harga jual baru untuk tiap marketplace aktif, bandingkan dengan harga kompetitor yang tampil sebagai referensi, lalu klik <strong>Simpan Perubahan Harga</strong>.</p>
+			<h3 id="modul-marketplace">6.6 Sales Channel <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Master Data → Sales Channel</strong> (sebelumnya bernama "Master Marketplace"). Halaman CRUD penuh untuk tabel <code>price_channels</code> (kanal penjualan). Kolom <strong>Kode</strong> dibuat otomatis dari Nama dan tidak ditampilkan di form/daftar. Daftar menampilkan kolom <strong>No</strong> (nomor urut tampilan), <strong>Nama Sales Channel</strong>, <strong>Urutan</strong> (persis di sebelah kolom Nama), <strong>Biaya Tambahan</strong> <span class="badge-new">BARU</span> (daftar nama+nominal biaya dari §6.5 yang dikaitkan ke kanal ini, atau "-" jika tidak ada), dan <strong>Status</strong>.</p>
+			<ul>
+				<li><strong>Tambah Sales Channel</strong>: isi Nama tampilan, Urutan Tampil (angka kecil tampil lebih dulu di form Update Harga), dan <strong>Biaya Tambahan</strong> <span class="badge-new">BARU</span> (opsional, dropdown pencarian Select2 multi-pilih — bisa memilih lebih dari satu item dari Master Biaya).</li>
+				<li><strong>Edit</strong>: ubah nama, urutan, biaya tambahan yang dikaitkan, dan status aktif.</li>
+				<li><strong>Hapus</strong> <span class="badge-new">BARU</span>: menghapus permanen. Ditolak dengan notifikasi jika sales channel masih dipakai pada data harga aktif (<code>product_prices</code>). Kanal berkode <code>OFFLINE</code> <strong>tidak bisa dihapus sama sekali</strong> (ditolak otomatis apa pun kondisinya) karena menjadi acuan wajib perhitungan Markup%/Margin% — nonaktifkan lewat Edit jika benar-benar diperlukan.</li>
+			</ul>
+			<div class="callout warn">⚠️ Jangan menonaktifkan sales channel bernama <code>Offline</code> kecuali Anda tahu konsekuensinya — kanal ini menjadi acuan perhitungan Markup%/Margin% di seluruh modul Update Harga.</div>
+
+			<h3 id="modul-update-harga">6.7 Update Harga</h3>
+			<p>Menu <strong>Draft Pricing → Update Harga</strong>. Daftar produk kini memakai <strong>paging</strong> (25 produk/halaman) plus pencarian kode/nama, sama seperti menu Produk. Pilih produk, lalu isi Modal &amp; Margin per vendor — SRP Suggest, Markup%, dan Margin% (aktual) terhitung otomatis (real-time via AJAX). Isi harga jual baru untuk tiap sales channel aktif, bandingkan dengan harga kompetitor yang tampil sebagai referensi, lalu klik <strong>Simpan Perubahan Harga</strong>.</p>
+			<div class="callout good">
+				✅ <strong>Field "Target HPP" diganti "Margin" <span class="badge-new">BARU</span>.</strong> Input Modal &amp; HPP kini bernama <strong>Modal &amp; Margin</strong>: field <strong>Margin (%)</strong> (dulu "Target HPP") diisi target margin yang diinginkan dari harga jual, lalu <strong>SRP Suggest &amp; Markup%</strong> dihitung <em>otomatis</em> memakai rumus <code>SRP Suggest = Modal ÷ (1 &minus; Margin% / 100)</code> (mis. Modal Rp 652.500, Margin 30% → SRP Suggest Rp 932.143) — kebalikan dari rumus lama (<code>Modal ÷ Target HPP%</code>). Kotak hasil <strong>Margin %</strong> tetap dihitung dari harga jual aktual kanal <b>Offline</b> terhadap Modal (bisa berbeda dari angka Margin yang diketik, karena mencerminkan harga jual sesungguhnya, bukan target). Dropdown <strong>Tambah Vendor</strong> kini hanya menampilkan Nama Vendor (sebelumnya "Kode - Nama"). Layout formulir dirombak: kartu <strong>Modal &amp; Margin</strong> kini tampil satu kolom penuh di atas, dengan kartu <strong>Harga Baru per Kanal</strong> (grid 3 kolom) di bawahnya — sebelumnya berdampingan. Kolom <code>product_vendor_costs.target_hpp_pct</code> di database tidak berganti nama (menghindari migrasi &amp; menjaga kompatibilitas format import Excel yang masih memakai header <code>target_hpp_pct</code>, lihat §6.11) — hanya isinya yang kini merepresentasikan Margin% target, bukan Target HPP% lagi. Tabel "Cost per Vendor" di menu Produk turut disesuaikan labelnya jadi <strong>Margin (Target)</strong> &amp; <strong>Margin (Aktual)</strong> agar tidak ambigu dengan dua kolom "Margin". Urutan tampil sales channel <strong>Harga Grosir (BtB)</strong> dipindah ke tepat di bawah <strong>Online</strong> (diatur lewat kolom Urutan di menu Sales Channel).
+			</div>
 			<div class="callout good">
 				✅ <strong>Notifikasi digabung, bukan langsung terkirim per produk <span class="badge-new">BARU</span>.</strong> Menyimpan harga <em>tidak lagi</em> langsung mengirim email — batch tersimpan berstatus "Pending". Selama masih ada batch berstatus Pending <em>di database</em> (dihitung ulang setiap halaman dimuat, <strong>bukan</strong> disimpan di sesi login), muncul kotak kuning di bagian atas <em>setiap halaman</em> aplikasi — <b>untuk siapa pun yang login</b> sebagai ADMIN/EDITOR, bukan cuma yang membuat perubahannya: <b>"N perubahan harga menunggu dikirim notifikasi"</b> dengan tombol <strong>Kirim Notifikasi Sekarang</strong>, yang mengirim <em>satu</em> email per penerima merangkum <em>semua</em> produk Pending yang ada (misal update 10 produk berurutan → 1 email berisi 10 produk per penerima, bukan 10 email terpisah).
 			</div>
@@ -394,11 +413,11 @@ SOURCE seed_sample_data.sql;</code></pre>
 				🛠️ <strong>Perbaikan bug — kalkulasi otomatis &amp; Preview Email sempat tidak berfungsi.</strong> Saat template diganti ke Tabler, skrip halaman ini memanggil <code>new bootstrap.Modal(...)</code> untuk tombol Preview Email — padahal JS bundel Tabler tidak menyediakan objek global <code>bootstrap</code>, sehingga baris itu gagal (<code>ReferenceError</code>) dan MEMATIKAN seluruh skrip di baliknya, termasuk listener kalkulasi otomatis SRP Suggest/Markup %/Margin % (jadi field Modal/Target HPP terlihat tidak menghitung apa-apa) dan tombol Preview Email (klik tidak bereaksi). Sudah diperbaiki dengan mengganti pemicu modal ke atribut <code>data-bs-toggle</code> bawaan Tabler — sudah diverifikasi langsung lewat browser otomatis (bukan cuma baca kode): kalkulasi live update dengan benar, modal Preview Email terbuka/tertutup normal, dan tidak ada error di console.
 			</div>
 			<div class="callout good">
-				✅ <strong>Dropdown Tambah Vendor kini Select2 <span class="badge-new">BARU</span>.</strong> Sama seperti pola pencarian di Harga Kompetitor — mempermudah memilih vendor dari daftar 100+ vendor master. Kolom "Harga Baru per Kanal" sendiri memang <em>sudah</em> mengambil data dari <strong>Master Data → Marketplace</strong> sejak awal (dikonfirmasi ulang saat perbaikan ini) — daftar kanal yang tampil otomatis mengikuti marketplace aktif di master, termasuk urutan tampilnya.
+				✅ <strong>Dropdown Tambah Vendor kini Select2 <span class="badge-new">BARU</span>.</strong> Sama seperti pola pencarian di Harga Kompetitor — mempermudah memilih vendor dari daftar 100+ vendor master. Kolom "Harga Baru per Kanal" sendiri memang <em>sudah</em> mengambil data dari <strong>Master Data → Sales Channel</strong> sejak awal (dikonfirmasi ulang saat perbaikan ini) — daftar kanal yang tampil otomatis mengikuti sales channel aktif di master, termasuk urutan tampilnya.
 			</div>
 
-			<h3 id="modul-harga-kompetitor">6.7 Harga Kompetitor</h3>
-			<p>Menu <strong>Transaksi → Harga Kompetitor</strong>. Kini bergaya menu master (sama seperti Master Kompetitor/Vendor): daftar berpaging (25 baris/halaman) dengan pencarian, tombol <strong>Tambah Harga Kompetitor</strong>, dan form tambah/edit satu entri per submit — menggantikan form matriks lama (satu produk × semua kompetitor sekaligus).</p>
+			<h3 id="modul-harga-kompetitor">6.8 Harga Kompetitor</h3>
+			<p>Menu <strong>Draft Pricing → Harga Kompetitor</strong>. Kini bergaya menu master (sama seperti Master Kompetitor/Vendor): daftar berpaging (25 baris/halaman) dengan pencarian, tombol <strong>Tambah Harga Kompetitor</strong>, dan form tambah/edit satu entri per submit — menggantikan form matriks lama (satu produk × semua kompetitor sekaligus).</p>
 			<ul>
 				<li><strong>Tambah</strong>: cari Produk lewat dropdown pencarian <a href="https://select2.org" target="_blank" rel="noopener">Select2</a> (mengetik minimal 2 huruf memicu pencarian AJAX ke katalog — dipakai karena jumlah produk terlalu besar untuk dropdown biasa), pilih <strong>Kompetitor</strong> dari dropdown yang datanya selalu diambil langsung dari <strong>Master Data → Kompetitor</strong> (hanya yang berstatus aktif), isi Harga dan Tanggal Pantau.</li>
 				<li>Jika kombinasi Produk + Kompetitor + Tanggal Pantau yang sama sudah pernah dicatat, sistem otomatis <strong>memperbarui</strong> harga tersebut alih-alih membuat duplikat.</li>
@@ -407,24 +426,24 @@ SOURCE seed_sample_data.sql;</code></pre>
 			</ul>
 			<p class="lead">Data ini menjadi referensi visual saat menentukan harga jual di modul Update Harga.</p>
 
-			<h3 id="modul-riwayat">6.8 Riwayat Perubahan</h3>
-			<p>Menu <strong>Transaksi → Riwayat Perubahan</strong>. Menampilkan seluruh batch perubahan harga beserta status pengiriman notifikasi (Terkirim/Sebagian/Gagal), dengan detail nilai lama vs baru per marketplace.</p>
+			<h3 id="modul-riwayat">6.9 Riwayat Perubahan</h3>
+			<p>Menu <strong>Draft Pricing → Riwayat Perubahan</strong>. Menampilkan seluruh batch perubahan harga beserta status pengiriman notifikasi (Terkirim/Sebagian/Gagal), dengan detail nilai lama vs baru per marketplace.</p>
 			<ul>
 				<li><strong>Filter Produk kini <a href="https://select2.org" target="_blank" rel="noopener">Select2</a> <span class="badge-new">BARU</span></strong> — dropdown pencarian (ketik minimal 2 huruf) menggantikan <code>&lt;select&gt;</code> berisi seluruh katalog produk.</li>
 				<li><strong>Paging diperbaiki <span class="badge-new">BARU</span></strong> — sebelumnya daftar nomor halaman polos tanpa navigasi Prev/Next dan <em>kehilangan filter aktif</em> saat pindah halaman. Sekarang 25 baris/halaman dengan navigasi First/Prev/Next/Last, kotak lompat ke halaman, dan seluruh filter (Produk, Status, rentang tanggal) tetap terjaga saat berpindah halaman.</li>
 				<li><strong>Tombol "Export Excel" — terbuka untuk semua role <span class="badge-new">BARU</span></strong> — mengunduh riwayat yang sedang tampil (mengikuti filter aktif) sebagai file <code>.xlsx</code> lewat <code>price-history/export</code>. Tersedia untuk <strong>ADMIN, EDITOR, maupun VIEWER</strong> yang bisa membuka halaman ini. Termasuk kolom <strong>Marketplace</strong>, <strong>Harga Lama</strong>, dan <strong>Harga Baru</strong> — karena satu batch bisa mengubah harga di beberapa marketplace sekaligus, setiap marketplace yang benar-benar berubah diekspor sebagai baris tersendiri (bukan digabung dalam satu sel) supaya angkanya tetap murni angka (bisa dijumlah/diurutkan di Excel). Marketplace yang harganya tidak berubah pada batch tsb tidak ikut dibuat baris. Batch tanpa perubahan harga marketplace (mis. hanya ubah Modal) tetap muncul satu baris dengan kolom Marketplace bertanda "-".</li>
 				<li><strong>Tombol "Detail" — hanya aktif untuk ADMIN &amp; EDITOR <span class="badge-new">BARU</span></strong> — halaman detail menampilkan aksi "Kirim Ulang Notifikasi", jadi sengaja dibatasi. Untuk role <strong>VIEWER</strong>, tombol Detail tetap tampil di daftar tapi berupa tombol nonaktif (abu-abu, tidak bisa diklik) — bukan disembunyikan, supaya VIEWER tahu fitur ini ada tapi bukan untuk perannya. Percobaan membuka URL detail secara langsung oleh VIEWER tetap diblokir (403), bukan cuma disamarkan di tampilan.</li>
 			</ul>
-			<p class="lead">Pembatasan tombol Detail ini bersifat tetap (hardcode di controller), berbeda dengan menu-menu lain yang aksesnya bisa diatur lewat <strong>Administrasi → Hak Akses</strong> — lihat §6.11.</p>
+			<p class="lead">Pembatasan tombol Detail ini bersifat tetap (hardcode di controller), berbeda dengan menu-menu lain yang aksesnya bisa diatur lewat <strong>Administrasi → Hak Akses</strong> — lihat §6.12.</p>
 
-			<h3 id="modul-user">6.9 Manajemen User &amp; Grup Notifikasi</h3>
+			<h3 id="modul-user">6.10 Manajemen User &amp; Grup Notifikasi</h3>
 			<p>Khusus role ADMIN. Kelola akun pengguna beserta role-nya, dan kelola grup notifikasi (siapa menerima email untuk marketplace apa saja).</p>
 
-			<h3 id="modul-import">6.10 Import / Export</h3>
+			<h3 id="modul-import">6.11 Import / Export</h3>
 			<p>Menu <strong>Administrasi → Import/Export</strong> untuk memasukkan data produk/harga secara massal dan mengekspor laporan.</p>
 
-			<h3 id="modul-hak-akses">6.11 Hak Akses <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Administrasi → Hak Akses</strong>, khusus role ADMIN. Matriks centang untuk menentukan menu apa saja yang bisa diakses role <strong>EDITOR</strong> dan <strong>VIEWER</strong>, dikelompokkan sama seperti sidebar (Master Data / Transaksi / Administrasi).</p>
+			<h3 id="modul-hak-akses">6.12 Hak Akses <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Administrasi → Hak Akses</strong>, khusus role ADMIN. Matriks centang untuk menentukan menu apa saja yang bisa diakses role <strong>EDITOR</strong> dan <strong>VIEWER</strong>, dikelompokkan sama seperti sidebar (Master Data / Draft Pricing / Administrasi).</p>
 			<ul>
 				<li>Centang sebuah kotak untuk <strong>mengizinkan</strong> role tsb membuka menu terkait; kosongkan untuk <strong>melarang</strong>.</li>
 				<li>Klik <strong>Simpan Hak Akses</strong> untuk menerapkan seluruh perubahan sekaligus (satu form menyimpan kolom EDITOR &amp; VIEWER bersamaan).</li>
@@ -463,10 +482,10 @@ SOURCE seed_sample_data.sql;</code></pre>
 				</div>
 			</div>
 			<ul>
-				<li><strong>Desktop (≥ 992px):</strong> sidebar navigasi selalu tampil di kiri, dikelompokkan per bagian (Master Data, Transaksi, Administrasi).</li>
+				<li><strong>Desktop (≥ 992px):</strong> sidebar navigasi selalu tampil di kiri, dikelompokkan per bagian (Master Data, Draft Pricing, Administrasi).</li>
 				<li><strong>Tablet &amp; Handphone (&lt; 992px):</strong> sidebar tersembunyi secara default dan dibuka lewat tombol menu (☰) di pojok kiri atas; area konten otomatis melebar penuh, dan tabel data bisa digeser (scroll) horizontal bila kolom terlalu banyak.</li>
 				<li><strong>Menu sidebar bisa di-scroll:</strong> jika daftar menu lebih panjang dari tinggi layar (mis. di layar pendek/handphone landscape), sidebar akan menampilkan scrollbar vertikal internal sehingga menu paling bawah (Import/Export, Keluar) tetap bisa dijangkau tanpa menggeser seluruh halaman.</li>
-				<li>Form, kartu statistik, dan tabel pada seluruh modul (termasuk Master Kategori Barang, Master Vendor, Master Kompetitor &amp; Master Marketplace) menyesuaikan lebar layar secara otomatis mengikuti grid Bootstrap 5.</li>
+				<li>Form, kartu statistik, dan tabel pada seluruh modul (termasuk Master Kategori Barang, Master Vendor, Master Kompetitor &amp; Sales Channel) menyesuaikan lebar layar secara otomatis mengikuti grid Bootstrap 5.</li>
 			</ul>
 			<div class="callout info">Tidak perlu instalasi aplikasi terpisah — cukup buka alamat aplikasi dari browser HP (Chrome/Safari) untuk pengalaman yang setara dengan versi desktop.</div>
 		</section>
@@ -484,8 +503,8 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<table>
 				<tr><th>Gejala</th><th>Penyebab Umum</th><th>Solusi</th></tr>
 				<tr><td>Tidak bisa login / halaman putih setelah login</td><td>Tabel <code>roles</code> kosong</td><td>Pastikan <code>seed_sample_data.sql</code> sudah dijalankan, atau isi manual minimal role ADMIN/EDITOR/VIEWER</td></tr>
-				<tr><td>Form Update Harga tidak menampilkan kolom marketplace</td><td>Tabel <code>price_channels</code> kosong / semua nonaktif</td><td>Buka menu <strong>Master Data → Marketplace</strong> dan tambahkan minimal satu marketplace aktif berkode <code>OFFLINE</code></td></tr>
-				<tr><td>Markup%/Margin% selalu 0</td><td>Tidak ada marketplace berkode <code>OFFLINE</code></td><td>Tambahkan marketplace dengan kode persis <code>OFFLINE</code> lewat menu Master Marketplace</td></tr>
+				<tr><td>Form Update Harga tidak menampilkan kolom sales channel</td><td>Tabel <code>price_channels</code> kosong / semua nonaktif</td><td>Buka menu <strong>Master Data → Sales Channel</strong> dan tambahkan minimal satu sales channel aktif bernama <code>Offline</code></td></tr>
+				<tr><td>Markup%/Margin% selalu 0</td><td>Tidak ada sales channel berkode <code>OFFLINE</code></td><td>Tambahkan Sales Channel dengan Nama persis <code>Offline</code> (kode <code>OFFLINE</code> dibuat otomatis oleh sistem) lewat menu <strong>Master Data → Sales Channel</strong></td></tr>
 				<tr><td>Kolom harga kompetitor kosong di form Update Harga</td><td>Belum ada kompetitor aktif</td><td>Tambahkan lewat menu <strong>Master Data → Kompetitor</strong></td></tr>
 				<tr><td>Sudah simpan harga tapi email belum terkirim</td><td>Ini perilaku normal (bukan bug) — lihat callout di modul Update Harga</td><td>Klik <strong>"Kirim Notifikasi Sekarang"</strong> pada kotak kuning di atas halaman setelah selesai update semua produk</td></tr>
 				<tr><td>Lupa klik kirim, sudah pindah menu/logout</td><td>Tidak masalah — hitungan "menunggu" berasal dari database, bukan sesi</td><td>Login kembali (user mana pun dengan role ADMIN/EDITOR) → banner tetap muncul dengan jumlah yang benar. Atau buka <strong>Riwayat Perubahan</strong>, cari batch berstatus "Pending", klik <strong>"Kirim Ulang Notifikasi"</strong> satu per satu</td></tr>
@@ -499,6 +518,54 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<div class="table-wrap">
 			<table>
 				<tr><th>Tanggal</th><th>Perubahan</th></tr>
+				<tr>
+					<td>27 Agu 2026</td>
+					<td>
+						🛠️ <strong>Perbaikan bug:</strong> SRP Suggest tidak berubah walau komponen Biaya sudah di-set di menu Sales Channel. Penyebabnya, rumus <code>SRP Suggest = (Modal + Total Biaya) ÷ (1 &minus; Margin%)</code> yang ditambahkan sehari sebelumnya sengaja dibatasi hanya untuk kanal berkode <code>ONLINE</code> — sementara biaya yang di-set user ada di kanal lain (mis. kanal-kanal marketplace lainnya), sehingga SRP Suggest-nya tetap memakai nilai global tanpa Biaya. Diperbaiki dengan menggeneralisasi rumus tsb ke <strong>semua kanal</strong> (bukan cuma Online): tiap kanal kini pakai Total Biaya-nya masing-masing dari <strong>Master Biaya</strong> — kanal yang belum punya Biaya otomatis tetap sama dengan SRP Suggest global (Total Biaya = 0), jadi tidak ada kanal yang berubah tampilannya kecuali yang benar-benar dikaitkan ke Master Biaya.
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan 7)</td>
+					<td>
+						Dua perubahan: (1) header grup menu <strong>"Transaksi"</strong> di sidebar &amp; menu Hak Akses diganti jadi <strong>"Draft Pricing"</strong> (menaungi Update Harga, Harga Kompetitor, Riwayat Perubahan — tabel <code>menus.menu_group</code> diperbarui, baik di database live maupun <code>seed_sample_data.sql</code>); (2) kotak <strong>SRP Suggest</strong> di bawah kolom <strong>Online</strong> pada menu Update Harga kini pakai rumus khusus <span class="badge-new">BARU</span>: <code>SRP Suggest (Online) = (Modal + Total Biaya kanal Online) ÷ (1 &minus; Margin%)</code> — beda dari kanal lain yang mengikuti SRP Suggest global (Modal ÷ (1&minus;Margin%) tanpa Biaya). "Total Biaya" diambil live dari <strong>Master Biaya</strong> yang dikaitkan ke kanal Online lewat menu Sales Channel (dijumlahkan otomatis, dihitung murni di browser dari <code>data-biaya</code> yang dikirim controller — tanpa AJAX tambahan). Markup % kanal Online tetap dihitung dengan rumus standar (harga kanal terhadap Modal, tanpa mengurangi Biaya).
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan 6)</td>
+					<td>
+						Tiga penyesuaian lanjutan di menu <strong>Update Harga</strong>: (1) kotak <strong>Margin %</strong> di bawah kolom Harga Offline dihapus — kini Offline menampilkan SRP Suggest &amp; Markup % saja, sama seperti kanal lain (Margin % tetap dihitung &amp; tersimpan di database/riwayat, hanya tidak lagi ditampilkan di form ini); (2) kartu <strong>Harga Kompetitor</strong> dipindah ke sebelah kanan kartu <strong>Harga Baru per Kanal</strong> (layout 2 kolom: 8/12 utk Harga Kanal, 4/12 utk Harga Kompetitor) — sebelumnya jadi kartu terpisah di bawah; (3) <strong>Harga Kompetitor kini bisa diisi langsung</strong> <span class="badge-new">BARU</span> di form ini (sebelumnya hanya tampilan baca-saja dengan link ke menu terpisah) — input per kompetitor otomatis tersimpan ke tabel <code>competitor_prices</code> saat tombol <strong>Simpan Perubahan Harga</strong> ditekan (tanggal pantau mengikuti Tanggal Efektif; kompetitor yang dikosongkan tidak diproses). Method <code>Price_model::upsert_competitor_price()</code> yang sudah ada sebelumnya kini dipanggil langsung dari <code>Price_update::save()</code>.
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan 5)</td>
+					<td>
+						Kotak hasil <strong>SRP Suggest</strong> &amp; <strong>Markup %</strong> di menu Update Harga kini muncul di bawah <em>setiap</em> kolom Harga Kanal (dihitung ulang otomatis lewat JS murni di browser — tanpa AJAX tambahan — dari harga kanal tsb terhadap Modal, memakai nilai SRP Suggest yang sama untuk semua kanal sebagai acuan pembanding cepat). Kotak <strong>SRP Suggest, Markup %, dan Margin %</strong> yang sebelumnya berdiri sendiri di kartu "Modal &amp; Margin" dipindah ke bawah kolom <strong>Harga Offline</strong> secara spesifik (satu-satunya kanal yang menampilkan Margin % juga, karena tetap jadi acuan utama perhitungan sesuai konvensi spreadsheet).
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan 4)</td>
+					<td>
+						Empat perbaikan pada menu <strong>Update Harga</strong>: (1) dropdown <strong>Tambah Vendor</strong> kini hanya menampilkan Nama Vendor (sebelumnya "Kode - Nama"); (2) field <strong>Target HPP (%)</strong> diganti <strong>Margin (%)</strong> dengan rumus dibalik — <code>SRP Suggest = Modal ÷ (1 &minus; Margin% / 100)</code> (dulu <code>Modal ÷ Target HPP%</code>) — sehingga SRP Suggest &amp; Markup% tetap otomatis terhitung dari input Margin (method <code>Price_calculator::calculate()</code> parameter kedua kini <code>$margin_pct</code>, POST field <code>margin_pct</code> menggantikan <code>target_hpp_pct</code> di form &amp; controller <code>Price_update</code>; kolom database <code>product_vendor_costs.target_hpp_pct</code> sengaja TIDAK di-rename untuk menjaga kompatibilitas format import Excel di menu Import/Export yang masih memakai header kolom tsb — kini isinya merepresentasikan Margin% target); (3) urutan tampil sales channel <strong>Harga Grosir (BtB)</strong> dipindah tepat di bawah <strong>Online</strong> lewat kolom Urutan di menu Sales Channel; (4) layout formulir dirombak dari 2 kolom berdampingan menjadi bertumpuk: kartu <strong>Modal &amp; Margin</strong> (satu kolom penuh) di atas, kartu <strong>Harga Baru per Kanal</strong> (grid 3 kolom, satu kolom penuh) di bawahnya. Label tabel "Cost per Vendor" di menu Produk turut disesuaikan jadi <strong>Margin (Target)</strong> &amp; <strong>Margin (Aktual)</strong> agar tidak ambigu.
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan 3)</td>
+					<td>
+						Menambahkan modul <strong>Master Biaya</strong> (CRUD penuh, tabel baru <code>costs</code>: Nama Biaya + Amount nominal Rupiah, kolom No/nomor urut, tombol Hapus permanen dengan proteksi jika masih dikaitkan ke sales channel). Ditambahkan relasi many-to-many baru ke <strong>Sales Channel</strong> lewat tabel <code>price_channel_costs</code> (FK <code>channel_id</code> → <code>price_channels.id</code> ON DELETE CASCADE, FK <code>cost_id</code> → <code>costs.id</code>): form Tambah/Edit Sales Channel kini punya field multi-pilih <strong>Select2</strong> "Biaya Tambahan" untuk mengaitkan satu/lebih biaya ke satu channel (method baru <code>Marketplace_model::sync_costs()</code>/<code>get_cost_ids()</code>/<code>get_costs_for_channel()</code>), dan daftar Sales Channel menampilkan kolom baru "Biaya Tambahan" berisi badge nama+nominal biaya yang terkait. Menu baru "Master Biaya" ditambahkan ke sidebar &amp; tabel <code>menus</code>/<code>role_menu_access</code> (hak akses default disamakan dengan menu master data lain: ADMIN &amp; EDITOR penuh, VIEWER tidak). Catatan: relasi ini baru bersifat data referensi — belum otomatis memengaruhi kalkulasi Markup%/Margin% di modul Update Harga (menyusul).
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan 2)</td>
+					<td>
+						<strong>Master Kategori Barang, Master Vendor, Master Kompetitor &amp; Sales Channel</strong> — empat penyesuaian sekaligus pada keempat menu master ini: (1) kolom <strong>ID</strong> pada daftar diganti kolom <strong>No</strong> berisi nomor urut tampilan (dihitung dari halaman &amp; posisi baris, bukan ID database); (2) tombol <strong>Hapus</strong> yang sebelumnya hanya menonaktifkan (<code>is_active = 0</code>) kini benar-benar <strong>menghapus permanen</strong> baris dari database (<code>Category_model::delete()</code>, <code>Vendor_model::delete()</code>, <code>Competitor_model::delete()</code>, <code>Marketplace_model::delete()</code> — method baru); (3) setiap penghapusan lebih dulu dicek lewat method <code>count_products()</code>/<code>count_usage()</code> di masing-masing model — jika data tsb masih dipakai di tabel lain, permintaan hapus ditolak dan notifikasi merah muncul menyebutkan nama data serta alasannya, bukan gagal dengan error database mentah (kategori dicek ke <code>products.category_id</code>; vendor dicek ke <code>product_vendor_costs</code>, <code>product_prices</code>, dan <code>price_change_batches</code>; kompetitor dicek ke <code>competitor_prices</code>; sales channel dicek ke <code>product_prices</code>, dan khusus kanal berkode <code>OFFLINE</code> ditolak tanpa syarat karena jadi acuan wajib Markup%/Margin%); (4) khusus <strong>Sales Channel</strong>, kolom <strong>Urutan</strong> dipindah posisinya jadi tepat di sebelah kolom <strong>Nama Sales Channel</strong> (urutan kolom sebelumnya: Urutan, Nama, Status → kini: No, Nama, Urutan, Status). Fitur nonaktifkan/aktifkan lewat checkbox "Aktif" di form Edit tetap ada di keempat modul sebagai cara menyembunyikan data tanpa menghapus.
+					</td>
+				</tr>
+				<tr>
+					<td>26 Agu 2026 (lanjutan)</td>
+					<td>
+						Empat perbaikan lanjutan atas menu master: <strong>Master Kompetitor</strong> &amp; <strong>Sales Channel</strong> (saat itu masih bernama "Master Marketplace") tidak lagi meminta input <strong>Kode</strong> secara manual di form Tambah — kode kini dibuat otomatis oleh controller dari Nama (huruf besar, non-alfanumerik jadi <code>_</code>, ditambah angka urut bila bentrok) lewat method <code>_generate_code()</code>, tetap tersimpan &amp; dipakai secara internal tapi tidak lagi ditampilkan di form/daftar. Menu <strong>Master Marketplace</strong> diganti nama tampilannya menjadi <strong>Sales Channel</strong> di judul halaman, sidebar, dan label menu Hak Akses (tabel <code>menus</code>). Kolom <strong>Kontak</strong> (<code>vendors.contact_info</code>) dihapus dari form &amp; daftar Master Vendor karena tidak diperlukan. Field <strong>Brand</strong> &amp; <strong>Kategori Barang</strong> di form Tambah/Edit Produk diganti ke dropdown <a href="https://select2.org" target="_blank" rel="noopener">Select2</a> (pencarian lokal dari daftar yang sudah dimuat, bukan AJAX — berbeda dari Select2 pencarian produk di modul lain) agar lebih mudah dicari saat daftar brand/kategori sudah panjang.
+					</td>
+				</tr>
 				<tr>
 					<td>25 Agu 2026 (lanjutan 17)</td>
 					<td>

@@ -1,20 +1,17 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Vendor_model extends CI_Model
+class Cost_model extends CI_Model
 {
-	protected $table = 'vendors';
+	protected $table = 'costs';
 
 	public function get_all($filters = array(), $limit = NULL, $offset = 0)
 	{
 		$this->db->from($this->table);
 		if (!empty($filters['keyword'])) {
-			$this->db->group_start()
-				->like('vendor_name', $filters['keyword'])
-				->or_like('vendor_code', $filters['keyword'])
-				->group_end();
+			$this->db->like('cost_name', $filters['keyword']);
 		}
-		$this->db->order_by('vendor_code', 'ASC');
+		$this->db->order_by('cost_name', 'ASC');
 		if ($limit !== NULL) $this->db->limit($limit, $offset);
 		return $this->db->get()->result_array();
 	}
@@ -22,12 +19,14 @@ class Vendor_model extends CI_Model
 	public function count_all($filters = array())
 	{
 		if (!empty($filters['keyword'])) {
-			$this->db->group_start()
-				->like('vendor_name', $filters['keyword'])
-				->or_like('vendor_code', $filters['keyword'])
-				->group_end();
+			$this->db->like('cost_name', $filters['keyword']);
 		}
 		return $this->db->count_all_results($this->table);
+	}
+
+	public function get_all_active()
+	{
+		return $this->db->where('is_active', 1)->order_by('cost_name', 'ASC')->get($this->table)->result_array();
 	}
 
 	public function find($id)
@@ -35,9 +34,9 @@ class Vendor_model extends CI_Model
 		return $this->db->where('id', $id)->get($this->table)->row_array();
 	}
 
-	public function find_by_code($code)
+	public function find_by_name($name)
 	{
-		return $this->db->where('vendor_code', $code)->get($this->table)->row_array();
+		return $this->db->where('cost_name', $name)->get($this->table)->row_array();
 	}
 
 	public function create($data)
@@ -63,10 +62,7 @@ class Vendor_model extends CI_Model
 
 	public function count_usage($id)
 	{
-		$n  = $this->db->where('vendor_id', $id)->count_all_results('product_vendor_costs');
-		$n += $this->db->where('vendor_id', $id)->count_all_results('product_prices');
-		$n += $this->db->where('vendor_id', $id)->count_all_results('price_change_batches');
-		return $n;
+		return $this->db->where('cost_id', $id)->count_all_results('price_channel_costs');
 	}
 
 	public function delete($id)

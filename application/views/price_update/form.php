@@ -27,7 +27,7 @@
 			<select name="vendor_id" id="vendorSelect" class="form-select" style="width:100%" required>
 				<option value="">-- Pilih Vendor --</option>
 				<?php foreach ($available_vendors as $v): ?>
-					<option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['vendor_code'] . ' - ' . $v['vendor_name']) ?></option>
+					<option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['vendor_name']) ?></option>
 				<?php endforeach; ?>
 			</select>
 		</div>
@@ -43,51 +43,57 @@
 		<input type="hidden" name="product_id" value="<?= $product['id'] ?>">
 		<input type="hidden" name="vendor_id" value="<?= $vc['vendor_id'] ?>">
 
-		<div class="row g-3">
-			<div class="col-md-6">
-				<div class="card card-stat p-3 h-100">
-					<h6 class="fw-bold">Modal & HPP</h6>
-					<div class="mb-2">
-						<label class="form-label">Modal (Rp)</label>
-						<input type="number" step="0.01" name="modal" class="form-control input-calc" value="<?= $vc['modal'] ?>" required>
-					</div>
-					<div class="mb-2">
-						<label class="form-label">Target HPP (%)</label>
-						<input type="number" step="0.01" name="target_hpp_pct" class="form-control input-calc" value="<?= $vc['target_hpp_pct'] ?>" required>
-					</div>
-					<div class="row mt-2">
-						<div class="col-4"><small class="text-muted">SRP Suggest</small><div class="fw-bold out-srp">Rp 0</div></div>
-						<div class="col-4"><small class="text-muted">Markup %</small><div class="fw-bold out-markup">0%</div></div>
-						<div class="col-4"><small class="text-muted">Margin %</small><div class="fw-bold out-margin">0%</div></div>
-					</div>
-					<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> Markup % &amp; Margin % dihitung dari harga kanal <b>Offline</b> terhadap Modal (sesuai format spreadsheet acuan). Jika Offline belum diisi, dihitung sementara dari SRP Suggest.</small>
+		<div class="card card-stat p-3">
+			<h6 class="fw-bold">Modal & Margin</h6>
+			<div class="row g-3">
+				<div class="col-md-4">
+					<label class="form-label">Modal (Rp)</label>
+					<input type="number" step="0.01" name="modal" class="form-control input-calc" value="<?= $vc['modal'] ?>" required>
+				</div>
+				<div class="col-md-4">
+					<label class="form-label">Margin (%)</label>
+					<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= $vc['target_hpp_pct'] ?>" required>
 				</div>
 			</div>
-
-			<div class="col-md-6">
-				<div class="card card-stat p-3 h-100">
-					<h6 class="fw-bold">Harga Baru per Kanal</h6>
-					<?php foreach ($channels as $ch): ?>
-					<div class="mb-2">
-						<label class="form-label"><?= htmlspecialchars($ch['channel_name']) ?></label>
-						<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control"
-							value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
-					</div>
-					<?php endforeach; ?>
-				</div>
-			</div>
+			<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> SRP Suggest dihitung otomatis dari Modal &amp; Margin (Modal ÷ (1 &minus; Margin%)) dan ditampilkan di bawah tiap kolom Harga Kanal, bersama Markup % (dihitung dari harga kanal tsb terhadap Modal). Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest.</small>
 		</div>
 
-		<div class="card card-stat p-3 mt-3">
-			<h6 class="fw-bold">Harga Kompetitor (Referensi)</h6>
-			<div class="row">
-			<?php foreach ($competitors as $c): ?>
-				<div class="col-md-4"><small class="text-muted"><?= htmlspecialchars($c['competitor_name']) ?></small>
-					<div class="fw-semibold"><?= rupiah($competitor_prices[$c['competitor_code']] ?? 0) ?></div>
+		<div class="row g-3 mt-3">
+			<div class="col-md-8">
+				<div class="card card-stat p-3 h-100">
+					<h6 class="fw-bold">Harga Baru per Kanal</h6>
+					<div class="row g-3">
+					<?php foreach ($channels as $ch): $is_offline = ($ch['channel_code'] === 'OFFLINE'); ?>
+						<div class="col-md-6">
+							<label class="form-label"><?= htmlspecialchars($ch['channel_name']) ?></label>
+							<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya'] ?? 0) ?>"
+								value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
+							<div class="row mt-1 gx-2">
+								<div class="col-6"><small class="text-muted">SRP Suggest</small><div class="small fw-bold <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">Rp 0</div></div>
+								<div class="col-6"><small class="text-muted">Markup %</small><div class="small fw-bold <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">0%</div></div>
+							</div>
+						</div>
+					<?php endforeach; ?>
+					</div>
 				</div>
-			<?php endforeach; ?>
 			</div>
-			<a href="<?= base_url('competitor-price') ?>" class="small">Perbarui harga kompetitor &raquo;</a>
+
+			<div class="col-md-4">
+				<div class="card card-stat p-3 h-100">
+					<h6 class="fw-bold">Harga Kompetitor</h6>
+					<?php foreach ($competitors as $c): ?>
+						<div class="mb-2">
+							<label class="form-label small mb-1"><?= htmlspecialchars($c['competitor_name']) ?></label>
+							<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control form-control-sm" placeholder="Rp" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
+						</div>
+					<?php endforeach; ?>
+					<?php if (empty($competitors)): ?>
+						<div class="text-muted small">Belum ada kompetitor aktif. Tambahkan lewat menu <a href="<?= base_url('competitors/create') ?>">Master Data → Kompetitor</a>.</div>
+					<?php endif; ?>
+					<div class="form-text mt-1">Harga di atas ikut tersimpan (tanggal pantau = Tanggal Efektif di bawah) saat <b>Simpan Perubahan Harga</b> ditekan.</div>
+					<a href="<?= base_url('competitor-price') ?>" class="small">Lihat riwayat harga kompetitor &raquo;</a>
+				</div>
+			</div>
 		</div>
 
 		<div class="row g-3 mt-1">
@@ -132,27 +138,50 @@ const previewTrigger = document.getElementById('previewModalTrigger');
 
 document.querySelectorAll('.price-form').forEach(form => {
 	const modal = form.querySelector('[name=modal]');
-	const hpp = form.querySelector('[name=target_hpp_pct]');
+	const margin = form.querySelector('[name=margin_pct]');
 	const offlinePrice = form.querySelector('[name=price_OFFLINE]');
 	const outSrp = form.querySelector('.out-srp');
 	const outMarkup = form.querySelector('.out-markup');
-	const outMargin = form.querySelector('.out-margin');
+	const channelInputs = Array.from(form.querySelectorAll('.channel-price-input')).filter(el => el.name !== 'price_OFFLINE');
+
+	function updateChannelOutputs() {
+		const modalVal = parseFloat(modal.value) || 0;
+		const marginVal = parseFloat(margin.value) || 0;
+		channelInputs.forEach(input => {
+			const wrap = input.closest('.col-md-6');
+			if (!wrap) return;
+			const srpEl = wrap.querySelector('.out-srp-channel');
+			const markupEl = wrap.querySelector('.out-markup-channel');
+			if (srpEl) {
+				// SRP Suggest per kanal = (Modal + Total Biaya kanal ini) / (1 - Margin%).
+				// Kanal tanpa Biaya (Total Biaya = 0) otomatis sama dengan SRP Suggest global.
+				const biaya = parseFloat(input.dataset.biaya) || 0;
+				const srpChannel = (modalVal > 0 && marginVal > 0 && marginVal < 100) ? (modalVal + biaya) / (1 - (marginVal / 100)) : 0;
+				srpEl.textContent = 'Rp ' + srpChannel.toLocaleString('id-ID');
+			}
+			if (markupEl) {
+				const priceVal = parseFloat(input.value) || 0;
+				markupEl.textContent = (modalVal > 0 && priceVal > 0) ? (((priceVal - modalVal) / modalVal) * 100).toFixed(2) + '%' : '0%';
+			}
+		});
+	}
 
 	function recalc() {
-		const body = `modal=${modal.value}&target_hpp_pct=${hpp.value}&actual_price=${offlinePrice ? offlinePrice.value : ''}`;
+		const body = `modal=${modal.value}&margin_pct=${margin.value}&actual_price=${offlinePrice ? offlinePrice.value : ''}`;
 		fetch(calcUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body
 		}).then(r => r.json()).then(d => {
-			outSrp.textContent = 'Rp ' + Number(d.srp_suggest).toLocaleString('id-ID');
+			outSrp.textContent = 'Rp ' + Number(d.srp_suggest || 0).toLocaleString('id-ID');
 			outMarkup.textContent = d.markup_pct + '%';
-			outMargin.textContent = d.margin_pct + '%';
+			updateChannelOutputs();
 		});
 	}
 	modal.addEventListener('input', recalc);
-	hpp.addEventListener('input', recalc);
+	margin.addEventListener('input', recalc);
 	if (offlinePrice) offlinePrice.addEventListener('input', recalc);
+	channelInputs.forEach(input => input.addEventListener('input', updateChannelOutputs));
 	recalc();
 
 	form.querySelector('.btn-preview').addEventListener('click', () => {

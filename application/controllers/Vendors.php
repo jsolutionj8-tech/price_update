@@ -47,20 +47,15 @@ class Vendors extends MY_Controller
 
 	public function store()
 	{
-		$code = $this->_sanitize_code($this->input->post('vendor_code', TRUE));
 		$name = trim((string) $this->input->post('vendor_name', TRUE));
 
-		if ($code === '') {
-			$this->session->set_flashdata('error', 'Kode Vendor wajib diisi.');
-			redirect('vendors/create');
-		}
-		if ($this->vendor_model->find_by_code($code)) {
-			$this->session->set_flashdata('error', 'Kode vendor "' . $code . '" sudah digunakan.');
+		if ($name === '') {
+			$this->session->set_flashdata('error', 'Nama Vendor wajib diisi.');
 			redirect('vendors/create');
 		}
 
 		$this->vendor_model->create(array(
-			'vendor_code'     => $code,
+			'vendor_code'     => $this->_generate_code($name),
 			'vendor_name'     => $name ?: NULL,
 			'vendor_category' => $this->input->post('vendor_category', TRUE) ?: NULL,
 			'is_active'       => 1,
@@ -89,8 +84,16 @@ class Vendors extends MY_Controller
 
 	public function delete($id)
 	{
-		$this->vendor_model->set_active($id, 0);
-		$this->session->set_flashdata('success', 'Vendor berhasil dinonaktifkan.');
+		$vendor = $this->vendor_model->find($id);
+		if (!$vendor) show_404();
+
+		if ($this->vendor_model->count_usage($id) > 0) {
+			$this->session->set_flashdata('error', 'Vendor "' . $vendor['vendor_name'] . '" tidak bisa dihapus karena masih dipakai pada data harga/update harga produk.');
+			redirect('vendors');
+		}
+
+		$this->vendor_model->delete($id);
+		$this->session->set_flashdata('success', 'Vendor berhasil dihapus.');
 		redirect('vendors');
 	}
 
@@ -101,9 +104,20 @@ class Vendors extends MY_Controller
 		redirect('vendors');
 	}
 
-	protected function _sanitize_code($code)
+	protected function _generate_code($name)
 	{
-		$code = strtoupper(trim((string) $code));
-		return preg_replace('/[^A-Z0-9_-]/', '_', $code);
+		$base = strtoupper(trim((string) $name));
+		$base = trim(preg_replace('/[^A-Z0-9]+/', '_', $base), '_');
+		if ($base === '') {
+			$base = 'VENDOR';
+		}
+
+		$code = $base;
+		$i = 2;
+		while ($this->vendor_model->find_by_code($code)) {
+			$code = $base . '_' . $i;
+			$i++;
+		}
+		return $code;
 	}
 }

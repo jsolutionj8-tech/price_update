@@ -212,6 +212,32 @@ CREATE TABLE `price_channels` (
   UNIQUE KEY `channel_code` (`channel_code`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `costs` */
+
+DROP TABLE IF EXISTS `costs`;
+
+CREATE TABLE `costs` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `cost_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `cost_name` (`cost_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/*Table structure for table `price_channel_costs` */
+
+DROP TABLE IF EXISTS `price_channel_costs`;
+
+CREATE TABLE `price_channel_costs` (
+  `channel_id` int(10) unsigned NOT NULL,
+  `cost_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`channel_id`,`cost_id`),
+  KEY `fk_pcc_cost` (`cost_id`),
+  CONSTRAINT `fk_pcc_channel` FOREIGN KEY (`channel_id`) REFERENCES `price_channels` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_pcc_cost` FOREIGN KEY (`cost_id`) REFERENCES `costs` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `product_categories` */
 
 DROP TABLE IF EXISTS `product_categories`;

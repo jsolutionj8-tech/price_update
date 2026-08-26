@@ -16,10 +16,11 @@ INSERT INTO menus (menu_key, menu_label, menu_group, menu_icon, sort_order) VALU
 ('categories',          'Kategori Barang',     'Master Data',   'bi-tags',                  20),
 ('vendors',             'Vendor',              'Master Data',   'bi-truck',                 30),
 ('competitors',         'Kompetitor',          'Master Data',   'bi-shop-window',           40),
+('costs',               'Master Biaya',        'Master Data',   'bi-cash-coin',             45),
 ('marketplaces',        'Sales Channel',       'Master Data',   'bi-bag-check',             50),
-('price-update',        'Update Harga',        'Transaksi',     'bi-currency-exchange',     60),
-('competitor-price',    'Harga Kompetitor',    'Transaksi',     'bi-graph-up-arrow',        70),
-('price-history',       'Riwayat Perubahan',   'Transaksi',     'bi-clock-history',         80),
+('price-update',        'Update Harga',        'Draft Pricing', 'bi-currency-exchange',     60),
+('competitor-price',    'Harga Kompetitor',    'Draft Pricing', 'bi-graph-up-arrow',        70),
+('price-history',       'Riwayat Perubahan',   'Draft Pricing', 'bi-clock-history',         80),
 ('users',               'Manajemen User',      'Administrasi',  'bi-people',                90),
 ('notification-groups', 'Grup Notifikasi',     'Administrasi',  'bi-bell',                  100),
 ('reports',             'Import / Export',     'Administrasi',  'bi-file-earmark-arrow-up', 110);
@@ -46,6 +47,13 @@ INSERT INTO price_channels (channel_code, channel_name, sort_order, is_active) V
 ('TOKOPEDIA', 'Tokopedia', 30, 1),
 ('SHOPEE', 'Shopee', 40, 1),
 ('LAZADA', 'Lazada', 50, 1);
+
+-- Master Biaya contoh — silakan sesuaikan lewat menu Master Data > Master Biaya, lalu kaitkan
+-- ke sales channel yang relevan lewat menu Master Data > Sales Channel.
+INSERT INTO costs (cost_name, amount, is_active) VALUES
+('Biaya Admin', 5000.00, 1),
+('Biaya Komisi Marketplace', 15000.00, 1),
+('Biaya Packing', 2000.00, 1);
 
 -- Master Kompetitor contoh — silakan ganti nama sesuai kompetitor riil melalui menu Master > Kompetitor.
 INSERT INTO competitors (competitor_code, competitor_name, website_url, is_active) VALUES

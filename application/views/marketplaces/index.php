@@ -18,25 +18,32 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Urutan</th><th>Nama Sales Channel</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>No</th><th>Nama Sales Channel</th><th>Urutan</th><th>Biaya Tambahan</th><th>Status</th><th></th></tr></thead>
 			<tbody>
+			<?php $no = $pagination['total'] > 0 ? (($pagination['page'] - 1) * $pagination['per_page']) + 1 : 1; ?>
 			<?php foreach ($marketplaces as $m): ?>
 				<tr>
-					<td><?= (int) $m['sort_order'] ?></td>
+					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($m['channel_name']) ?></td>
+					<td><?= (int) $m['sort_order'] ?></td>
+					<td>
+						<?php if (!empty($m['costs'])): ?>
+							<?php foreach ($m['costs'] as $cst): ?>
+								<span class="badge bg-light text-dark border"><?= htmlspecialchars($cst['cost_name']) ?> (<?= rupiah($cst['amount']) ?>)</span>
+							<?php endforeach; ?>
+						<?php else: ?>
+							<span class="text-muted">-</span>
+						<?php endif; ?>
+					</td>
 					<td><?= status_badge($m['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
 						<a href="<?= base_url('marketplaces/edit/' . $m['id']) ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
-						<?php if ($m['is_active']): ?>
-							<a href="<?= base_url('marketplaces/delete/' . $m['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Nonaktifkan marketplace ini?')"><i class="bi bi-trash"></i></a>
-						<?php else: ?>
-							<a href="<?= base_url('marketplaces/activate/' . $m['id']) ?>" class="btn btn-sm btn-outline-success" onclick="return confirm('Aktifkan kembali marketplace ini?')"><i class="bi bi-arrow-counterclockwise"></i></a>
-						<?php endif; ?>
+						<a href="<?= base_url('marketplaces/delete/' . $m['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus sales channel ini? Tindakan ini tidak dapat dibatalkan.')"><i class="bi bi-trash"></i></a>
 					</td>
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($marketplaces)): ?>
-				<tr><td colspan="4" class="text-center text-muted py-3">Tidak ada sales channel ditemukan.</td></tr>
+				<tr><td colspan="6" class="text-center text-muted py-3">Tidak ada sales channel ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

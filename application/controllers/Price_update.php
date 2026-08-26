@@ -18,6 +18,7 @@ class Price_update extends MY_Controller
 		$this->load->model('product_vendor_cost_model');
 		$this->load->model('price_model');
 		$this->load->model('price_change_batch_model');
+		$this->load->model('marketplace_model');
 		$this->load->library('price_calculator');
 	}
 
@@ -56,6 +57,15 @@ class Price_update extends MY_Controller
 		$existing_vendor_ids = array_column($vendor_costs, 'vendor_id');
 		$all_vendors = $this->product_model->get_all_vendors();
 
+		// Total Biaya (Master Biaya) yang dikaitkan ke tiap sales channel — dipakai untuk
+		// rumus SRP Suggest per kanal: (Modal + Total Biaya kanal) / (1 - Margin%).
+		// Kanal tanpa Biaya (total_biaya = 0) otomatis sama dengan SRP Suggest global.
+		$channels = $this->price_model->get_channels();
+		foreach ($channels as &$ch) {
+			$ch['total_biaya'] = array_sum(array_column($this->marketplace_model->get_costs_for_channel($ch['id']), 'amount'));
+		}
+		unset($ch);
+
 		$data = array(
 			'title'       => 'Update Harga - ' . $product['product_name'],
 			'product'     => $product,
@@ -63,7 +73,7 @@ class Price_update extends MY_Controller
 			'available_vendors' => array_values(array_filter($all_vendors, function ($v) use ($existing_vendor_ids) {
 				return !in_array($v['id'], $existing_vendor_ids);
 			})),
-			'channels'    => $this->price_model->get_channels(),
+			'channels'    => $channels,
 			'competitors' => $this->price_model->get_competitors(),
 			'competitor_prices' => $this->price_model->get_current_competitor_prices($product_id),
 		);
@@ -108,9 +118,9 @@ class Price_update extends MY_Controller
 	public function calculate()
 	{
 		$modal = (float) $this->input->post('modal');
-		$target_hpp = (float) $this->input->post('target_hpp_pct');
+		$margin = (float) $this->input->post('margin_pct');
 		$actual_price = $this->input->post('actual_price');
-		$result = $this->price_calculator->calculate($modal, $target_hpp, $actual_price);
+		$result = $this->price_calculator->calculate($modal, $margin, $actual_price);
 
 		$this->output->set_content_type('application/json')->set_output(json_encode($result));
 	}
@@ -125,7 +135,7 @@ class Price_update extends MY_Controller
 		$this->form_validation->set_rules('product_id', 'Produk', 'required|integer');
 		$this->form_validation->set_rules('vendor_id', 'Vendor', 'required|integer');
 		$this->form_validation->set_rules('modal', 'Modal', 'required|numeric');
-		$this->form_validation->set_rules('target_hpp_pct', 'Target HPP', 'required|numeric');
+		$this->form_validation->set_rules('margin_pct', 'Margin', 'required|numeric');
 		$this->form_validation->set_rules('effective_date', 'Tanggal Efektif', 'required');
 
 		if ($this->form_validation->run() === FALSE) {
@@ -136,7 +146,7 @@ class Price_update extends MY_Controller
 		$product_id = (int) $this->input->post('product_id');
 		$vendor_id  = (int) $this->input->post('vendor_id');
 		$modal      = (float) $this->input->post('modal');
-		$target_hpp = (float) $this->input->post('target_hpp_pct');
+		$margin     = (float) $this->input->post('margin_pct');
 		$effective_date = $this->input->post('effective_date');
 		$notes = $this->input->post('notes', TRUE);
 		$user_id = $this->auth_lib->user_id();
@@ -149,12 +159,12 @@ class Price_update extends MY_Controller
 		$old_prices = $this->price_model->get_current_prices($product_id, $vendor_id);
 
 		// --- hitung nilai baru ---
-		$calc = $this->price_calculator->calculate($modal, $target_hpp, $reference_price);
+		$calc = $this->price_calculator->calculate($modal, $margin, $reference_price);
 
-		// --- simpan cost baru ---
+		// --- simpan cost baru (kolom DB `target_hpp_pct` kini menyimpan nilai Margin% target) ---
 		$this->product_vendor_cost_model->upsert($product_id, $vendor_id, array(
 			'modal' => $modal,
-			'target_hpp_pct' => $target_hpp,
+			'target_hpp_pct' => $margin,
 			'srp_suggest' => $calc['srp_suggest'],
 			'srp_markup_pct' => $calc['markup_pct'],
 			'srp_margin_pct' => $calc['margin_pct'],
@@ -181,6 +191,13 @@ class Price_update extends MY_Controller
 			$this->price_model->upsert_price($product_id, $vendor_id, $ch['id'], $posted, $effective_date, $user_id);
 		}
 
+		// --- simpan harga kompetitor (opsional, diinput langsung dari form Update Harga) ---
+		$competitor_prices_posted = (array) $this->input->post('competitor_price');
+		foreach ($competitor_prices_posted as $competitor_id => $price) {
+			if ($price === NULL || $price === '') continue;
+			$this->price_model->upsert_competitor_price($product_id, (int) $competitor_id, (float) $price, $effective_date, $user_id);
+		}
+
 		// --- catat batch riwayat (trigger notifikasi) ---
 		$batch_id = $this->price_change_batch_model->create(array(
 			'product_id' => $product_id,
@@ -190,13 +207,13 @@ class Price_update extends MY_Controller
 			'notes' => $notes,
 			'old_values' => json_encode(array(
 				'modal' => $old_cost['modal'] ?? 0,
-				'target_hpp_pct' => $old_cost['target_hpp_pct'] ?? 0,
+				'margin_pct' => $old_cost['target_hpp_pct'] ?? 0,
 				'srp_suggest' => $old_cost['srp_suggest'] ?? 0,
 				'channel_prices' => $old_prices,
 			)),
 			'new_values' => json_encode(array(
 				'modal' => $modal,
-				'target_hpp_pct' => $target_hpp,
+				'margin_pct' => $margin,
 				'srp_suggest' => $calc['srp_suggest'],
 				'markup_pct' => $calc['markup_pct'],
 				'margin_pct' => $calc['margin_pct'],
@@ -255,9 +272,9 @@ class Price_update extends MY_Controller
 	{
 		$product = $this->product_model->find($this->input->post('product_id'));
 		$modal = (float) $this->input->post('modal');
-		$target_hpp = (float) $this->input->post('target_hpp_pct');
+		$margin = (float) $this->input->post('margin_pct');
 		$reference_price = $this->input->post('price_OFFLINE');
-		$calc = $this->price_calculator->calculate($modal, $target_hpp, $reference_price);
+		$calc = $this->price_calculator->calculate($modal, $margin, $reference_price);
 
 		$html = $this->load->view('emails/templates/price_update', array(
 			'product' => $product,

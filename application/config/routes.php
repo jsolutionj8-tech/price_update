@@ -101,6 +101,14 @@ $route['competitors/update/(:num)']    = 'competitors/update/$1';
 $route['competitors/delete/(:num)']    = 'competitors/delete/$1';
 $route['competitors/activate/(:num)']  = 'competitors/activate/$1';
 
+// Biaya (master data)
+$route['costs']                        = 'costs/index';
+$route['costs/create']                 = 'costs/create';
+$route['costs/store']                  = 'costs/store';
+$route['costs/edit/(:num)']            = 'costs/edit/$1';
+$route['costs/update/(:num)']          = 'costs/update/$1';
+$route['costs/delete/(:num)']          = 'costs/delete/$1';
+
 // Marketplace / kanal penjualan (master data)
 $route['marketplaces']                 = 'marketplaces/index';
 $route['marketplaces/create']          = 'marketplaces/create';
