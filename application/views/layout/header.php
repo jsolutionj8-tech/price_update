@@ -47,8 +47,8 @@
 		/* Wider content area for data-heavy tables */
 		.page-body > .container-xl { max-width: 100%; }
 
-		/* Warna navy khas Atambah.com — dipakai sbg border kartu Harga per Channel di Update Harga */
-		.border-brand { border-color: #1B2A41 !important; }
+		/* Warna teal-biru navbar atambah.com — dipakai sbg border kartu Harga per Channel di Update Harga */
+		.border-brand { border-color: #3D5C6C !important; border-width: 2px !important; }
 	</style>
 </head>
 <body>
