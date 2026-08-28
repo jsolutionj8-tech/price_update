@@ -12,6 +12,36 @@
 	<style>
 		body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
+		/* Rebrand warna Tabler ke identitas Atambah.com: biru -> navy navbar, kuning -> oranye logo (#E34F05,
+		   diambil langsung dari pixel logo assets/images/atambah-logo.png). Tabler membaca warna tema lewat
+		   variabel CSS ini di hampir semua komponennya (tombol, badge, link, border, dst), jadi override di
+		   :root sudah cukup tanpa perlu ubah tiap kelas satu-satu. */
+		:root {
+			--tblr-primary: #3D5C6C;
+			--tblr-primary-rgb: 61, 92, 108;
+			--tblr-warning: #E34F05;
+			--tblr-warning-rgb: 227, 79, 5;
+			--tblr-yellow: #E34F05;
+			--tblr-yellow-rgb: 227, 79, 5;
+			--tblr-success: #E34F05;
+			--tblr-success-rgb: 227, 79, 5;
+			--tblr-green: #E34F05;
+			--tblr-green-rgb: 227, 79, 5;
+		}
+
+		/* Select2 (dropdown pencarian vendor/brand/kategori) pakai tema Bootstrap sendiri yang warna birunya
+		   hardcode (bukan variabel), jadi tidak ikut ke-override otomatis di atas — disesuaikan manual di sini. */
+		.select2-container--bootstrap-5.select2-container--open .select2-selection,
+		.select2-container--bootstrap-5 .select2-dropdown .select2-search .select2-search__field:focus {
+			border-color: #3D5C6C !important;
+			box-shadow: 0 0 0 .25rem rgba(61, 92, 108, .25) !important;
+		}
+		.select2-container--bootstrap-5 .select2-dropdown { border-color: #3D5C6C !important; }
+		.select2-container--bootstrap-5 .select2-results__option--selected,
+		.select2-container--bootstrap-5 .select2-results__option[aria-selected="true"]:not(.select2-results__option--highlighted) {
+			background-color: #3D5C6C !important;
+		}
+
 		/* Logo Atambah.com di header konten utama, menggantikan judul halaman ($title) */
 		.page-header-logo { height: 2rem; width: auto; display: block; }
 		.navbar-vertical .nav-section-title {
@@ -34,7 +64,7 @@
 			justify-content: center; font-size: 1.2rem; flex: none;
 		}
 		.stat-icon.tone-accent { background: rgba(46,116,181,.12); color: var(--tblr-primary, #2E74B5); }
-		.stat-icon.tone-good { background: rgba(45,181,105,.14); color: #2fb344; }
+		.stat-icon.tone-good { background: rgba(227,79,5,.14); color: #E34F05; }
 		.stat-icon.tone-bad { background: rgba(214,44,64,.12); color: #d63939; }
 
 		/* Wider content area for data-heavy tables */

@@ -18,14 +18,13 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>No</th><th>Nama Sales Channel</th><th>Urutan</th><th>Biaya Tambahan</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>No</th><th>Nama Sales Channel</th><th>Biaya Tambahan</th><th>Status</th><th></th></tr></thead>
 			<tbody>
 			<?php $no = $pagination['total'] > 0 ? (($pagination['page'] - 1) * $pagination['per_page']) + 1 : 1; ?>
 			<?php foreach ($marketplaces as $m): ?>
 				<tr>
 					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($m['channel_name']) ?></td>
-					<td><?= (int) $m['sort_order'] ?></td>
 					<td>
 						<?php if (!empty($m['costs'])): ?>
 							<?php foreach ($m['costs'] as $cst): ?>
@@ -43,7 +42,7 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($marketplaces)): ?>
-				<tr><td colspan="6" class="text-center text-muted py-3">Tidak ada sales channel ditemukan.</td></tr>
+				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada sales channel ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
