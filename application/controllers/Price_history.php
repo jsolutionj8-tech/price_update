@@ -98,4 +98,20 @@ class Price_history extends MY_Controller
 		$this->load->library('price_history_exporter');
 		$this->price_history_exporter->export_to_browser($filters);
 	}
+
+	/**
+	 * Export PDF langsung dari halaman Riwayat Perubahan — sama seperti export()
+	 * (Excel), terbuka untuk semua role yang bisa melihat halaman ini.
+	 */
+	public function export_pdf()
+	{
+		$filters = array(
+			'product_id' => $this->input->get('product_id'),
+			'status'     => $this->input->get('status'),
+			'date_from'  => $this->input->get('date_from'),
+			'date_to'    => $this->input->get('date_to'),
+		);
+		$this->load->library('price_history_exporter');
+		$this->price_history_exporter->export_to_pdf_browser($filters);
+	}
 }

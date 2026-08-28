@@ -24,15 +24,12 @@ class Price_history_exporter
 	}
 
 	/**
-	 * Bangun file .xlsx dari $filters lalu langsung dikirim ke browser (download).
-	 * Method ini exit() di akhir — tidak ada kode setelah pemanggilan yang jalan.
+	 * Susun baris data (satu baris per marketplace yang berubah dalam satu batch)
+	 * dari $filters — dipakai bersama oleh export Excel & PDF supaya isinya identik,
+	 * hanya beda format file.
 	 */
-	public function export_to_browser(array $filters)
+	protected function _build_rows(array $filters)
 	{
-		if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
-			show_error('Library PhpSpreadsheet belum terpasang. Jalankan "composer install" pada root project.');
-		}
-
 		$batches = $this->CI->price_change_batch_model->get_all_filtered($filters);
 
 		// Peta kode -> nama marketplace, termasuk yang sudah nonaktif (data riwayat lama
@@ -42,39 +39,51 @@ class Price_history_exporter
 			$channel_names[$ch['channel_code']] = $ch['channel_name'];
 		}
 
-		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-		$sheet = $spreadsheet->getActiveSheet();
-		$sheet->setTitle('Riwayat Harga');
-		$headers = array('Tanggal Efektif', 'Kode Produk', 'Produk', 'Vendor', 'Marketplace', 'Harga Lama', 'Harga Baru', 'Diubah Oleh', 'Status Notifikasi', 'Dibuat Pada');
-		$sheet->fromArray($headers, NULL, 'A1');
-
-		$row = 2;
+		$rows = array();
 		foreach ($batches as $b) {
 			$old = json_decode($b['old_values'], TRUE) ?: array();
 			$new = json_decode($b['new_values'], TRUE) ?: array();
 			$changed_channels = $new['channels_changed'] ?? array();
 
 			if (empty($changed_channels)) {
-				$sheet->fromArray(array(
+				$rows[] = array(
 					$b['effective_date'], $b['product_code'], $b['product_name'], $b['vendor_code'],
 					'-', NULL, NULL,
 					$b['changed_by_name'], $b['notify_status'], $b['created_at'],
-				), NULL, 'A' . $row);
-				$row++;
+				);
 				continue;
 			}
 
 			foreach ($changed_channels as $code) {
-				$sheet->fromArray(array(
+				$rows[] = array(
 					$b['effective_date'], $b['product_code'], $b['product_name'], $b['vendor_code'],
 					$channel_names[$code] ?? $code,
 					$old['channel_prices'][$code] ?? NULL,
 					$new['channel_prices'][$code] ?? NULL,
 					$b['changed_by_name'], $b['notify_status'], $b['created_at'],
-				), NULL, 'A' . $row);
-				$row++;
+				);
 			}
 		}
+		return $rows;
+	}
+
+	/**
+	 * Bangun file .xlsx dari $filters lalu langsung dikirim ke browser (download).
+	 * Method ini exit() di akhir — tidak ada kode setelah pemanggilan yang jalan.
+	 */
+	public function export_to_browser(array $filters)
+	{
+		if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
+			show_error('Library PhpSpreadsheet belum terpasang. Jalankan "composer install" pada root project.');
+		}
+
+		$headers = array('Tanggal Efektif', 'Kode Produk', 'Produk', 'Vendor', 'Marketplace', 'Harga Lama', 'Harga Baru', 'Diubah Oleh', 'Status Notifikasi', 'Dibuat Pada');
+
+		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$sheet = $spreadsheet->getActiveSheet();
+		$sheet->setTitle('Riwayat Harga');
+		$sheet->fromArray($headers, NULL, 'A1');
+		$sheet->fromArray($this->_build_rows($filters), NULL, 'A2');
 
 		$filename = 'laporan_harga_' . date('Ymd_His') . '.xlsx';
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -83,6 +92,54 @@ class Price_history_exporter
 
 		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
 		$writer->save('php://output');
+		exit;
+	}
+
+	/**
+	 * Bangun file .pdf (tabel sederhana) dari $filters lalu langsung dikirim ke
+	 * browser (download). Method ini exit() di akhir.
+	 */
+	public function export_to_pdf_browser(array $filters)
+	{
+		if (!class_exists('\Dompdf\Dompdf')) {
+			show_error('Library Dompdf belum terpasang. Jalankan "composer install" pada root project.');
+		}
+
+		$headers = array('Tanggal Efektif', 'Kode Produk', 'Produk', 'Vendor', 'Marketplace', 'Harga Lama', 'Harga Baru', 'Diubah Oleh', 'Status Notifikasi', 'Dibuat Pada');
+		$rows = $this->_build_rows($filters);
+
+		$html = '<html><head><meta charset="utf-8"><style>
+			body { font-family: sans-serif; font-size: 10px; }
+			h4 { margin: 0 0 10px; }
+			table { width: 100%; border-collapse: collapse; }
+			th, td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
+			th { background: #f1f1f1; }
+			td.num { text-align: right; }
+		</style></head><body>';
+		$html .= '<h4>Riwayat Perubahan Harga — dicetak ' . htmlspecialchars(date('d/m/Y H:i')) . '</h4>';
+		$html .= '<table><thead><tr>';
+		foreach ($headers as $h) $html .= '<th>' . htmlspecialchars($h) . '</th>';
+		$html .= '</tr></thead><tbody>';
+		foreach ($rows as $r) {
+			$html .= '<tr>';
+			foreach ($r as $i => $v) {
+				$is_price = in_array($i, array(5, 6), TRUE);
+				$html .= '<td class="' . ($is_price ? 'num' : '') . '">' . ($v === NULL ? '-' : htmlspecialchars((string) $v)) . '</td>';
+			}
+			$html .= '</tr>';
+		}
+		if (empty($rows)) {
+			$html .= '<tr><td colspan="' . count($headers) . '" style="text-align:center;color:#888;">Tidak ada data.</td></tr>';
+		}
+		$html .= '</tbody></table></body></html>';
+
+		$dompdf = new \Dompdf\Dompdf(array('isRemoteEnabled' => FALSE));
+		$dompdf->setPaper('A4', 'landscape');
+		$dompdf->loadHtml($html);
+		$dompdf->render();
+
+		$filename = 'laporan_harga_' . date('Ymd_His') . '.pdf';
+		$dompdf->stream($filename, array('Attachment' => TRUE));
 		exit;
 	}
 }

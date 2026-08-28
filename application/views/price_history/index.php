@@ -34,9 +34,12 @@
 		</div>
 		<div class="col-md-2"><input type="date" name="date_from" class="form-control" value="<?= $filters['date_from'] ?? '' ?>" placeholder="Dari"></div>
 		<div class="col-md-2"><input type="date" name="date_to" class="form-control" value="<?= $filters['date_to'] ?? '' ?>" placeholder="Sampai"></div>
-		<div class="col-md-3 d-flex gap-2">
-			<button class="btn btn-outline-secondary flex-fill"><i class="bi bi-funnel"></i> Filter</button>
-			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-success flex-fill"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+		<div class="col-md-3">
+			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
+		</div>
+		<div class="col-12 d-flex gap-2 justify-content-end">
+			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
 		</div>
 	</form>
 </div>
