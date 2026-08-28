@@ -16,7 +16,7 @@
 			<label class="form-label">Biaya Tambahan (opsional)</label>
 			<select name="cost_ids[]" id="costSelect" class="form-select" multiple style="width:100%">
 				<?php foreach ($costs as $cst): ?>
-					<option value="<?= $cst['id'] ?>" <?= in_array((int) $cst['id'], $selected_cost_ids, TRUE) ? 'selected' : '' ?>><?= htmlspecialchars($cst['cost_name']) ?> (<?= rupiah($cst['amount']) ?>)</option>
+					<option value="<?= $cst['id'] ?>" <?= in_array((int) $cst['id'], $selected_cost_ids, TRUE) ? 'selected' : '' ?>><?= htmlspecialchars($cst['cost_name']) ?> (<?= cost_amount_fmt($cst) ?>)</option>
 				<?php endforeach; ?>
 			</select>
 			<div class="form-text">Biaya yang dipilih dari <a href="<?= base_url('costs') ?>" target="_blank">Master Biaya</a> akan menjadi komponen tambahan biaya untuk sales channel ini.</div>

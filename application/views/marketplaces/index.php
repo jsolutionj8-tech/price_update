@@ -29,7 +29,7 @@
 					<td>
 						<?php if (!empty($m['costs'])): ?>
 							<?php foreach ($m['costs'] as $cst): ?>
-								<span class="badge bg-light text-dark border"><?= htmlspecialchars($cst['cost_name']) ?> (<?= rupiah($cst['amount']) ?>)</span>
+								<span class="badge bg-light text-dark border"><?= htmlspecialchars($cst['cost_name']) ?> (<?= cost_amount_fmt($cst) ?>)</span>
 							<?php endforeach; ?>
 						<?php else: ?>
 							<span class="text-muted">-</span>

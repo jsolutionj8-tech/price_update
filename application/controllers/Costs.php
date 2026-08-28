@@ -49,7 +49,8 @@ class Costs extends MY_Controller
 	public function store()
 	{
 		$name = trim((string) $this->input->post('cost_name', TRUE));
-		$amount = (float) str_replace(',', '', (string) $this->input->post('amount', TRUE));
+		$cost_type = $this->input->post('cost_type', TRUE) === 'percent' ? 'percent' : 'nominal';
+		$amount = $this->_parse_amount($cost_type, (string) $this->input->post('amount', TRUE));
 
 		if ($name === '') {
 			$this->session->set_flashdata('error', 'Nama Biaya wajib diisi.');
@@ -59,9 +60,14 @@ class Costs extends MY_Controller
 			$this->session->set_flashdata('error', 'Biaya "' . $name . '" sudah ada.');
 			redirect('costs/create');
 		}
+		if ($cost_type === 'percent' && ($amount < 0 || $amount > 100)) {
+			$this->session->set_flashdata('error', 'Persentase harus di antara 0 - 100.');
+			redirect('costs/create');
+		}
 
 		$this->cost_model->create(array(
 			'cost_name' => $name,
+			'cost_type' => $cost_type,
 			'amount'    => $amount,
 			'is_active' => 1,
 		));
@@ -79,15 +85,21 @@ class Costs extends MY_Controller
 	public function update($id)
 	{
 		$name = trim((string) $this->input->post('cost_name', TRUE));
-		$amount = (float) str_replace(',', '', (string) $this->input->post('amount', TRUE));
+		$cost_type = $this->input->post('cost_type', TRUE) === 'percent' ? 'percent' : 'nominal';
+		$amount = $this->_parse_amount($cost_type, (string) $this->input->post('amount', TRUE));
 
 		if ($name === '') {
 			$this->session->set_flashdata('error', 'Nama Biaya wajib diisi.');
 			redirect('costs/edit/' . $id);
 		}
+		if ($cost_type === 'percent' && ($amount < 0 || $amount > 100)) {
+			$this->session->set_flashdata('error', 'Persentase harus di antara 0 - 100.');
+			redirect('costs/edit/' . $id);
+		}
 
 		$this->cost_model->update($id, array(
 			'cost_name' => $name,
+			'cost_type' => $cost_type,
 			'amount'    => $amount,
 			'is_active' => $this->input->post('is_active') ? 1 : 0,
 		));
@@ -108,5 +120,19 @@ class Costs extends MY_Controller
 		$this->cost_model->delete($id);
 		$this->session->set_flashdata('success', 'Biaya berhasil dihapus.');
 		redirect('costs');
+	}
+
+	/**
+	 * Nominal Rupiah dikirim client sudah polos tanpa titik ribuan (lihat costs/form.php),
+	 * tapi tetap dibersihkan lagi di sini (fallback jika JS mati) — jangan pakai (float) langsung
+	 * karena titik selalu dibaca sebagai pemisah desimal, bukan pemisah ribuan
+	 * (mis. "7.000" jadi 7, bukan 7000).
+	 */
+	protected function _parse_amount($cost_type, $raw)
+	{
+		if ($cost_type === 'percent') {
+			return (float) str_replace(',', '.', $raw);
+		}
+		return (float) preg_replace('/[^\d]/', '', $raw);
 	}
 }

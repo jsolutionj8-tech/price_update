@@ -56,15 +56,7 @@ class Price_update extends MY_Controller
 		$vendor_costs = $this->product_vendor_cost_model->get_for_product($product_id);
 		$existing_vendor_ids = array_column($vendor_costs, 'vendor_id');
 		$all_vendors = $this->product_model->get_all_vendors();
-
-		// Total Biaya (Master Biaya) yang dikaitkan ke tiap sales channel — dipakai untuk
-		// rumus SRP Suggest per kanal: (Modal + Total Biaya kanal) / (1 - Margin%).
-		// Kanal tanpa Biaya (total_biaya = 0) otomatis sama dengan SRP Suggest global.
-		$channels = $this->price_model->get_channels();
-		foreach ($channels as &$ch) {
-			$ch['total_biaya'] = array_sum(array_column($this->marketplace_model->get_costs_for_channel($ch['id']), 'amount'));
-		}
-		unset($ch);
+		$channels = $this->_channels_with_biaya();
 
 		$data = array(
 			'title'       => 'Update Harga - ' . $product['product_name'],
@@ -89,6 +81,8 @@ class Price_update extends MY_Controller
 	/**
 	 * Tambahkan vendor baru (cost awal 0) untuk produk ini, agar muncul sebagai tab
 	 * di form Update Harga dan bisa langsung diisi Modal/HPP-nya.
+	 * Dipanggil lewat AJAX dari form.php (tab baru disisipkan tanpa reload halaman);
+	 * redirect biasa tetap disediakan sebagai fallback jika JS mati.
 	 */
 	public function add_vendor($product_id)
 	{
@@ -96,18 +90,78 @@ class Price_update extends MY_Controller
 		if (!$product) show_404();
 
 		$vendor_id = (int) $this->input->post('vendor_id');
-		if ($vendor_id) {
-			$this->product_vendor_cost_model->upsert($product_id, $vendor_id, array(
-				'modal' => 0,
-				'target_hpp_pct' => 0,
-				'srp_suggest' => 0,
-				'srp_markup_pct' => 0,
-				'srp_margin_pct' => 0,
-				'updated_by' => $this->auth_lib->user_id(),
-			));
+		$is_ajax = $this->input->is_ajax_request();
+
+		if (!$vendor_id) {
+			if ($is_ajax) {
+				$this->output->set_status_header(422)->set_content_type('application/json')
+					->set_output(json_encode(array('success' => FALSE, 'message' => 'Pilih vendor terlebih dahulu.')));
+				return;
+			}
+			redirect('price-update/form/' . $product_id);
 		}
 
-		redirect('price-update/form/' . $product_id);
+		$this->product_vendor_cost_model->upsert($product_id, $vendor_id, array(
+			'modal' => 0,
+			'target_hpp_pct' => 0,
+			'srp_suggest' => 0,
+			'srp_markup_pct' => 0,
+			'srp_margin_pct' => 0,
+			'updated_by' => $this->auth_lib->user_id(),
+		));
+
+		if (!$is_ajax) {
+			redirect('price-update/form/' . $product_id);
+		}
+
+		$vc = NULL;
+		foreach ($this->product_vendor_cost_model->get_for_product($product_id) as $row) {
+			if ((int) $row['vendor_id'] === $vendor_id) { $vc = $row; break; }
+		}
+		if (!$vc) show_404();
+		$vc['current_prices'] = $this->price_model->get_current_prices($product_id, $vendor_id);
+
+		$tab_html = $this->load->view('price_update/_vendor_tab', array(
+			'product' => $product,
+			'vc' => $vc,
+			'channels' => $this->_channels_with_biaya(),
+			'competitors' => $this->price_model->get_competitors(),
+			'competitor_prices' => $this->price_model->get_current_competitor_prices($product_id),
+			'active' => FALSE,
+		), TRUE);
+
+		$this->output->set_content_type('application/json')->set_output(json_encode(array(
+			'success'     => TRUE,
+			'vendor_id'   => $vendor_id,
+			'vendor_name' => $vc['vendor_name'],
+			'tab_html'    => $tab_html,
+		)));
+	}
+
+	/**
+	 * Total Biaya (Master Biaya) yang dikaitkan ke tiap sales channel — dipakai untuk
+	 * rumus SRP Suggest per kanal: (Modal + Total Biaya kanal) / (1 - Margin%).
+	 * Biaya bertipe nominal dijumlah langsung (Rp); biaya bertipe persen dihitung sebagai
+	 * % dari Modal vendor yang aktif (dihitung di browser, lihat form.php), sehingga di sini
+	 * cukup dijumlah terpisah: total_biaya_nominal & total_biaya_percent. Kanal tanpa Biaya
+	 * (keduanya 0) otomatis sama dengan SRP Suggest global.
+	 */
+	protected function _channels_with_biaya()
+	{
+		$channels = $this->price_model->get_channels();
+		foreach ($channels as &$ch) {
+			$ch['total_biaya_nominal'] = 0;
+			$ch['total_biaya_percent'] = 0;
+			foreach ($this->marketplace_model->get_costs_for_channel($ch['id']) as $cost) {
+				if ($cost['cost_type'] === 'percent') {
+					$ch['total_biaya_percent'] += (float) $cost['amount'];
+				} else {
+					$ch['total_biaya_nominal'] += (float) $cost['amount'];
+				}
+			}
+		}
+		unset($ch);
+		return $channels;
 	}
 
 	/**

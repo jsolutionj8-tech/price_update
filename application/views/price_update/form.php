@@ -20,8 +20,8 @@
 <?php if (!empty($available_vendors)): ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
-<div class="card card-stat p-3 mb-3">
-	<form method="post" action="<?= base_url('price-update/add-vendor/' . $product['id']) ?>" class="d-flex align-items-end gap-2">
+<div class="card card-stat p-3 mb-3" id="addVendorCard">
+	<form method="post" action="<?= base_url('price-update/add-vendor/' . $product['id']) ?>" id="addVendorForm" class="d-flex align-items-end gap-2">
 		<div style="min-width:280px;">
 			<label class="form-label mb-1">Tambah Vendor</label>
 			<select name="vendor_id" id="vendorSelect" class="form-select" style="width:100%" required>
@@ -38,82 +38,14 @@
 
 <div class="tab-content">
 <?php $i = 0; foreach ($vendor_costs as $vc): $i++; ?>
-	<div class="tab-pane fade <?= $i === 1 ? 'show active' : '' ?>" id="vendor<?= $vc['vendor_id'] ?>">
-	<form class="price-form" method="post" action="<?= base_url('price-update/save') ?>">
-		<input type="hidden" name="product_id" value="<?= $product['id'] ?>">
-		<input type="hidden" name="vendor_id" value="<?= $vc['vendor_id'] ?>">
-
-		<div class="card card-stat p-3">
-			<h6 class="fw-bold">Modal & Margin</h6>
-			<div class="row g-3">
-				<div class="col-md-4">
-					<label class="form-label">Modal (Rp)</label>
-					<input type="number" step="0.01" name="modal" class="form-control input-calc" value="<?= $vc['modal'] ?>" required>
-				</div>
-				<div class="col-md-4">
-					<label class="form-label">Margin (%)</label>
-					<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= $vc['target_hpp_pct'] ?>" required>
-				</div>
-			</div>
-			<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> SRP Suggest dihitung otomatis dari Modal &amp; Margin (Modal ÷ (1 &minus; Margin%)) dan ditampilkan di bawah tiap kolom Harga Kanal, bersama Markup % (dihitung dari harga kanal tsb terhadap Modal). Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest.</small>
-		</div>
-
-		<div class="row g-3 mt-3">
-			<div class="col-md-8">
-				<div class="card card-stat p-3 h-100">
-					<h6 class="fw-bold">Harga Baru per Kanal</h6>
-					<div class="row g-3">
-					<?php foreach ($channels as $ch): $is_offline = ($ch['channel_code'] === 'OFFLINE'); ?>
-						<div class="col-md-6">
-							<label class="form-label"><?= htmlspecialchars($ch['channel_name']) ?></label>
-							<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya'] ?? 0) ?>"
-								value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
-							<div class="row mt-1 gx-2">
-								<div class="col-6"><small class="text-muted">SRP Suggest</small><div class="small fw-bold <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">Rp 0</div></div>
-								<div class="col-6"><small class="text-muted">Markup %</small><div class="small fw-bold <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">0%</div></div>
-							</div>
-						</div>
-					<?php endforeach; ?>
-					</div>
-				</div>
-			</div>
-
-			<div class="col-md-4">
-				<div class="card card-stat p-3 h-100">
-					<h6 class="fw-bold">Harga Kompetitor</h6>
-					<?php foreach ($competitors as $c): ?>
-						<div class="mb-2">
-							<label class="form-label small mb-1"><?= htmlspecialchars($c['competitor_name']) ?></label>
-							<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control form-control-sm" placeholder="Rp" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
-						</div>
-					<?php endforeach; ?>
-					<?php if (empty($competitors)): ?>
-						<div class="text-muted small">Belum ada kompetitor aktif. Tambahkan lewat menu <a href="<?= base_url('competitors/create') ?>">Master Data → Kompetitor</a>.</div>
-					<?php endif; ?>
-					<div class="form-text mt-1">Harga di atas ikut tersimpan (tanggal pantau = Tanggal Efektif di bawah) saat <b>Simpan Perubahan Harga</b> ditekan.</div>
-					<a href="<?= base_url('competitor-price') ?>" class="small">Lihat riwayat harga kompetitor &raquo;</a>
-				</div>
-			</div>
-		</div>
-
-		<div class="row g-3 mt-1">
-			<div class="col-md-4">
-				<label class="form-label">Tanggal Efektif</label>
-				<input type="date" name="effective_date" class="form-control" value="<?= date('Y-m-d') ?>" required>
-			</div>
-			<div class="col-md-8">
-				<label class="form-label">Catatan (opsional)</label>
-				<input type="text" name="notes" class="form-control" placeholder="Alasan/keterangan perubahan harga...">
-			</div>
-		</div>
-
-		<div class="mt-3">
-			<button type="button" class="btn btn-outline-primary btn-preview"><i class="bi bi-envelope"></i> Preview Email</button>
-			<button type="submit" class="btn btn-primary" onclick="return confirm('Simpan perubahan harga ini? Notifikasi belum langsung terkirim &mdash; klik &quot;Kirim Notifikasi Sekarang&quot; setelah semua produk selesai diupdate.')"><i class="bi bi-save"></i> Simpan Perubahan Harga</button>
-			<div class="form-text mt-1"><i class="bi bi-info-circle"></i> Notifikasi email dikirim belakangan lewat tombol <b>"Kirim Notifikasi Sekarang"</b> di bagian atas halaman, sehingga beberapa produk yang diupdate berurutan cukup mengirim satu email gabungan.</div>
-		</div>
-	</form>
-	</div>
+	<?= $this->load->view('price_update/_vendor_tab', array(
+		'product' => $product,
+		'vc' => $vc,
+		'channels' => $channels,
+		'competitors' => $competitors,
+		'competitor_prices' => $competitor_prices,
+		'active' => $i === 1,
+	), TRUE) ?>
 <?php endforeach; ?>
 </div>
 
@@ -136,12 +68,13 @@ const calcUrl = "<?= base_url('price-update/calculate') ?>";
 const previewUrl = "<?= base_url('price-update/preview-email') ?>";
 const previewTrigger = document.getElementById('previewModalTrigger');
 
-document.querySelectorAll('.price-form').forEach(form => {
+function wireForm(form) {
 	const modal = form.querySelector('[name=modal]');
 	const margin = form.querySelector('[name=margin_pct]');
 	const offlinePrice = form.querySelector('[name=price_OFFLINE]');
 	const outSrp = form.querySelector('.out-srp');
 	const outMarkup = form.querySelector('.out-markup');
+	const outMargin = form.querySelector('.out-margin');
 	const channelInputs = Array.from(form.querySelectorAll('.channel-price-input')).filter(el => el.name !== 'price_OFFLINE');
 
 	function updateChannelOutputs() {
@@ -152,16 +85,25 @@ document.querySelectorAll('.price-form').forEach(form => {
 			if (!wrap) return;
 			const srpEl = wrap.querySelector('.out-srp-channel');
 			const markupEl = wrap.querySelector('.out-markup-channel');
+			const marginEl = wrap.querySelector('.out-margin-channel');
 			if (srpEl) {
 				// SRP Suggest per kanal = (Modal + Total Biaya kanal ini) / (1 - Margin%).
-				// Kanal tanpa Biaya (Total Biaya = 0) otomatis sama dengan SRP Suggest global.
-				const biaya = parseFloat(input.dataset.biaya) || 0;
+				// Total Biaya = biaya nominal (Rp, dijumlah langsung) + biaya persen (% x Modal).
+				// Kanal tanpa Biaya (keduanya 0) otomatis sama dengan SRP Suggest global.
+				const biayaNominal = parseFloat(input.dataset.biaya) || 0;
+				const biayaPct = parseFloat(input.dataset.biayaPct) || 0;
+				const biaya = biayaNominal + (modalVal * biayaPct / 100);
 				const srpChannel = (modalVal > 0 && marginVal > 0 && marginVal < 100) ? (modalVal + biaya) / (1 - (marginVal / 100)) : 0;
 				srpEl.textContent = 'Rp ' + srpChannel.toLocaleString('id-ID');
 			}
+			const priceVal = parseFloat(input.value) || 0;
 			if (markupEl) {
-				const priceVal = parseFloat(input.value) || 0;
+				// Markup % = (Harga - Modal) / Modal * 100
 				markupEl.textContent = (modalVal > 0 && priceVal > 0) ? (((priceVal - modalVal) / modalVal) * 100).toFixed(2) + '%' : '0%';
+			}
+			if (marginEl) {
+				// Margin % = (Harga - Modal) / Harga * 100 -- rumus sama seperti Markup, hanya pembaginya Harga (bukan Modal)
+				marginEl.textContent = (modalVal > 0 && priceVal > 0) ? (((priceVal - modalVal) / priceVal) * 100).toFixed(2) + '%' : '0%';
 			}
 		});
 	}
@@ -175,6 +117,7 @@ document.querySelectorAll('.price-form').forEach(form => {
 		}).then(r => r.json()).then(d => {
 			outSrp.textContent = 'Rp ' + Number(d.srp_suggest || 0).toLocaleString('id-ID');
 			outMarkup.textContent = d.markup_pct + '%';
+			if (outMargin) outMargin.textContent = d.margin_pct + '%';
 			updateChannelOutputs();
 		});
 	}
@@ -190,7 +133,10 @@ document.querySelectorAll('.price-form').forEach(form => {
 			.then(r => r.text())
 			.then(html => { document.getElementById('previewBody').innerHTML = html; previewTrigger.click(); });
 	});
-});
+}
+
+document.querySelectorAll('.price-form').forEach(wireForm);
+window.priceUpdateWireForm = wireForm;
 });
 </script>
 
@@ -204,6 +150,82 @@ jQuery(function ($) {
 		width: '100%',
 		placeholder: '-- Pilih Vendor --',
 		allowClear: true
+	});
+
+	// Tambah Vendor lewat AJAX: tab & form vendor baru disisipkan langsung tanpa reload halaman.
+	const addVendorForm = document.getElementById('addVendorForm');
+	const addVendorUrl = addVendorForm.getAttribute('action');
+	const submitBtn = addVendorForm.querySelector('button[type=submit]');
+
+	addVendorForm.addEventListener('submit', function (e) {
+		e.preventDefault();
+		const vendorId = $('#vendorSelect').val();
+		if (!vendorId) return;
+
+		submitBtn.disabled = true;
+		fetch(addVendorUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: 'vendor_id=' + encodeURIComponent(vendorId)
+		})
+		.then(r => r.json())
+		.then(function (d) {
+			if (!d.success) {
+				alert(d.message || 'Gagal menambah vendor.');
+				return;
+			}
+
+			const warn = document.querySelector('.alert-warning');
+			if (warn) warn.remove();
+
+			const li = document.createElement('li');
+			li.className = 'nav-item';
+			const navBtn = document.createElement('button');
+			navBtn.type = 'button';
+			navBtn.className = 'nav-link';
+			navBtn.setAttribute('data-bs-toggle', 'tab');
+			navBtn.setAttribute('data-bs-target', '#vendor' + d.vendor_id);
+			navBtn.textContent = d.vendor_name;
+			li.appendChild(navBtn);
+			document.querySelector('.nav-tabs').appendChild(li);
+
+			const tabContent = document.querySelector('.tab-content');
+			const existingFirstPane = tabContent.querySelector('.tab-pane');
+			const wrapper = document.createElement('div');
+			wrapper.innerHTML = d.tab_html.trim();
+			const newPane = wrapper.firstElementChild;
+			tabContent.appendChild(newPane);
+
+			const newForm = newPane.querySelector('.price-form');
+			if (window.priceUpdateWireForm) window.priceUpdateWireForm(newForm);
+
+			// Salin Harga Kompetitor yang sudah diisi di tab vendor pertama supaya tidak
+			// perlu diketik ulang — harga kompetitor memang bukan data per-vendor.
+			if (existingFirstPane && existingFirstPane !== newPane) {
+				existingFirstPane.querySelectorAll('[name^="competitor_price"]').forEach(function (src) {
+					if (src.value === '') return;
+					const target = newForm.querySelector('[name="' + src.name + '"]');
+					if (target) target.value = src.value;
+				});
+			}
+
+			$('#vendorSelect option[value="' + vendorId + '"]').remove();
+			$('#vendorSelect').val('').trigger('change');
+			if ($('#vendorSelect option[value!=""]').length === 0) {
+				document.getElementById('addVendorCard').remove();
+			}
+
+			navBtn.click();
+		})
+		.catch(function () {
+			alert('Gagal menambah vendor. Coba lagi.');
+		})
+		.finally(function () {
+			submitBtn.disabled = false;
+		});
 	});
 });
 </script>

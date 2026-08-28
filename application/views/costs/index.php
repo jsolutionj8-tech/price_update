@@ -13,14 +13,15 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>No</th><th>Nama Biaya</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+			<thead><tr><th>No</th><th>Nama Biaya</th><th>Tipe</th><th>Amount</th><th>Status</th><th></th></tr></thead>
 			<tbody>
 			<?php $no = $pagination['total'] > 0 ? (($pagination['page'] - 1) * $pagination['per_page']) + 1 : 1; ?>
 			<?php foreach ($costs as $c): ?>
 				<tr>
 					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($c['cost_name']) ?></td>
-					<td><?= rupiah($c['amount']) ?></td>
+					<td><?= ($c['cost_type'] ?? 'nominal') === 'percent' ? '<span class="badge bg-azure-lt">Persentase</span>' : '<span class="badge bg-secondary-lt">Nominal</span>' ?></td>
+					<td><?= cost_amount_fmt($c) ?></td>
 					<td><?= status_badge($c['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
 						<a href="<?= base_url('costs/edit/' . $c['id']) ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
@@ -29,7 +30,7 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($costs)): ?>
-				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada biaya ditemukan.</td></tr>
+				<tr><td colspan="6" class="text-center text-muted py-3">Tidak ada biaya ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

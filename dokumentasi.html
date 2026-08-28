@@ -381,15 +381,15 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<div class="callout good">✅ Kompetitor yang aktif otomatis muncul sebagai kolom input di modul <strong>Harga Kompetitor</strong> dan sebagai referensi harga di modul <strong>Update Harga</strong>.</div>
 
 			<h3 id="modul-biaya">6.5 Master Biaya <span class="badge-new">BARU</span></h3>
-			<p>Menu <strong>Master Data → Master Biaya</strong>. Halaman CRUD penuh untuk tabel baru <code>costs</code> — daftar komponen biaya (mis. Biaya Admin, Biaya Komisi Marketplace, Biaya Packing) yang nantinya dikaitkan ke satu atau lebih <strong>Sales Channel</strong> (§6.6) sebagai biaya tambahan per kanal. Daftar menampilkan kolom <strong>No</strong>, <strong>Nama Biaya</strong>, <strong>Amount</strong> (nominal Rupiah tetap), dan <strong>Status</strong>.</p>
+			<p>Menu <strong>Master Data → Master Biaya</strong>. Halaman CRUD penuh untuk tabel <code>costs</code> — daftar komponen biaya (mis. Biaya Admin, Komisi Marketplace, Biaya Packing) yang nantinya dikaitkan ke satu atau lebih <strong>Sales Channel</strong> (§6.6) sebagai biaya tambahan per kanal. Daftar menampilkan kolom <strong>No</strong>, <strong>Nama Biaya</strong>, <strong>Tipe</strong> <span class="badge-new">BARU</span> (badge Nominal/Persentase), <strong>Amount</strong>, dan <strong>Status</strong>.</p>
 			<ul>
-				<li><strong>Tambah Biaya</strong>: isi Nama Biaya (harus unik) dan Amount dalam Rupiah (mis. <code>5000</code> untuk Rp 5.000).</li>
+				<li><strong>Tambah Biaya</strong>: isi Nama Biaya (harus unik), pilih <strong>Tipe Biaya</strong> <span class="badge-new">BARU</span> — <strong>Nominal (Rp)</strong> untuk nilai tetap (mis. <code>5000</code> untuk Rp 5.000) atau <strong>Persentase (%)</strong> untuk nilai 0–100 (mis. <code>2.5</code> untuk 2,5%) — field Amount di bawahnya otomatis berganti label/satuan mengikuti Tipe yang dipilih.</li>
 				<li><strong>Cari</strong>: kotak pencarian di atas tabel menyaring berdasarkan nama.</li>
-				<li><strong>Edit</strong>: ubah nama, amount, dan status aktif.</li>
+				<li><strong>Edit</strong>: ubah nama, tipe, amount, dan status aktif.</li>
 				<li><strong>Hapus</strong>: menghapus permanen. Ditolak dengan notifikasi jika biaya tsb masih dikaitkan ke satu atau lebih Sales Channel (tabel relasi <code>price_channel_costs</code>) — lepaskan kaitannya dulu lewat Edit Sales Channel yang bersangkutan.</li>
 			</ul>
-			<div class="callout good">✅ Biaya yang aktif otomatis muncul sebagai pilihan multi-select "Biaya Tambahan" di form Tambah/Edit <strong>Sales Channel</strong> (§6.6). Satu sales channel bisa memakai lebih dari satu biaya sekaligus; satu biaya juga bisa dipakai ulang di banyak sales channel (relasi many-to-many lewat <code>price_channel_costs</code>).</div>
-			<div class="callout info">ℹ️ Saat ini Master Biaya &amp; relasinya ke Sales Channel bersifat data referensi (belum otomatis mengurangi/menambah perhitungan Markup%/Margin% di modul Update Harga) — integrasi ke kalkulasi harga akan menyusul.</div>
+			<div class="callout good">✅ Biaya yang aktif otomatis muncul sebagai pilihan multi-select "Biaya Tambahan" di form Tambah/Edit <strong>Sales Channel</strong> (§6.6). Satu sales channel bisa memakai lebih dari satu biaya sekaligus (campur Nominal &amp; Persentase juga boleh); satu biaya juga bisa dipakai ulang di banyak sales channel (relasi many-to-many lewat <code>price_channel_costs</code>).</div>
+			<div class="callout good">✅ <strong>Biaya bertipe Persentase <span class="badge-new">BARU</span></strong> — dipakai di modul Update Harga (§6.7) sebagai % dari <strong>Modal</strong> vendor yang sedang diisi, dikonversi dulu ke nominal Rupiah baru dijumlah dengan biaya bertipe Nominal, sebelum masuk ke rumus SRP Suggest per kanal. Cocok untuk komisi marketplace yang memang dihitung persenan (mis. komisi 5% dari harga jual/Modal), bukan nominal Rupiah tetap seperti biaya packing/logistik.</div>
 
 			<h3 id="modul-marketplace">6.6 Sales Channel <span class="badge-new">BARU</span></h3>
 			<p>Menu <strong>Master Data → Sales Channel</strong> (sebelumnya bernama "Master Marketplace"). Halaman CRUD penuh untuk tabel <code>price_channels</code> (kanal penjualan). Kolom <strong>Kode</strong> dibuat otomatis dari Nama dan tidak ditampilkan di form/daftar. Daftar menampilkan kolom <strong>No</strong> (nomor urut tampilan), <strong>Nama Sales Channel</strong>, <strong>Urutan</strong> (persis di sebelah kolom Nama), <strong>Biaya Tambahan</strong> <span class="badge-new">BARU</span> (daftar nama+nominal biaya dari §6.5 yang dikaitkan ke kanal ini, atau "-" jika tidak ada), dan <strong>Status</strong>.</p>
@@ -414,6 +414,12 @@ SOURCE seed_sample_data.sql;</code></pre>
 			</div>
 			<div class="callout good">
 				✅ <strong>Dropdown Tambah Vendor kini Select2 <span class="badge-new">BARU</span>.</strong> Sama seperti pola pencarian di Harga Kompetitor — mempermudah memilih vendor dari daftar 100+ vendor master. Kolom "Harga Baru per Kanal" sendiri memang <em>sudah</em> mengambil data dari <strong>Master Data → Sales Channel</strong> sejak awal (dikonfirmasi ulang saat perbaikan ini) — daftar kanal yang tampil otomatis mengikuti sales channel aktif di master, termasuk urutan tampilnya.
+			</div>
+			<div class="callout good">
+				✅ <strong>Kotak Margin % dikembalikan ke setiap kolom Harga Kanal <span class="badge-new">BARU</span>.</strong> Sebelumnya tiap kanal hanya menampilkan SRP Suggest &amp; Markup % (lihat entri 26 Agu 2026 lanjutan 6); kini <strong>Margin %</strong> tampil juga di bawah tiap kolom Harga Kanal (termasuk Offline), dihitung ulang otomatis lewat JS murni di browser (tanpa AJAX tambahan untuk kanal non-Offline) memakai rumus yang polanya sama seperti Markup %, hanya beda pembagi: <code>Markup % = (Harga &minus; Modal) ÷ Modal × 100</code> vs <code>Margin % = (Harga &minus; Modal) ÷ Harga × 100</code>. Tab vendor menampilkan <strong>Nama Vendor</strong> (bukan lagi Kode Vendor) di judulnya. Kolom <strong>No</strong> (nomor urut tampilan) ditambahkan di daftar menu Produk, sama seperti pola yang sudah ada di menu-menu master data lain.
+			</div>
+			<div class="callout good">
+				✅ <strong>Total Biaya kini mendukung biaya bertipe Persentase <span class="badge-new">BARU</span>.</strong> Rumus SRP Suggest per kanal (<code>(Modal + Total Biaya kanal) ÷ (1 &minus; Margin%)</code>) sebelumnya menganggap semua item Master Biaya (§6.5) sebagai nominal Rupiah tetap. Sekarang Total Biaya dipecah dua: biaya <strong>Nominal</strong> dijumlah apa adanya, biaya <strong>Persentase</strong> dikonversi dulu ke Rupiah sebagai <code>% × Modal</code> vendor yang sedang diisi (dihitung di browser, ikut berubah live saat Modal diketik ulang) — baru keduanya dijumlah jadi Total Biaya kanal tsb. Method <code>Price_update::form()</code> kini menghasilkan <code>total_biaya_nominal</code> &amp; <code>total_biaya_percent</code> per kanal (menggantikan <code>total_biaya</code> tunggal), dikirim ke tampilan lewat atribut <code>data-biaya</code> &amp; <code>data-biaya-pct</code> baru pada tiap input Harga Kanal.
 			</div>
 
 			<h3 id="modul-harga-kompetitor">6.8 Harga Kompetitor</h3>
@@ -518,6 +524,18 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<div class="table-wrap">
 			<table>
 				<tr><th>Tanggal</th><th>Perubahan</th></tr>
+				<tr>
+					<td>28 Agu 2026 (lanjutan 2)</td>
+					<td>
+						<strong>Master Biaya kini punya Tipe Biaya: Nominal (Rp) atau Persentase (%) <span class="badge-new">BARU</span></strong> — kolom baru <code>costs.cost_type</code> (enum <code>nominal</code>/<code>percent</code>, default <code>nominal</code>). Form Tambah/Edit Biaya dapat toggle Tipe; field Amount otomatis berganti label &amp; validasi (0–100 untuk Persentase). Daftar Master Biaya menampilkan kolom <strong>Tipe</strong> (badge) dan Amount terformat sesuai tipenya (helper baru <code>cost_amount_fmt()</code>, dipakai juga di badge "Biaya Tambahan" pada menu Sales Channel). Di modul <strong>Update Harga</strong>, biaya Persentase dihitung sebagai % dari Modal vendor yang sedang diisi lalu dijumlah dengan biaya Nominal untuk membentuk Total Biaya kanal — dipakai pada rumus SRP Suggest per kanal (lihat §6.7 &amp; §6.5). Cocok untuk komponen biaya yang memang persenan seperti komisi marketplace, dibanding sebelumnya terpaksa diisi manual sebagai nominal Rupiah perkiraan (berisiko keliru &amp; membengkakkan SRP Suggest jika basis harganya berubah).
+					</td>
+				</tr>
+				<tr>
+					<td>28 Agu 2026</td>
+					<td>
+						Tiga perubahan pada menu <strong>Update Harga</strong> &amp; <strong>Produk</strong>: (1) 🛠️ kotak <strong>Margin %</strong> yang sebelumnya dihapus dari tampilan (26 Agu 2026 lanjutan 6) kini <strong>dikembalikan</strong> — muncul lagi di bawah tiap kolom Harga Kanal (semua kanal, bukan cuma Offline), dihitung ulang otomatis di browser (tanpa AJAX tambahan) memakai rumus dengan pola yang sama seperti Markup %, hanya beda pembagi: <code>Markup % = (Harga &minus; Modal) ÷ Modal × 100</code>, <code>Margin % = (Harga &minus; Modal) ÷ Harga × 100</code>; (2) judul tab vendor di form Update Harga (setelah klik <strong>Tambah</strong> vendor) kini menampilkan <strong>Nama Vendor</strong>, sebelumnya Kode Vendor; (3) daftar menu <strong>Produk</strong> mendapat kolom <strong>No</strong> (nomor urut tampilan, mengikuti halaman &amp; posisi baris) — pola yang sama seperti menu-menu master data lain (lihat 25 Agu 2026 lanjutan 8).
+					</td>
+				</tr>
 				<tr>
 					<td>27 Agu 2026</td>
 					<td>

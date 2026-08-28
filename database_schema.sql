@@ -219,6 +219,7 @@ DROP TABLE IF EXISTS `costs`;
 CREATE TABLE `costs` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `cost_name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `cost_type` enum('nominal','percent') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'nominal',
   `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`),

@@ -20,6 +20,19 @@ if (!function_exists('percent_fmt')) {
 	}
 }
 
+if (!function_exists('cost_amount_fmt')) {
+	/**
+	 * Format nilai baris Master Biaya sesuai tipenya: Rp nominal tetap, atau
+	 * persentase (dipakai sebagai % dari Modal saat dikaitkan ke Sales Channel).
+	 */
+	function cost_amount_fmt($cost)
+	{
+		return (isset($cost['cost_type']) && $cost['cost_type'] === 'percent')
+			? percent_fmt($cost['amount']) . ' dari Modal'
+			: rupiah($cost['amount']);
+	}
+}
+
 if (!function_exists('tgl_indo')) {
 	function tgl_indo($date, $with_time = FALSE)
 	{
