@@ -1,10 +1,10 @@
-<div class="card card-stat p-3 mb-3">
+<div class="card card-stat bg-brand p-3 mb-3">
 	<div class="d-flex justify-content-between align-items-start">
 		<div>
-			<h5 class="fw-bold mb-0"><?= htmlspecialchars($product['product_name']) ?></h5>
-			<small class="text-muted">Kode: <?= htmlspecialchars($product['product_code']) ?> &nbsp;|&nbsp; Brand: <?= htmlspecialchars($product['brand_name'] ?? '-') ?></small>
+			<h5 class="fw-bold mb-0 text-white fs-4"><?= htmlspecialchars($product['product_name']) ?></h5>
+			<small class="text-white-50">Kode: <?= htmlspecialchars($product['product_code']) ?> &nbsp;|&nbsp; Brand: <?= htmlspecialchars($product['brand_name'] ?? '-') ?></small>
 		</div>
-		<a href="<?= base_url('price-update') ?>" class="btn btn-sm btn-outline-secondary">Kembali</a>
+		<a href="<?= base_url('price-update') ?>" class="btn btn-sm btn-outline-light">Kembali</a>
 	</div>
 </div>
 

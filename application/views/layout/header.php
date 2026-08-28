@@ -77,10 +77,16 @@
 		/* Warna teal-biru navbar atambah.com — dipakai sbg latar sidebar navigasi supaya konsisten dgn branding. */
 		.navbar-vertical.navbar[data-bs-theme="dark"] { background-color: #3D5C6C !important; }
 
-		/* Kartu Harga per Channel di Update Harga: latar biru atambah solid, kotak-kotak isinya putih. */
-		.channel-price-card { background-color: #3D5C6C; }
+		/* Latar biru atambah solid, dipakai di kartu Nama Produk & kartu Harga per Channel di Update Harga. */
+		.bg-brand, .channel-price-card { background-color: #3D5C6C; }
 		/* Markup positif biru brand — merah (.text-danger) menang saat minus. RRP sengaja tidak diwarnai. */
 		.text-markup-positive { color: #3D5C6C; }
+
+		/* Tab pilihan vendor di Update Harga: latar oranye penuh (identitas Atambah), tulisan putih tebal. */
+		.nav-tabs .nav-link {
+			background-color: #E34F05; color: #fff; font-weight: 700; border: none; margin-right: .35rem;
+		}
+		.nav-tabs .nav-link.active { background-color: #E34F05; color: #fff; }
 	</style>
 </head>
 <body>

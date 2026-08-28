@@ -20,7 +20,7 @@
 				<tr>
 					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($c['cost_name']) ?></td>
-					<td><?= ($c['cost_type'] ?? 'nominal') === 'percent' ? '<span class="badge bg-azure-lt">Persentase</span>' : '<span class="badge bg-secondary-lt">Nominal</span>' ?></td>
+					<td><?= ($c['cost_type'] ?? 'nominal') === 'percent' ? '<span class="badge bg-brand text-white">Persentase</span>' : '<span class="badge bg-secondary-lt">Nominal</span>' ?></td>
 					<td><?= cost_amount_fmt($c) ?></td>
 					<td><?= status_badge($c['is_active'] ? 'active' : 'inactive') ?></td>
 					<td class="text-end text-nowrap">
