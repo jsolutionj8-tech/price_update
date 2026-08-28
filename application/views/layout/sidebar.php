@@ -16,22 +16,8 @@
 		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#sidebar-menu" aria-controls="sidebar-menu" aria-expanded="false" aria-label="Toggle navigation">
 			<span class="navbar-toggler-icon"></span>
 		</button>
-		<h1 class="navbar-brand navbar-brand-autodark">
-			<a href="<?= base_url('dashboard') ?>" class="text-decoration-none">
-				<span class="navbar-brand-logo-wrap">
-					<img src="<?= base_url('assets/images/atambah-logo.png') ?>" alt="Atambah" class="navbar-brand-logo">
-				</span>
-			</a>
-		</h1>
 		<div class="collapse navbar-collapse" id="sidebar-menu">
 			<ul class="navbar-nav pt-lg-3">
-				<li class="nav-item">
-					<a class="nav-link <?= $seg === 'dashboard' ? 'active' : '' ?>" href="<?= base_url('dashboard') ?>">
-						<span class="nav-link-icon"><i class="bi bi-speedometer2"></i></span>
-						<span class="nav-link-title">Dashboard</span>
-					</a>
-				</li>
-
 				<?php if ($show_master_data): ?>
 				<li class="nav-item"><span class="nav-section-title">Master Data</span></li>
 				<?php endif; ?>
@@ -162,7 +148,9 @@
 		<div class="container-fluid">
 			<div class="row g-2 align-items-center">
 				<div class="col">
-					<h2 class="page-title"><?= isset($title) ? htmlspecialchars($title) : '' ?></h2>
+					<a href="<?= base_url('dashboard') ?>">
+						<img src="<?= base_url('assets/images/atambah-logo.png') ?>" alt="Atambah" class="page-header-logo">
+					</a>
 				</div>
 				<div class="col-auto">
 					<?php

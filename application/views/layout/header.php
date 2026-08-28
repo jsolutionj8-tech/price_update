@@ -12,22 +12,15 @@
 	<style>
 		body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
 
-		/* Brand mark + section titles inside the vertical sidebar */
-		.navbar-brand-mark {
-			width: 2rem; height: 2rem; border-radius: .55rem; background: rgba(255,255,255,.14);
-			display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; flex: none;
-		}
-
-		/* Logo Atambah.com dibungkus chip putih supaya tetap kontras di atas sidebar gelap */
-		.navbar-brand-logo-wrap {
-			background: #fff; border-radius: .5rem; padding: .4rem .65rem;
-			display: inline-flex; align-items: center;
-		}
-		.navbar-brand-logo { height: 1.75rem; width: auto; display: block; }
+		/* Logo Atambah.com di header konten utama, menggantikan judul halaman ($title) */
+		.page-header-logo { height: 2rem; width: auto; display: block; }
 		.navbar-vertical .nav-section-title {
 			display: block; color: #7f93b8; text-transform: uppercase; font-size: .68rem;
 			letter-spacing: .08em; font-weight: 700; padding: 1rem 1rem .35rem;
 		}
+
+		/* Perbesar tulisan menu sidebar ~10% dari ukuran default Tabler */
+		.navbar-vertical .nav-link { font-size: 1.1em; }
 
 		/* Logged-in user chip in the page header */
 		.user-avatar {
