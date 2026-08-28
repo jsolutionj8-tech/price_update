@@ -77,6 +77,18 @@ function wireForm(form) {
 	const outMargin = form.querySelector('.out-margin');
 	const channelInputs = Array.from(form.querySelectorAll('.channel-price-input')).filter(el => el.name !== 'price_OFFLINE');
 
+	// Tampilkan persentase (Markup/Margin) dengan teks merah kalau nilainya minus (harga jual di bawah Modal).
+	function setPctText(el, pct, canCompute) {
+		if (!el) return;
+		if (!canCompute) {
+			el.textContent = '—';
+			el.classList.remove('text-danger');
+			return;
+		}
+		el.textContent = pct.toFixed(2) + '%';
+		el.classList.toggle('text-danger', pct < 0);
+	}
+
 	function updateChannelOutputs() {
 		const modalVal = parseFloat(modal.value) || 0;
 		const marginVal = parseFloat(margin.value) || 0;
@@ -98,14 +110,10 @@ function wireForm(form) {
 			}
 			const priceVal = parseFloat(input.value) || 0;
 			const canPct = modalVal > 0 && priceVal > 0;
-			if (markupEl) {
-				// Markup % = (Harga - Modal) / Modal * 100
-				markupEl.textContent = canPct ? (((priceVal - modalVal) / modalVal) * 100).toFixed(2) + '%' : '—';
-			}
-			if (marginEl) {
-				// Margin % = (Harga - Modal) / Harga * 100 -- rumus sama seperti Markup, hanya pembaginya Harga (bukan Modal)
-				marginEl.textContent = canPct ? (((priceVal - modalVal) / priceVal) * 100).toFixed(2) + '%' : '—';
-			}
+			// Markup % = (Harga - Modal) / Modal * 100
+			setPctText(markupEl, ((priceVal - modalVal) / modalVal) * 100, canPct);
+			// Margin % = (Harga - Modal) / Harga * 100 -- rumus sama seperti Markup, hanya pembaginya Harga (bukan Modal)
+			setPctText(marginEl, ((priceVal - modalVal) / priceVal) * 100, canPct);
 		});
 	}
 
@@ -118,8 +126,8 @@ function wireForm(form) {
 		}).then(r => r.json()).then(d => {
 			const hasSrp = Number(d.srp_suggest) > 0;
 			outSrp.textContent = hasSrp ? 'Rp ' + Number(d.srp_suggest).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
-			outMarkup.textContent = hasSrp ? d.markup_pct + '%' : '—';
-			if (outMargin) outMargin.textContent = hasSrp ? d.margin_pct + '%' : '—';
+			setPctText(outMarkup, Number(d.markup_pct), hasSrp);
+			setPctText(outMargin, Number(d.margin_pct), hasSrp);
 			updateChannelOutputs();
 		});
 	}

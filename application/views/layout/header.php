@@ -29,6 +29,10 @@
 			--tblr-green-rgb: 227, 79, 5;
 		}
 
+		/* Badge .bg-success ("Aktif"/"Sent" dari status_badge()) hanya set warna latar, bukan warna tulisan —
+		   defaultnya abu-abu (kurang kontras di atas oranye). Dipaksa putih di sini. */
+		.badge.bg-success { color: #fff; }
+
 		/* Select2 (dropdown pencarian vendor/brand/kategori) pakai tema Bootstrap sendiri yang warna birunya
 		   hardcode (bukan variabel), jadi tidak ikut ke-override otomatis di atas — disesuaikan manual di sini. */
 		.select2-container--bootstrap-5.select2-container--open .select2-selection,
@@ -73,6 +77,8 @@
 		/* Warna teal-biru navbar atambah.com — dipakai sbg border kartu Harga per Channel di Update Harga,
 		   dan sbg warna latar sidebar navigasi supaya konsisten dgn branding. */
 		.border-brand { border-color: #3D5C6C !important; border-width: 2px !important; }
+		/* Kotak-kotak di dalam kartu Harga per Channel (input harga & RRP/Markup/Margin) — biru atambah versi terang */
+		.bg-brand-lt { background-color: rgba(61, 92, 108, .12) !important; }
 		.navbar-vertical.navbar[data-bs-theme="dark"] { background-color: #3D5C6C !important; }
 	</style>
 </head>

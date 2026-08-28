@@ -23,7 +23,7 @@
 				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= $vc['target_hpp_pct'] ?>" required>
 			</div>
 		</div>
-		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> SRP Suggest dihitung otomatis dari Modal &amp; Margin (Modal ÷ (1 &minus; Margin%)) dan ditampilkan di bawah tiap kolom Harga Kanal, bersama Markup % (dihitung dari harga kanal tsb terhadap Modal). Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest.</small>
+		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> RRP Suggest dihitung otomatis dari Modal &amp; Margin (Modal ÷ (1 &minus; Margin%)) dan ditampilkan di bawah tiap kolom Harga Kanal, bersama Markup % (dihitung dari harga kanal tsb terhadap Modal). Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari RRP Suggest.</small>
 	</div>
 
 	<div class="row g-3 mt-3">
@@ -36,25 +36,25 @@
 						<div class="border border-brand rounded-3 p-3 h-100">
 							<div class="fw-bold mb-2"><?= htmlspecialchars($ch['channel_name']) ?></div>
 							<div class="input-group input-group-lg mb-2">
-								<span class="input-group-text bg-light border-0 fw-bold">Rp</span>
-								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-light border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+								<span class="input-group-text bg-brand-lt border-0 fw-bold">Rp</span>
+								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-brand-lt border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
 							</div>
 							<div class="row g-2 text-center">
 								<div class="col-4">
-									<div class="bg-light rounded-3 py-2">
-										<div class="small text-muted">SRP</div>
+									<div class="bg-brand-lt rounded-3 py-2">
+										<div class="small text-muted">RRP</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
 									</div>
 								</div>
 								<div class="col-4">
-									<div class="bg-light rounded-3 py-2">
+									<div class="bg-brand-lt rounded-3 py-2">
 										<div class="small text-muted">Markup</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
 									</div>
 								</div>
 								<div class="col-4">
-									<div class="bg-light rounded-3 py-2">
+									<div class="bg-brand-lt rounded-3 py-2">
 										<div class="small text-muted">Margin</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
 									</div>
