@@ -93,17 +93,18 @@ function wireForm(form) {
 				const biayaNominal = parseFloat(input.dataset.biaya) || 0;
 				const biayaPct = parseFloat(input.dataset.biayaPct) || 0;
 				const biaya = biayaNominal + (modalVal * biayaPct / 100);
-				const srpChannel = (modalVal > 0 && marginVal > 0 && marginVal < 100) ? (modalVal + biaya) / (1 - (marginVal / 100)) : 0;
-				srpEl.textContent = 'Rp ' + srpChannel.toLocaleString('id-ID');
+				const canSrp = modalVal > 0 && marginVal > 0 && marginVal < 100;
+				srpEl.textContent = canSrp ? 'Rp ' + ((modalVal + biaya) / (1 - (marginVal / 100))).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
 			}
 			const priceVal = parseFloat(input.value) || 0;
+			const canPct = modalVal > 0 && priceVal > 0;
 			if (markupEl) {
 				// Markup % = (Harga - Modal) / Modal * 100
-				markupEl.textContent = (modalVal > 0 && priceVal > 0) ? (((priceVal - modalVal) / modalVal) * 100).toFixed(2) + '%' : '0%';
+				markupEl.textContent = canPct ? (((priceVal - modalVal) / modalVal) * 100).toFixed(2) + '%' : '—';
 			}
 			if (marginEl) {
 				// Margin % = (Harga - Modal) / Harga * 100 -- rumus sama seperti Markup, hanya pembaginya Harga (bukan Modal)
-				marginEl.textContent = (modalVal > 0 && priceVal > 0) ? (((priceVal - modalVal) / priceVal) * 100).toFixed(2) + '%' : '0%';
+				marginEl.textContent = canPct ? (((priceVal - modalVal) / priceVal) * 100).toFixed(2) + '%' : '—';
 			}
 		});
 	}
@@ -115,9 +116,10 @@ function wireForm(form) {
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
 			body
 		}).then(r => r.json()).then(d => {
-			outSrp.textContent = 'Rp ' + Number(d.srp_suggest || 0).toLocaleString('id-ID');
-			outMarkup.textContent = d.markup_pct + '%';
-			if (outMargin) outMargin.textContent = d.margin_pct + '%';
+			const hasSrp = Number(d.srp_suggest) > 0;
+			outSrp.textContent = hasSrp ? 'Rp ' + Number(d.srp_suggest).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+			outMarkup.textContent = hasSrp ? d.markup_pct + '%' : '—';
+			if (outMargin) outMargin.textContent = hasSrp ? d.margin_pct + '%' : '—';
 			updateChannelOutputs();
 		});
 	}

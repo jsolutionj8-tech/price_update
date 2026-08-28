@@ -33,14 +33,32 @@
 				<div class="row g-3">
 				<?php foreach ($channels as $ch): $is_offline = ($ch['channel_code'] === 'OFFLINE'); ?>
 					<div class="col-md-6">
-						<div class="border border-primary rounded-3 p-3 h-100">
-							<label class="form-label"><?= htmlspecialchars($ch['channel_name']) ?></label>
-							<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>"
-								value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
-							<div class="row mt-1 gx-2">
-								<div class="col-4"><small class="text-muted">SRP Suggest</small><div class="small fw-bold <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">Rp 0</div></div>
-								<div class="col-4"><small class="text-muted">Markup %</small><div class="small fw-bold <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">0%</div></div>
-								<div class="col-4"><small class="text-muted">Margin %</small><div class="small fw-bold <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">0%</div></div>
+						<div class="border border-brand rounded-3 p-3 h-100">
+							<div class="fw-bold mb-2"><?= htmlspecialchars($ch['channel_name']) ?></div>
+							<div class="input-group input-group-lg mb-2">
+								<span class="input-group-text bg-light border-0 fw-bold">Rp</span>
+								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-light border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
+							</div>
+							<div class="row g-2 text-center">
+								<div class="col-4">
+									<div class="bg-light rounded-3 py-2">
+										<div class="small text-muted">SRP</div>
+										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="bg-light rounded-3 py-2">
+										<div class="small text-muted">Markup</div>
+										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="bg-light rounded-3 py-2">
+										<div class="small text-muted">Margin</div>
+										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>

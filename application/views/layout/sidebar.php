@@ -17,9 +17,10 @@
 			<span class="navbar-toggler-icon"></span>
 		</button>
 		<h1 class="navbar-brand navbar-brand-autodark">
-			<a href="<?= base_url('dashboard') ?>" class="d-flex align-items-center gap-2 text-decoration-none">
-				<span class="navbar-brand-mark"><i class="bi bi-tags-fill"></i></span>
-				<span class="fw-bold">Update Harga</span>
+			<a href="<?= base_url('dashboard') ?>" class="text-decoration-none">
+				<span class="navbar-brand-logo-wrap">
+					<img src="<?= base_url('assets/images/atambah-logo.png') ?>" alt="Atambah" class="navbar-brand-logo">
+				</span>
 			</a>
 		</h1>
 		<div class="collapse navbar-collapse" id="sidebar-menu">
