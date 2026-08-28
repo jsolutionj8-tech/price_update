@@ -8,7 +8,7 @@
 		return $role === 'ADMIN' || in_array($key, $accessible_menus, TRUE);
 	};
 	$show_master_data = $can('products') || $can('categories') || $can('vendors') || $can('competitors') || $can('costs') || $can('marketplaces');
-	$show_transaksi   = $can('price-update') || $can('competitor-price') || $can('price-history');
+	$show_transaksi   = $can('price-update') || $can('price-history');
 	$show_admin       = $role === 'ADMIN' || $can('users') || $can('notification-groups') || $can('reports');
 ?>
 <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
@@ -91,14 +91,6 @@
 					<a class="nav-link <?= $seg === 'price-update' ? 'active' : '' ?>" href="<?= base_url('price-update') ?>">
 						<span class="nav-link-icon"><i class="bi bi-currency-exchange"></i></span>
 						<span class="nav-link-title">Update Harga</span>
-					</a>
-				</li>
-				<?php endif; ?>
-				<?php if ($can('competitor-price')): ?>
-				<li class="nav-item">
-					<a class="nav-link <?= $seg === 'competitor-price' ? 'active' : '' ?>" href="<?= base_url('competitor-price') ?>">
-						<span class="nav-link-icon"><i class="bi bi-graph-up-arrow"></i></span>
-						<span class="nav-link-title">Harga Kompetitor</span>
 					</a>
 				</li>
 				<?php endif; ?>
