@@ -29,9 +29,9 @@
 			--tblr-green-rgb: 227, 79, 5;
 		}
 
-		/* Badge .bg-success ("Aktif"/"Sent" dari status_badge()) hanya set warna latar, bukan warna tulisan —
-		   defaultnya abu-abu (kurang kontras di atas oranye). Dipaksa putih di sini. */
-		.badge.bg-success { color: #fff; }
+		/* Badge .bg-success/.bg-warning ("Aktif"/"Sent"/"Pending"/dst dari status_badge()) hanya set warna
+		   latar, bukan warna tulisan — defaultnya abu-abu (kurang kontras di atas oranye). Dipaksa putih. */
+		.badge.bg-success, .badge.bg-warning { color: #fff; }
 
 		/* Select2 (dropdown pencarian vendor/brand/kategori) pakai tema Bootstrap sendiri yang warna birunya
 		   hardcode (bukan variabel), jadi tidak ikut ke-override otomatis di atas — disesuaikan manual di sini. */
