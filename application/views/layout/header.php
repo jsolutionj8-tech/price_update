@@ -47,8 +47,10 @@
 		/* Wider content area for data-heavy tables */
 		.page-body > .container-xl { max-width: 100%; }
 
-		/* Warna teal-biru navbar atambah.com — dipakai sbg border kartu Harga per Channel di Update Harga */
+		/* Warna teal-biru navbar atambah.com — dipakai sbg border kartu Harga per Channel di Update Harga,
+		   dan sbg warna latar sidebar navigasi supaya konsisten dgn branding. */
 		.border-brand { border-color: #3D5C6C !important; border-width: 2px !important; }
+		.navbar-vertical.navbar[data-bs-theme="dark"] { background-color: #3D5C6C !important; }
 	</style>
 </head>
 <body>
