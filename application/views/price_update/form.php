@@ -78,15 +78,21 @@ function wireForm(form) {
 	const channelInputs = Array.from(form.querySelectorAll('.channel-price-input')).filter(el => el.name !== 'price_OFFLINE');
 
 	// Tampilkan persentase (Markup/Margin) dengan teks merah kalau nilainya minus (harga jual di bawah Modal).
-	function setPctText(el, pct, canCompute) {
+	// positiveClass (opsional) dipakai saat nilainya positif, mis. Markup biru brand saat untung.
+	function setPctText(el, pct, canCompute, positiveClass) {
 		if (!el) return;
+		el.classList.remove('text-danger');
+		if (positiveClass) el.classList.remove(positiveClass);
 		if (!canCompute) {
 			el.textContent = '—';
-			el.classList.remove('text-danger');
 			return;
 		}
 		el.textContent = pct.toFixed(2) + '%';
-		el.classList.toggle('text-danger', pct < 0);
+		if (pct < 0) {
+			el.classList.add('text-danger');
+		} else if (positiveClass) {
+			el.classList.add(positiveClass);
+		}
 	}
 
 	function updateChannelOutputs() {
@@ -111,7 +117,7 @@ function wireForm(form) {
 			const priceVal = parseFloat(input.value) || 0;
 			const canPct = modalVal > 0 && priceVal > 0;
 			// Markup % = (Harga - Modal) / Modal * 100
-			setPctText(markupEl, ((priceVal - modalVal) / modalVal) * 100, canPct);
+			setPctText(markupEl, ((priceVal - modalVal) / modalVal) * 100, canPct, 'text-markup-positive');
 			// Margin % = (Harga - Modal) / Harga * 100 -- rumus sama seperti Markup, hanya pembaginya Harga (bukan Modal)
 			setPctText(marginEl, ((priceVal - modalVal) / priceVal) * 100, canPct);
 		});
@@ -126,7 +132,7 @@ function wireForm(form) {
 		}).then(r => r.json()).then(d => {
 			const hasSrp = Number(d.srp_suggest) > 0;
 			outSrp.textContent = hasSrp ? 'Rp ' + Number(d.srp_suggest).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
-			setPctText(outMarkup, Number(d.markup_pct), hasSrp);
+			setPctText(outMarkup, Number(d.markup_pct), hasSrp, 'text-markup-positive');
 			setPctText(outMargin, Number(d.margin_pct), hasSrp);
 			updateChannelOutputs();
 		});

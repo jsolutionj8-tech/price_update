@@ -74,12 +74,13 @@
 		/* Wider content area for data-heavy tables */
 		.page-body > .container-xl { max-width: 100%; }
 
-		/* Warna teal-biru navbar atambah.com — dipakai sbg border kartu Harga per Channel di Update Harga,
-		   dan sbg warna latar sidebar navigasi supaya konsisten dgn branding. */
-		.border-brand { border-color: #3D5C6C !important; border-width: 2px !important; }
-		/* Kotak-kotak di dalam kartu Harga per Channel (input harga & RRP/Markup/Margin) — biru atambah versi terang */
-		.bg-brand-lt { background-color: rgba(61, 92, 108, .12) !important; }
+		/* Warna teal-biru navbar atambah.com — dipakai sbg latar sidebar navigasi supaya konsisten dgn branding. */
 		.navbar-vertical.navbar[data-bs-theme="dark"] { background-color: #3D5C6C !important; }
+
+		/* Kartu Harga per Channel di Update Harga: latar biru atambah solid, kotak-kotak isinya putih. */
+		.channel-price-card { background-color: #3D5C6C; }
+		/* Markup positif biru brand — merah (.text-danger) menang saat minus. RRP sengaja tidak diwarnai. */
+		.text-markup-positive { color: #3D5C6C; }
 	</style>
 </head>
 <body>

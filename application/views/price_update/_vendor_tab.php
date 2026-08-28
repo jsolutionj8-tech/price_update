@@ -33,28 +33,28 @@
 				<div class="row g-3">
 				<?php foreach ($channels as $ch): $is_offline = ($ch['channel_code'] === 'OFFLINE'); ?>
 					<div class="col-md-6">
-						<div class="border border-brand rounded-3 p-3 h-100">
-							<div class="fw-bold mb-2"><?= htmlspecialchars($ch['channel_name']) ?></div>
+						<div class="channel-price-card rounded-3 p-3 h-100">
+							<div class="fw-bold mb-2 text-white"><?= htmlspecialchars($ch['channel_name']) ?></div>
 							<div class="input-group input-group-lg mb-2">
-								<span class="input-group-text bg-brand-lt border-0 fw-bold">Rp</span>
-								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-brand-lt border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
+								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
 							</div>
 							<div class="row g-2 text-center">
 								<div class="col-4">
-									<div class="bg-brand-lt rounded-3 py-2">
+									<div class="bg-white rounded-3 py-2">
 										<div class="small text-muted">RRP</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
 									</div>
 								</div>
 								<div class="col-4">
-									<div class="bg-brand-lt rounded-3 py-2">
+									<div class="bg-white rounded-3 py-2">
 										<div class="small text-muted">Markup</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
 									</div>
 								</div>
 								<div class="col-4">
-									<div class="bg-brand-lt rounded-3 py-2">
+									<div class="bg-white rounded-3 py-2">
 										<div class="small text-muted">Margin</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
 									</div>
