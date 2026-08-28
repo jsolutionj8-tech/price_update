@@ -29,10 +29,12 @@
 <div class="card card-stat p-3">
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Kode Produk</th><th>Nama Produk</th><th>Brand</th><th>Kategori</th><th></th></tr></thead>
+			<thead><tr><th>No</th><th>Kode Produk</th><th>Nama Produk</th><th>Brand</th><th>Kategori</th><th></th></tr></thead>
 			<tbody>
+			<?php $no = (($pagination['page'] - 1) * $pagination['per_page']) + 1; ?>
 			<?php foreach ($products as $p): ?>
 				<tr>
+					<td><?= $no++ ?></td>
 					<td><?= htmlspecialchars($p['product_code']) ?></td>
 					<td><?= htmlspecialchars($p['product_name']) ?></td>
 					<td><?= htmlspecialchars($p['brand_name'] ?? '-') ?></td>
@@ -45,7 +47,7 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($products)): ?>
-				<tr><td colspan="5" class="text-center text-muted py-3">Tidak ada produk ditemukan.</td></tr>
+				<tr><td colspan="6" class="text-center text-muted py-3">Tidak ada produk ditemukan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

@@ -10,7 +10,7 @@
 
 <ul class="nav nav-tabs mb-3">
 	<?php $i = 0; foreach ($vendor_costs as $vc): $i++; ?>
-	<li class="nav-item"><button class="nav-link <?= $i === 1 ? 'active' : '' ?>" data-bs-toggle="tab" data-bs-target="#vendor<?= $vc['vendor_id'] ?>"><?= htmlspecialchars($vc['vendor_code']) ?></button></li>
+	<li class="nav-item"><button class="nav-link <?= $i === 1 ? 'active' : '' ?>" data-bs-toggle="tab" data-bs-target="#vendor<?= $vc['vendor_id'] ?>"><?= htmlspecialchars($vc['vendor_name']) ?></button></li>
 	<?php endforeach; ?>
 </ul>
 <?php if (empty($vendor_costs)): ?>
