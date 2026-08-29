@@ -38,8 +38,8 @@
 				var isPercent = percent.checked;
 				label.textContent = isPercent ? 'Persentase (%)' : 'Amount (Rp)';
 				help.textContent = isPercent
-					? 'Dihitung sebagai % dari Modal saat biaya ini dikaitkan ke Sales Channel di menu Update Harga.'
-					: 'Nilai tetap dalam Rupiah, langsung ditambahkan ke Modal saat dikaitkan ke Sales Channel. Titik ribuan otomatis mengikuti saat mengetik (mis. 7000 → 7.000) — jangan ketik titik/koma sendiri.';
+					? 'Dihitung sebagai % dari Harga Jual (bukan Modal) saat biaya ini dikaitkan ke Sales Channel di menu Update Harga — sesuai cara marketplace memotong komisi.'
+					: 'Nilai tetap dalam Rupiah, langsung ditambahkan sebagai Total Biaya kanal saat dikaitkan ke Sales Channel. Titik ribuan otomatis mengikuti saat mengetik (mis. 7000 → 7.000) — jangan ketik titik/koma sendiri.';
 			}
 
 			// Ganti tipe: format ulang nilai yang sudah diketik supaya tidak salah baca

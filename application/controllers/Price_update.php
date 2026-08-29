@@ -139,12 +139,13 @@ class Price_update extends MY_Controller
 	}
 
 	/**
-	 * Total Biaya (Master Biaya) yang dikaitkan ke tiap sales channel — dipakai untuk
-	 * rumus SRP Suggest per kanal: (Modal + Total Biaya kanal) / (1 - Margin%).
-	 * Biaya bertipe nominal dijumlah langsung (Rp); biaya bertipe persen dihitung sebagai
-	 * % dari Modal vendor yang aktif (dihitung di browser, lihat form.php), sehingga di sini
-	 * cukup dijumlah terpisah: total_biaya_nominal & total_biaya_percent. Kanal tanpa Biaya
-	 * (keduanya 0) otomatis sama dengan SRP Suggest global.
+	 * Total Biaya (Master Biaya) yang dikaitkan ke tiap sales channel — dipakai untuk rumus
+	 * RRP Suggest & Laba Bersih per kanal (lihat form.php). Biaya bertipe nominal dijumlah
+	 * langsung (Rp); biaya bertipe persen dihitung sebagai % dari HARGA JUAL aktual kanal
+	 * tsb (bukan Modal) — sesuai cara marketplace memotong komisi dari harga jual, bukan
+	 * dari modal. Dihitung di browser (butuh Harga Jual yang baru diketik), di sini cukup
+	 * dijumlah terpisah: total_biaya_nominal & total_biaya_percent. Kanal tanpa Biaya
+	 * (keduanya 0) otomatis sama dengan RRP Suggest global.
 	 */
 	protected function _channels_with_biaya()
 	{

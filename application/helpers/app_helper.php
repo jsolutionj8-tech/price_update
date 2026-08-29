@@ -30,6 +30,26 @@ if (!function_exists('generate_batch_code')) {
 	}
 }
 
+if (!function_exists('channel_icon')) {
+	/**
+	 * Ikon Bootstrap Icons untuk tiap Sales Channel di kartu Harga Baru per Channel
+	 * (Update Harga) — dipetakan dari channel_code, dengan fallback generik untuk
+	 * channel custom (mis. dummy 01/02) supaya tidak perlu kolom ikon terpisah di DB.
+	 */
+	function channel_icon($channel_code)
+	{
+		$map = array(
+			'OFFLINE'      => 'bi-shop',
+			'WEBSITE'      => 'bi-globe',
+			'ONLINE'       => 'bi-cloud-fill',
+			'TOKOPEDIA'    => 'bi-bag-fill',
+			'GRABMART'     => 'bi-bicycle',
+			'PARTNER__BTB' => 'bi-boxes',
+		);
+		return $map[$channel_code] ?? 'bi-tag-fill';
+	}
+}
+
 if (!function_exists('current_user')) {
 	function current_user()
 	{

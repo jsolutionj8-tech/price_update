@@ -28,7 +28,7 @@ if (!function_exists('cost_amount_fmt')) {
 	function cost_amount_fmt($cost)
 	{
 		return (isset($cost['cost_type']) && $cost['cost_type'] === 'percent')
-			? percent_fmt($cost['amount']) . ' dari Modal'
+			? percent_fmt($cost['amount']) . ' dari Harga Jual'
 			: rupiah($cost['amount']);
 	}
 }

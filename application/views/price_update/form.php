@@ -1,8 +1,8 @@
 <div class="card card-stat bg-brand p-3 mb-3">
 	<div class="d-flex justify-content-between align-items-start">
 		<div>
-			<h5 class="fw-bold mb-0 text-white fs-4"><?= htmlspecialchars($product['product_name']) ?></h5>
-			<small class="text-white-50">Kode: <?= htmlspecialchars($product['product_code']) ?> &nbsp;|&nbsp; Brand: <?= htmlspecialchars($product['brand_name'] ?? '-') ?></small>
+			<h5 class="fw-bold mb-0 text-white fs-3"><?= htmlspecialchars($product['product_name']) ?></h5>
+			<div class="text-white-50 product-header-sub">Kode: <?= htmlspecialchars($product['product_code']) ?> &nbsp;|&nbsp; Brand: <?= htmlspecialchars($product['brand_name'] ?? '-') ?></div>
 		</div>
 		<a href="<?= base_url('price-update') ?>" class="btn btn-sm btn-outline-light">Kembali</a>
 	</div>
@@ -104,22 +104,28 @@ function wireForm(form) {
 			const srpEl = wrap.querySelector('.out-srp-channel');
 			const markupEl = wrap.querySelector('.out-markup-channel');
 			const marginEl = wrap.querySelector('.out-margin-channel');
+			const biayaNominal = parseFloat(input.dataset.biaya) || 0;
+			const biayaPct = parseFloat(input.dataset.biayaPct) || 0; // dalam %, mis. 7.5 untuk 7,5%
 			if (srpEl) {
-				// SRP Suggest per kanal = (Modal + Total Biaya kanal ini) / (1 - Margin%).
-				// Total Biaya = biaya nominal (Rp, dijumlah langsung) + biaya persen (% x Modal).
-				// Kanal tanpa Biaya (keduanya 0) otomatis sama dengan SRP Suggest global.
-				const biayaNominal = parseFloat(input.dataset.biaya) || 0;
-				const biayaPct = parseFloat(input.dataset.biayaPct) || 0;
-				const biaya = biayaNominal + (modalVal * biayaPct / 100);
-				const canSrp = modalVal > 0 && marginVal > 0 && marginVal < 100;
-				srpEl.textContent = canSrp ? 'Rp ' + ((modalVal + biaya) / (1 - (marginVal / 100))).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+				// RRP Suggest per kanal, dgn biaya persen dihitung dari HARGA JUAL (bukan Modal) —
+				// sesuai cara marketplace memotong komisi (mis. Komisi 6,5% x harga jual, bukan x modal).
+				// Diturunkan dari: Margin% = (RRP - TotalBiaya - Modal) / RRP, TotalBiaya = biayaNominal + biayaPct%*RRP
+				// -> RRP = (Modal + biayaNominal) / (1 - Margin%/100 - biayaPct/100)
+				const denom = 1 - (marginVal / 100) - (biayaPct / 100);
+				const canSrp = modalVal > 0 && marginVal > 0 && denom > 0;
+				srpEl.textContent = canSrp ? 'Rp ' + Math.round((modalVal + biayaNominal) / denom).toLocaleString('id-ID') : '—';
 			}
 			const priceVal = parseFloat(input.value) || 0;
 			const canPct = modalVal > 0 && priceVal > 0;
-			// Markup % = (Harga - Modal) / Modal * 100
-			setPctText(markupEl, ((priceVal - modalVal) / modalVal) * 100, canPct, 'text-markup-positive');
-			// Margin % = (Harga - Modal) / Harga * 100 -- rumus sama seperti Markup, hanya pembaginya Harga (bukan Modal)
-			setPctText(marginEl, ((priceVal - modalVal) / priceVal) * 100, canPct);
+			// Total Biaya kanal dari Harga Jual aktual = biaya nominal (Rp) + (biaya persen % x Harga Jual).
+			// Laba Bersih = Harga Jual - Total Biaya - Modal.
+			const totalBiaya = biayaNominal + (priceVal * biayaPct / 100);
+			const labaBersih = priceVal - totalBiaya - modalVal;
+			// Markup % = Laba Bersih / (Modal + Total Biaya) * 100
+			const totalModal = modalVal + totalBiaya;
+			setPctText(markupEl, canPct && totalModal > 0 ? (labaBersih / totalModal) * 100 : 0, canPct && totalModal > 0, 'text-markup-positive');
+			// Margin % = Laba Bersih / Harga Jual * 100
+			setPctText(marginEl, canPct ? (labaBersih / priceVal) * 100 : 0, canPct);
 		});
 	}
 
@@ -131,7 +137,7 @@ function wireForm(form) {
 			body
 		}).then(r => r.json()).then(d => {
 			const hasSrp = Number(d.srp_suggest) > 0;
-			outSrp.textContent = hasSrp ? 'Rp ' + Number(d.srp_suggest).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—';
+			outSrp.textContent = hasSrp ? 'Rp ' + Math.round(Number(d.srp_suggest)).toLocaleString('id-ID') : '—';
 			setPctText(outMarkup, Number(d.markup_pct), hasSrp, 'text-markup-positive');
 			setPctText(outMargin, Number(d.margin_pct), hasSrp);
 			updateChannelOutputs();

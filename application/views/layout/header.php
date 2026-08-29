@@ -79,6 +79,13 @@
 
 		/* Latar biru atambah solid, dipakai di kartu Nama Produk & kartu Harga per Channel di Update Harga. */
 		.bg-brand, .channel-price-card { background-color: #3D5C6C; }
+		/* Baris "Kode: ... | Brand: ..." di kartu Nama Produk — sedikit lebih besar dari <small> bawaan */
+		.product-header-sub { font-size: 1rem; }
+		/* Ikon kecil di judul tiap kartu Harga per Channel (lihat helper channel_icon()) */
+		.channel-icon {
+			width: 1.8em; height: 1.8em; border-radius: .4em; background: rgba(255,255,255,.16);
+			display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: .85em;
+		}
 		/* Markup positif biru brand — merah (.text-danger) menang saat minus. RRP sengaja tidak diwarnai. */
 		.text-markup-positive { color: #3D5C6C; }
 
@@ -87,6 +94,13 @@
 			background-color: #E34F05; color: #fff; font-weight: 700; border: none; margin-right: .35rem;
 		}
 		.nav-tabs .nav-link.active { background-color: #E34F05; color: #fff; }
+
+		/* Perbesar tulisan kartu Harga Baru per Channel & Harga Kompetitor ~10% di Update Harga */
+		.channel-price-section, .competitor-price-section { font-size: 1.1em; }
+		/* Judul "Harga Baru per Channel" / "Harga Kompetitor" dibuat lebih besar dari ukuran h6 bawaan */
+		.section-title { font-size: 1.5rem; }
+		/* Angka RRP bisa panjang (mis. Rp 10.000.000) — dikecilkan sedikit dari Markup/Margin biar muat di kotak */
+		.rrp-figure { font-size: .9em; }
 	</style>
 </head>
 <body>
