@@ -42,19 +42,21 @@
 								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
 							</div>
-							<div class="bg-white rounded-3 py-2 text-center mb-2">
-								<div class="small text-muted">Profit</div>
-								<div class="fw-bold rrp-figure <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
-							</div>
 							<div class="row g-2 text-center">
-								<div class="col-6">
-									<div class="bg-white rounded-3 py-2">
+								<div class="col-4">
+									<div class="bg-white rounded-3 py-2 h-100 d-flex flex-column justify-content-center">
+										<div class="small text-muted">Profit</div>
+										<div class="fw-bold text-nowrap rrp-figure <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
+									</div>
+								</div>
+								<div class="col-4">
+									<div class="bg-white rounded-3 py-2 h-100 d-flex flex-column justify-content-center">
 										<div class="small text-muted">Markup</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
 									</div>
 								</div>
-								<div class="col-6">
-									<div class="bg-white rounded-3 py-2">
+								<div class="col-4">
+									<div class="bg-white rounded-3 py-2 h-100 d-flex flex-column justify-content-center">
 										<div class="small text-muted">Margin</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
 									</div>
