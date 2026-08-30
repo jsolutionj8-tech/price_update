@@ -23,13 +23,12 @@
 				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= $vc['target_hpp_pct'] ?>" required>
 			</div>
 		</div>
-		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> RRP Suggest dihitung otomatis dari Modal &amp; Margin (Modal ÷ (1 &minus; Margin%), ditambah Biaya kanal jika ada) dan ditampilkan di bawah tiap kolom Harga Kanal, bersama Markup % &amp; Margin % yang kini berbasis <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal): Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari RRP Suggest.</small>
+		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> Profit Suggest dihitung otomatis dari Modal &amp; Margin (Modal ÷ (1 &minus; Margin%), ditambah Biaya kanal jika ada) dan ditampilkan di bawah tiap kolom Harga Kanal, bersama Markup % &amp; Margin % yang kini berbasis <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal): Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari Profit Suggest.</small>
 	</div>
 
 	<div class="row g-3 mt-3">
 		<div class="col-md-8">
 			<div class="card card-stat channel-price-section p-3 h-100">
-				<h6 class="fw-bold section-title">Harga Baru per Channel</h6>
 				<div class="row g-3">
 				<?php foreach ($channels as $ch): $is_offline = ($ch['channel_code'] === 'OFFLINE'); ?>
 					<div class="col-md-6">
@@ -43,20 +42,18 @@
 								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
 							</div>
+							<div class="bg-white rounded-3 py-2 text-center mb-2">
+								<div class="small text-muted">Profit</div>
+								<div class="fw-bold rrp-figure <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
+							</div>
 							<div class="row g-2 text-center">
-								<div class="col-4">
-									<div class="bg-white rounded-3 py-2">
-										<div class="small text-muted">RRP</div>
-										<div class="fw-bold text-nowrap rrp-figure <?= $is_offline ? 'out-srp' : 'out-srp-channel' ?>">—</div>
-									</div>
-								</div>
-								<div class="col-4">
+								<div class="col-6">
 									<div class="bg-white rounded-3 py-2">
 										<div class="small text-muted">Markup</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
 									</div>
 								</div>
-								<div class="col-4">
+								<div class="col-6">
 									<div class="bg-white rounded-3 py-2">
 										<div class="small text-muted">Margin</div>
 										<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
@@ -72,7 +69,6 @@
 
 		<div class="col-md-4">
 			<div class="card card-stat competitor-price-section p-3 h-100">
-				<h6 class="fw-bold section-title">Harga Kompetitor</h6>
 				<?php foreach ($competitors as $c): ?>
 					<div class="mb-2">
 						<label class="form-label small mb-1">

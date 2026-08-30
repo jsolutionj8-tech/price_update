@@ -79,6 +79,9 @@
 
 		/* Latar biru atambah solid, dipakai di kartu Nama Produk & kartu Harga per Channel di Update Harga. */
 		.bg-brand, .channel-price-card { background-color: #3D5C6C; }
+		/* Badge "Nominal" di menu Master Biaya: frame putih, tulisan biru atambah, lebar disamakan dgn badge "Persentase". */
+		.badge-nominal { background-color: #fff; color: #3D5C6C; border: 1px solid #3D5C6C; }
+		.cost-type-badge { display: inline-block; width: 6.5rem; }
 		/* Baris "Kode: ... | Brand: ..." di kartu Nama Produk — sedikit lebih besar dari <small> bawaan */
 		.product-header-sub { font-size: 1rem; }
 		/* Ikon kecil di judul tiap kartu Harga per Channel (lihat helper channel_icon()) */
@@ -99,8 +102,10 @@
 		.channel-price-section, .competitor-price-section { font-size: 1.1em; }
 		/* Judul "Harga Baru per Channel" / "Harga Kompetitor" dibuat lebih besar dari ukuran h6 bawaan */
 		.section-title { font-size: 1.5rem; }
-		/* Angka RRP bisa panjang (mis. Rp 10.000.000) — dikecilkan sedikit dari Markup/Margin biar muat di kotak */
-		.rrp-figure { font-size: .9em; }
+		/* Kotak Profit kini selebar penuh (di bawah inputan Harga), tapi angkanya bisa sangat panjang
+		   (mis. Rp 145.000.000 utk harga ratusan juta) — dibolehkan turun baris kalau tetap kepanjangan
+		   supaya tidak keluar dari kotak putihnya. */
+		.rrp-figure { font-size: .95em; white-space: normal; overflow-wrap: break-word; line-height: 1.15; }
 	</style>
 </head>
 <body>
