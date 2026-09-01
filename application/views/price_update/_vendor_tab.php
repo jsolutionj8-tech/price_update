@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * Partial: satu tab-pane vendor pada form Update Harga.
  * Dipakai baik oleh price_update/form.php (render awal, semua vendor) maupun
@@ -42,9 +42,14 @@
 								<span class="channel-icon"><i class="bi <?= channel_icon($ch['channel_code']) ?>"></i></span>
 								<?= htmlspecialchars($ch['channel_name']) ?>
 							</div>
+							<div class="small text-white-50 mb-1">RRP</div>
 							<div class="input-group input-group-lg mb-2">
 								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
-								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+								<input type="text" class="form-control bg-white border-0 fw-bold text-markup-positive out-channel-srp" value="—" readonly tabindex="-1">
+							</div>
+							<div class="input-group input-group-lg mb-2">
+								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
+								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
 							</div>
 							<div class="row g-2 text-center">

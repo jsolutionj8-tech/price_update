@@ -95,9 +95,33 @@ function wireForm(form) {
 		}
 	}
 
+	// Sama seperti setPctText tapi hanya mengatur warna (textContent-nya sudah diisi manual
+	// di pemanggil, mis. figur Rupiah Profit) — dipakai supaya Profit ikut merah/biru brand
+	// seperti Markup, bukan cuma teks persentase.
+	function setValueColor(el, value, canCompute, positiveClass) {
+		if (!el) return;
+		el.classList.remove('text-danger');
+		if (positiveClass) el.classList.remove(positiveClass);
+		if (!canCompute) return;
+		if (value < 0) {
+			el.classList.add('text-danger');
+		} else if (positiveClass) {
+			el.classList.add(positiveClass);
+		}
+	}
+
 	function updateChannelOutputs() {
 		const modalVal = parseFloat(modal.value) || 0;
 		const marginVal = parseFloat(margin.value) || 0;
+
+		// RRP = Modal / (1 - Margin%), sama utk semua kanal (tidak dipengaruhi Biaya kanal
+		// ataupun Harga Jual yg sudah diisi) — ditampilkan di atas tiap input Harga Jual.
+		const canSrp = modalVal > 0 && marginVal > 0 && marginVal < 100;
+		const srpVal = canSrp ? modalVal / (1 - marginVal / 100) : null;
+		form.querySelectorAll('.out-channel-srp').forEach(el => {
+			el.value = srpVal !== null ? Math.round(srpVal).toLocaleString('id-ID') : '—';
+		});
+
 		channelInputs.forEach(input => {
 			const wrap = input.closest('.col-md-6');
 			if (!wrap) return;
@@ -115,12 +139,13 @@ function wireForm(form) {
 			const labaBersih = priceVal - totalBiaya - modalVal;
 			if (srpEl) {
 				srpEl.textContent = canPct ? 'Rp ' + Math.round(labaBersih).toLocaleString('id-ID') : '—';
+				setValueColor(srpEl, labaBersih, canPct, 'text-markup-positive');
 			}
 			// Markup % = Laba Bersih / (Modal + Total Biaya) * 100
 			const totalModal = modalVal + totalBiaya;
 			setPctText(markupEl, canPct && totalModal > 0 ? (labaBersih / totalModal) * 100 : 0, canPct && totalModal > 0, 'text-markup-positive');
 			// Margin % = Laba Bersih / Harga Jual * 100
-			setPctText(marginEl, canPct ? (labaBersih / priceVal) * 100 : 0, canPct);
+			setPctText(marginEl, canPct ? (labaBersih / priceVal) * 100 : 0, canPct, 'text-markup-positive');
 		});
 	}
 
@@ -137,8 +162,9 @@ function wireForm(form) {
 			const modalVal = parseFloat(modal.value) || 0;
 			const profitRupiah = modalVal * (Number(d.markup_pct) / 100);
 			outSrp.textContent = hasSrp ? 'Rp ' + Math.round(profitRupiah).toLocaleString('id-ID') : '—';
+			setValueColor(outSrp, profitRupiah, hasSrp, 'text-markup-positive');
 			setPctText(outMarkup, Number(d.markup_pct), hasSrp, 'text-markup-positive');
-			setPctText(outMargin, Number(d.margin_pct), hasSrp);
+			setPctText(outMargin, Number(d.margin_pct), hasSrp, 'text-markup-positive');
 			updateChannelOutputs();
 		});
 	}

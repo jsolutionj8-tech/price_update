@@ -102,9 +102,10 @@
 		.channel-price-section, .competitor-price-section { font-size: 1.1em; }
 		/* Judul "Harga Baru per Channel" / "Harga Kompetitor" dibuat lebih besar dari ukuran h6 bawaan */
 		.section-title { font-size: 1.5rem; }
-		/* Angka Profit bisa sangat panjang (mis. Rp 145.000.000 utk harga ratusan juta) — dikecilkan & dibolehkan
-		   turun baris (override text-nowrap bawaan) supaya tidak keluar dari kotak putihnya. */
-		.rrp-figure { font-size: .75em; white-space: normal !important; overflow-wrap: break-word; line-height: 1.15; }
+		/* Angka Profit bisa sangat panjang (mis. Rp 145.000.000 utk harga ratusan juta) — dibolehkan
+		   turun baris (override text-nowrap bawaan) supaya tidak keluar dari kotak putihnya, tanpa
+		   mengecilkan ukuran font-nya (disamakan dgn Markup/Margin di sebelahnya). */
+		.rrp-figure { white-space: normal !important; overflow-wrap: break-word; line-height: 1.15; }
 	</style>
 </head>
 <body>
