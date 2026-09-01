@@ -139,6 +139,43 @@ class Price_update extends MY_Controller
 	}
 
 	/**
+	 * Batalkan vendor yang sudah ditambahkan ke produk ini (hapus baris Modal/Margin-nya),
+	 * mis. saat vendor ke-klik "Tambah" secara tidak sengaja. Batch riwayat yang masih
+	 * berstatus 'pending' untuk produk-vendor ini ikut dihapus supaya banner "Kirim
+	 * Notifikasi Sekarang" tidak lagi menghitungnya. Batch yang sudah processing/sent/
+	 * partial/failed (notifikasi sudah pernah diproses/terkirim) TIDAK ikut terhapus —
+	 * itu tetap riwayat sah, lihat Price_change_batch_model::delete_pending_for_vendor().
+	 */
+	public function remove_vendor($product_id)
+	{
+		$product = $this->product_model->find($product_id);
+		if (!$product) show_404();
+
+		$vendor_id = (int) $this->input->post('vendor_id');
+		$is_ajax = $this->input->is_ajax_request();
+
+		if (!$vendor_id) {
+			if ($is_ajax) {
+				$this->output->set_status_header(422)->set_content_type('application/json')
+					->set_output(json_encode(array('success' => FALSE, 'message' => 'Vendor tidak valid.')));
+				return;
+			}
+			redirect('price-update/form/' . $product_id);
+		}
+
+		$this->product_vendor_cost_model->delete($product_id, $vendor_id);
+		$this->price_change_batch_model->delete_pending_for_vendor($product_id, $vendor_id);
+
+		if (!$is_ajax) {
+			redirect('price-update/form/' . $product_id);
+		}
+
+		$this->output->set_content_type('application/json')->set_output(json_encode(array(
+			'success' => TRUE,
+		)));
+	}
+
+	/**
 	 * Total Biaya (Master Biaya) yang dikaitkan ke tiap sales channel — dipakai untuk rumus
 	 * RRP Suggest & Laba Bersih per kanal (lihat form.php). Biaya bertipe nominal dijumlah
 	 * langsung (Rp); biaya bertipe persen dihitung sebagai % dari HARGA JUAL aktual kanal
@@ -285,6 +322,44 @@ class Price_update extends MY_Controller
 		$this->session->set_flashdata('success', 'Harga berhasil disimpan. Total ' . $pending_count . ' perubahan menunggu dikirim notifikasi — lanjutkan update produk lain, lalu klik "Kirim Notifikasi Sekarang" di atas jika sudah selesai.');
 
 		redirect('price-history/detail/' . $batch_id);
+	}
+
+	/**
+	 * Endpoint AJAX: daftar batch berstatus 'pending' (produk/vendor/tanggal/pengubah)
+	 * untuk ditampilkan di modal "Lihat Detail" pada banner "Kirim Notifikasi Sekarang".
+	 */
+	public function pending_list()
+	{
+		$can_view_detail = in_array(current_user()['role'] ?? '', array('ADMIN', 'EDITOR'), TRUE);
+
+		$html = $this->load->view('price_update/_pending_list', array(
+			'batches' => $this->price_change_batch_model->get_pending_detail(),
+			'can_view_detail' => $can_view_detail,
+		), TRUE);
+
+		$this->output->set_content_type('text/html')->set_output($html);
+	}
+
+	/**
+	 * Batalkan satu batch riwayat yang masih 'pending' langsung dari modal "Lihat Detail"
+	 * (lihat _pending_list.php) — termasuk utk membersihkan batch yatim yang produk/
+	 * vendor-nya sudah terlanjur dihapus lebih dulu (lihat delete_if_pending()).
+	 */
+	public function cancel_pending($id)
+	{
+		$is_ajax = $this->input->is_ajax_request();
+
+		$this->price_change_batch_model->delete_if_pending($id);
+		$pending_count = $this->price_change_batch_model->count_pending();
+
+		if (!$is_ajax) {
+			redirect($this->_safe_referer());
+		}
+
+		$this->output->set_content_type('application/json')->set_output(json_encode(array(
+			'success' => TRUE,
+			'pending_count' => $pending_count,
+		)));
 	}
 
 	/**

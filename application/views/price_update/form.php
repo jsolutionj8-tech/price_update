@@ -159,6 +159,41 @@ function wireForm(form) {
 
 document.querySelectorAll('.price-form').forEach(wireForm);
 window.priceUpdateWireForm = wireForm;
+
+// Batalkan Vendor: hapus data Modal/Margin vendor ini utk produk ini, lalu reload
+// agar tab, dropdown "Tambah Vendor", & select2 kembali sinkron dgn state server.
+const removeVendorUrl = "<?= base_url('price-update/remove-vendor/' . $product['id']) ?>";
+document.querySelector('.tab-content').addEventListener('click', function (e) {
+	const btn = e.target.closest('.btn-cancel-vendor');
+	if (!btn) return;
+
+	const vendorId = btn.dataset.vendorId;
+	const vendorName = btn.dataset.vendorName;
+	if (!confirm('Batalkan vendor "' + vendorName + '" untuk produk ini? Data Modal & Margin yang sudah diisi untuk vendor ini akan dihapus, termasuk notifikasi yang belum terkirim.')) return;
+
+	btn.disabled = true;
+	fetch(removeVendorUrl, {
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'X-Requested-With': 'XMLHttpRequest'
+		},
+		body: 'vendor_id=' + encodeURIComponent(vendorId)
+	})
+	.then(r => r.json())
+	.then(function (d) {
+		if (!d.success) {
+			alert(d.message || 'Gagal membatalkan vendor.');
+			btn.disabled = false;
+			return;
+		}
+		window.location.reload();
+	})
+	.catch(function () {
+		alert('Gagal membatalkan vendor. Coba lagi.');
+		btn.disabled = false;
+	});
+});
 });
 </script>
 

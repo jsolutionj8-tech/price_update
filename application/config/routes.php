@@ -124,6 +124,9 @@ $route['price-update/form/(:num)']     = 'price_update/form/$1';
 $route['price-update/calculate']       = 'price_update/calculate';
 $route['price-update/save']            = 'price_update/save';
 $route['price-update/add-vendor/(:num)'] = 'price_update/add_vendor/$1';
+$route['price-update/remove-vendor/(:num)'] = 'price_update/remove_vendor/$1';
+$route['price-update/pending-list']    = 'price_update/pending_list';
+$route['price-update/cancel-pending/(:num)'] = 'price_update/cancel_pending/$1';
 $route['price-update/preview-email']   = 'price_update/preview_email';
 $route['price-update/send-pending']    = 'price_update/send_pending';
 

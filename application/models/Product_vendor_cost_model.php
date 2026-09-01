@@ -38,4 +38,10 @@ class Product_vendor_cost_model extends CI_Model
 		$this->db->insert($this->table, $data);
 		return $this->db->insert_id();
 	}
+
+	public function delete($product_id, $vendor_id)
+	{
+		return $this->db->where(array('product_id' => $product_id, 'vendor_id' => $vendor_id))
+			->delete($this->table);
+	}
 }

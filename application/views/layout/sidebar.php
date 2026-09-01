@@ -185,10 +185,80 @@
 			<?php endif; ?>
 			<?php $pending_notify_count = $pending_notify_count ?? 0; ?>
 			<?php if ($pending_notify_count > 0 && $can('price-update')): ?>
-				<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2">
-					<div><i class="bi bi-envelope-exclamation-fill me-1"></i><?= $pending_notify_count ?> perubahan harga menunggu dikirim notifikasi.</div>
-					<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
-						<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk <?= $pending_notify_count ?> perubahan harga sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
-					</form>
+				<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2" id="pendingNotifyBanner">
+					<div><i class="bi bi-envelope-exclamation-fill me-1"></i><span id="pendingNotifyCount"><?= $pending_notify_count ?></span> perubahan harga menunggu dikirim notifikasi.</div>
+					<div class="d-flex gap-2">
+						<button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#pendingNotifyModal"><i class="bi bi-eye"></i> Lihat Detail</button>
+						<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
+							<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk seluruh perubahan harga yang menunggu sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
+						</form>
+					</div>
 				</div>
+
+				<div class="modal fade" id="pendingNotifyModal" tabindex="-1">
+					<div class="modal-dialog modal-lg modal-dialog-scrollable">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">Perubahan Harga Menunggu Notifikasi</h5>
+								<button class="btn-close" data-bs-dismiss="modal"></button>
+							</div>
+							<div class="modal-body" id="pendingNotifyModalBody">Memuat...</div>
+						</div>
+					</div>
+				</div>
+				<script>
+				document.addEventListener('DOMContentLoaded', function () {
+					var modalEl = document.getElementById('pendingNotifyModal');
+					var body = document.getElementById('pendingNotifyModalBody');
+					var countEl = document.getElementById('pendingNotifyCount');
+					var bannerEl = document.getElementById('pendingNotifyBanner');
+					var loaded = false;
+
+					function loadList() {
+						body.innerHTML = 'Memuat...';
+						fetch("<?= base_url('price-update/pending-list') ?>")
+							.then(function (r) { return r.text(); })
+							.then(function (html) { body.innerHTML = html; loaded = true; })
+							.catch(function () { body.innerHTML = '<div class="text-danger">Gagal memuat data.</div>'; });
+					}
+
+					modalEl.addEventListener('show.bs.modal', function () {
+						if (!loaded) loadList();
+					});
+
+					body.addEventListener('click', function (e) {
+						var btn = e.target.closest('.btn-cancel-pending');
+						if (!btn) return;
+
+						if (!confirm('Batalkan notifikasi untuk "' + btn.dataset.productName + '"? Perubahan harga ini tidak akan ikut dikirim.')) return;
+
+						btn.disabled = true;
+						fetch("<?= base_url('price-update/cancel-pending/') ?>" + btn.dataset.batchId, {
+							method: 'POST',
+							headers: { 'X-Requested-With': 'XMLHttpRequest' }
+						})
+						.then(function (r) { return r.json(); })
+						.then(function (d) {
+							if (!d.success) {
+								alert('Gagal membatalkan.');
+								btn.disabled = false;
+								return;
+							}
+							var row = btn.closest('tr');
+							if (row) row.remove();
+							if (countEl) countEl.textContent = d.pending_count;
+							if (d.pending_count <= 0) {
+								if (bannerEl) bannerEl.remove();
+							}
+							if (!body.querySelector('tbody tr')) {
+								body.innerHTML = '<div class="text-center text-muted py-3">Tidak ada perubahan harga yang menunggu dikirim.</div>';
+							}
+						})
+						.catch(function () {
+							alert('Gagal membatalkan. Coba lagi.');
+							btn.disabled = false;
+						});
+					});
+				});
+				</script>
 			<?php endif; ?>

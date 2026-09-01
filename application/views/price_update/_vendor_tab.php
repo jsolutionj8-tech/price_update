@@ -7,6 +7,11 @@
  */
 ?>
 <div class="tab-pane fade <?= $active ? 'show active' : '' ?>" id="vendor<?= $vc['vendor_id'] ?>">
+<div class="d-flex justify-content-end mb-2">
+	<button type="button" class="btn btn-sm btn-outline-danger btn-cancel-vendor" data-vendor-id="<?= $vc['vendor_id'] ?>" data-vendor-name="<?= htmlspecialchars($vc['vendor_name']) ?>">
+		<i class="bi bi-x-circle"></i> Batalkan Vendor Ini
+	</button>
+</div>
 <form class="price-form" method="post" action="<?= base_url('price-update/save') ?>">
 	<input type="hidden" name="product_id" value="<?= $product['id'] ?>">
 	<input type="hidden" name="vendor_id" value="<?= $vc['vendor_id'] ?>">

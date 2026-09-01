@@ -23,6 +23,32 @@ class Price_change_batch_model extends CI_Model
 	}
 
 	/**
+	 * Hapus batch berstatus 'pending' milik satu produk-vendor — dipakai saat vendor
+	 * dibatalkan (lihat Price_update::remove_vendor()) supaya notifikasi yang belum
+	 * sempat terkirim ikut batal juga. Batch yang statusnya sudah processing/sent/
+	 * partial/failed TIDAK disentuh (punya nilai audit & mungkin sudah ada email_logs).
+	 */
+	public function delete_pending_for_vendor($product_id, $vendor_id)
+	{
+		return $this->db->where(array(
+			'product_id' => $product_id,
+			'vendor_id' => $vendor_id,
+			'notify_status' => 'pending',
+		))->delete($this->table);
+	}
+
+	/**
+	 * Hapus satu batch by id, hanya jika masih berstatus 'pending' — dipakai tombol
+	 * "Batalkan" per baris di modal "Lihat Detail" (lihat _pending_list.php), termasuk
+	 * utk membersihkan batch yatim (produk/vendor-nya sudah terlanjur dihapus lebih
+	 * dulu) yang tidak lagi punya tombol "Batalkan Vendor Ini" utk memicu pembersihan.
+	 */
+	public function delete_if_pending($id)
+	{
+		return $this->db->where(array('id' => $id, 'notify_status' => 'pending'))->delete($this->table);
+	}
+
+	/**
 	 * Jumlah & daftar batch berstatus 'pending' secara global (lintas user/sesi) —
 	 * dipakai sebagai sumber kebenaran untuk banner "Kirim Notifikasi Sekarang",
 	 * bukan disimpan di session supaya tidak hilang saat logout/ganti user.
@@ -38,6 +64,22 @@ class Price_change_batch_model extends CI_Model
 			$this->db->select('id')->where('notify_status', 'pending')->get($this->table)->result_array(),
 			'id'
 		);
+	}
+
+	/**
+	 * Detail batch berstatus 'pending' (produk, vendor, tanggal, pengubah) — dipakai
+	 * untuk menampilkan isi banner "Kirim Notifikasi Sekarang" sebelum benar-benar dikirim.
+	 */
+	public function get_pending_detail()
+	{
+		return $this->db->select('price_change_batches.*, products.product_name, products.product_code, vendors.vendor_code, users.full_name as changed_by_name')
+			->from($this->table)
+			->join('products', 'products.id = price_change_batches.product_id')
+			->join('vendors', 'vendors.id = price_change_batches.vendor_id')
+			->join('users', 'users.id = price_change_batches.changed_by')
+			->where('price_change_batches.notify_status', 'pending')
+			->order_by('price_change_batches.created_at', 'DESC')
+			->get()->result_array();
 	}
 
 	public function get_with_detail($id)
