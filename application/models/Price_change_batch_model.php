@@ -108,7 +108,9 @@ class Price_change_batch_model extends CI_Model
 	public function count_all_filtered($filters = array())
 	{
 		$this->_apply_filters($filters);
-		return $this->db->from($this->table)->count_all_results();
+		return $this->db->from($this->table)
+			->join('products', 'products.id = price_change_batches.product_id')
+			->count_all_results();
 	}
 
 	/**
@@ -128,9 +130,18 @@ class Price_change_batch_model extends CI_Model
 			->get()->result_array();
 	}
 
+	// Filter brand/kategori/keyword mengikuti kolom yg sama dgn Product_model::get_all()/count_all()
+	// (menu Master Data -> Produk), tapi via join ke `products` krn batch cuma simpan product_id.
 	protected function _apply_filters($filters)
 	{
-		if (!empty($filters['product_id'])) $this->db->where('price_change_batches.product_id', $filters['product_id']);
+		if (!empty($filters['brand_id'])) $this->db->where('products.brand_id', $filters['brand_id']);
+		if (!empty($filters['category_id'])) $this->db->where('products.category_id', $filters['category_id']);
+		if (!empty($filters['keyword'])) {
+			$this->db->group_start()
+				->like('products.product_name', $filters['keyword'])
+				->or_like('products.product_code', $filters['keyword'])
+				->group_end();
+		}
 		if (!empty($filters['status'])) $this->db->where('price_change_batches.notify_status', $filters['status']);
 		if (!empty($filters['date_from'])) $this->db->where('price_change_batches.effective_date >=', $filters['date_from']);
 		if (!empty($filters['date_to'])) $this->db->where('price_change_batches.effective_date <=', $filters['date_to']);

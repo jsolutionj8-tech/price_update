@@ -1,9 +1,8 @@
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
-
 <?php
 	$qs_base = array();
-	if (!empty($filters['product_id'])) $qs_base['product_id'] = $filters['product_id'];
+	if (!empty($filters['keyword'])) $qs_base['keyword'] = $filters['keyword'];
+	if (!empty($filters['brand_id'])) $qs_base['brand_id'] = $filters['brand_id'];
+	if (!empty($filters['category_id'])) $qs_base['category_id'] = $filters['category_id'];
 	if (!empty($filters['status'])) $qs_base['status'] = $filters['status'];
 	if (!empty($filters['date_from'])) $qs_base['date_from'] = $filters['date_from'];
 	if (!empty($filters['date_to'])) $qs_base['date_to'] = $filters['date_to'];
@@ -15,13 +14,25 @@
 ?>
 
 <div class="card card-stat p-3 mb-3">
+	<!-- Filter brand/kategori/kode-nama disamakan dgn menu Master Data -> Produk. -->
 	<form method="get" class="row g-2">
 		<div class="col-md-3">
-			<select name="product_id" id="productFilterSelect" class="form-select" style="width:100%">
-				<option value="">Semua Produk</option>
-				<?php if (!empty($selected_product)): ?>
-					<option value="<?= $selected_product['id'] ?>" selected><?= htmlspecialchars($selected_product['product_code'] . ' - ' . $selected_product['product_name']) ?></option>
-				<?php endif; ?>
+			<input type="text" name="keyword" class="form-control" placeholder="Cari kode / nama produk..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
+		</div>
+		<div class="col-md-2">
+			<select name="brand_id" class="form-select">
+				<option value="">Semua Brand</option>
+				<?php foreach ($brands as $b): ?>
+					<option value="<?= $b['id'] ?>" <?= ($filters['brand_id'] ?? '') == $b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['brand_name']) ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+		<div class="col-md-2">
+			<select name="category_id" class="form-select">
+				<option value="">Semua Kategori</option>
+				<?php foreach ($categories as $cat): ?>
+					<option value="<?= $cat['id'] ?>" <?= ($filters['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>><?= htmlspecialchars($cat['category_name']) ?></option>
+				<?php endforeach; ?>
 			</select>
 		</div>
 		<div class="col-md-2">
@@ -32,12 +43,12 @@
 				<?php endforeach; ?>
 			</select>
 		</div>
-		<div class="col-md-2"><input type="date" name="date_from" class="form-control" value="<?= $filters['date_from'] ?? '' ?>" placeholder="Dari"></div>
-		<div class="col-md-2"><input type="date" name="date_to" class="form-control" value="<?= $filters['date_to'] ?? '' ?>" placeholder="Sampai"></div>
 		<div class="col-md-3">
 			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
 		</div>
-		<div class="col-12 d-flex gap-2 justify-content-end">
+		<div class="col-md-3"><input type="date" name="date_from" class="form-control" value="<?= $filters['date_from'] ?? '' ?>" placeholder="Dari"></div>
+		<div class="col-md-3"><input type="date" name="date_to" class="form-control" value="<?= $filters['date_to'] ?? '' ?>" placeholder="Sampai"></div>
+		<div class="col-md-6 d-flex gap-2 justify-content-end">
 			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
 			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
 		</div>
@@ -55,7 +66,7 @@
 					<td><?= htmlspecialchars($b['product_name']) ?> <small class="text-muted d-block"><?= htmlspecialchars($b['product_code']) ?></small></td>
 					<td><?= htmlspecialchars($b['vendor_code']) ?></td>
 					<td><?= htmlspecialchars($b['changed_by_name']) ?></td>
-					<td><?= status_badge($b['notify_status']) ?></td>
+					<td class="notify-status-cell"><?= status_badge($b['notify_status']) ?></td>
 					<td>
 						<?php if ($can_view_detail): ?>
 							<a href="<?= base_url('price-history/detail/' . $b['id']) ?>" class="btn btn-sm btn-outline-secondary">Detail</a>
@@ -107,31 +118,3 @@
 		</form>
 	</div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-<script>
-jQuery(function ($) {
-	$('#productFilterSelect').select2({
-		theme: 'bootstrap-5',
-		width: '100%',
-		placeholder: 'Semua Produk',
-		allowClear: true,
-		minimumInputLength: 2,
-		language: {
-			inputTooShort: function () { return 'Ketik minimal 2 huruf...'; },
-			searching: function () { return 'Mencari...'; },
-			noResults: function () { return 'Produk tidak ditemukan.'; }
-		},
-		ajax: {
-			url: "<?= base_url('products/search') ?>",
-			dataType: 'json',
-			delay: 250,
-			data: function (params) { return { q: params.term }; },
-			processResults: function (data) {
-				return { results: data.map(function (p) { return { id: p.id, text: p.code + ' - ' + p.name }; }) };
-			}
-		}
-	});
-});
-</script>

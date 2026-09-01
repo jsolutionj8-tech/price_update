@@ -4,7 +4,7 @@
 			<h5 class="fw-bold mb-1"><?= htmlspecialchars($batch['product_name']) ?> <small class="text-muted">(<?= htmlspecialchars($batch['product_code']) ?>)</small></h5>
 			<div>Kode Batch: <code><?= htmlspecialchars($batch['batch_code']) ?></code></div>
 			<div>Tanggal Efektif: <?= tgl_indo($batch['effective_date']) ?> &nbsp;|&nbsp; Diubah oleh: <?= htmlspecialchars($batch['changed_by_name']) ?></div>
-			<div class="mt-1">Status Notifikasi: <?= status_badge($batch['notify_status']) ?></div>
+			<div class="mt-1 notify-status-cell">Status Notifikasi: <?= status_badge($batch['notify_status']) ?></div>
 		</div>
 		<div>
 			<a href="<?= base_url('price-history/resend/' . $batch['id']) ?>" class="btn btn-outline-primary btn-sm" onclick="return confirm('Kirim ulang notifikasi email untuk perubahan ini?')"><i class="bi bi-arrow-repeat"></i> Kirim Ulang Notifikasi</a>

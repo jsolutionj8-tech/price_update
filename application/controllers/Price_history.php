@@ -17,10 +17,12 @@ class Price_history extends MY_Controller
 	public function index()
 	{
 		$filters = array(
-			'product_id' => $this->input->get('product_id'),
-			'status'     => $this->input->get('status'),
-			'date_from'  => $this->input->get('date_from'),
-			'date_to'    => $this->input->get('date_to'),
+			'brand_id'    => $this->input->get('brand_id'),
+			'category_id' => $this->input->get('category_id'),
+			'keyword'     => $this->input->get('keyword'),
+			'status'      => $this->input->get('status'),
+			'date_from'   => $this->input->get('date_from'),
+			'date_to'     => $this->input->get('date_to'),
 		);
 
 		$total = $this->price_change_batch_model->count_all_filtered($filters);
@@ -29,11 +31,12 @@ class Price_history extends MY_Controller
 		$offset = ($page - 1) * self::PER_PAGE;
 
 		$data = array(
-			'title'            => 'Riwayat Perubahan Harga',
-			'batches'          => $this->price_change_batch_model->get_paginated(self::PER_PAGE, $offset, $filters),
-			'filters'          => $filters,
-			'selected_product' => !empty($filters['product_id']) ? $this->product_model->find($filters['product_id']) : NULL,
-			'pagination'       => array(
+			'title'      => 'Riwayat Perubahan Harga',
+			'batches'    => $this->price_change_batch_model->get_paginated(self::PER_PAGE, $offset, $filters),
+			'filters'    => $filters,
+			'brands'     => $this->product_model->get_all_brands(),
+			'categories' => $this->product_model->get_all_categories(),
+			'pagination' => array(
 				'page'        => $page,
 				'total_pages' => $total_pages,
 				'total'       => $total,
@@ -90,10 +93,12 @@ class Price_history extends MY_Controller
 	public function export()
 	{
 		$filters = array(
-			'product_id' => $this->input->get('product_id'),
-			'status'     => $this->input->get('status'),
-			'date_from'  => $this->input->get('date_from'),
-			'date_to'    => $this->input->get('date_to'),
+			'brand_id'    => $this->input->get('brand_id'),
+			'category_id' => $this->input->get('category_id'),
+			'keyword'     => $this->input->get('keyword'),
+			'status'      => $this->input->get('status'),
+			'date_from'   => $this->input->get('date_from'),
+			'date_to'     => $this->input->get('date_to'),
 		);
 		$this->load->library('price_history_exporter');
 		$this->price_history_exporter->export_to_browser($filters);
@@ -106,10 +111,12 @@ class Price_history extends MY_Controller
 	public function export_pdf()
 	{
 		$filters = array(
-			'product_id' => $this->input->get('product_id'),
-			'status'     => $this->input->get('status'),
-			'date_from'  => $this->input->get('date_from'),
-			'date_to'    => $this->input->get('date_to'),
+			'brand_id'    => $this->input->get('brand_id'),
+			'category_id' => $this->input->get('category_id'),
+			'keyword'     => $this->input->get('keyword'),
+			'status'      => $this->input->get('status'),
+			'date_from'   => $this->input->get('date_from'),
+			'date_to'     => $this->input->get('date_to'),
 		);
 		$this->load->library('price_history_exporter');
 		$this->price_history_exporter->export_to_pdf_browser($filters);

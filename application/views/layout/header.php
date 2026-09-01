@@ -33,6 +33,12 @@
 		   latar, bukan warna tulisan — defaultnya abu-abu (kurang kontras di atas oranye). Dipaksa putih. */
 		.badge.bg-success, .badge.bg-warning { color: #fff; }
 
+		/* Badge "Non-active"/"Inactive" (status_badge(), dipakai di semua menu Master Data) dibalik jadi
+		   outline (latar putih, tulisan & frame oranye) supaya kontras dgn "Active" yg latar oranye penuh
+		   — border disamakan tebalnya di keduanya supaya ukuran kotaknya sejajar. */
+		.badge.bg-success, .badge.bg-secondary { border: 2px solid #E34F05; display: inline-block; width: 6.5rem; text-align: center; }
+		.badge.bg-secondary { background-color: #fff !important; color: #E34F05 !important; }
+
 		/* Select2 (dropdown pencarian vendor/brand/kategori) pakai tema Bootstrap sendiri yang warna birunya
 		   hardcode (bukan variabel), jadi tidak ikut ke-override otomatis di atas — disesuaikan manual di sini. */
 		.select2-container--bootstrap-5.select2-container--open .select2-selection,
@@ -92,11 +98,13 @@
 		/* Markup positif biru brand — merah (.text-danger) menang saat minus. RRP sengaja tidak diwarnai. */
 		.text-markup-positive { color: #3D5C6C; }
 
-		/* Tab pilihan vendor di Update Harga: latar oranye penuh (identitas Atambah), tulisan putih tebal. */
+		/* Tab pilihan vendor di Update Harga: tab non-aktif putih dgn tulisan & frame oranye, tab aktif
+		   latar oranye penuh & tulisan putih (identitas Atambah). Border sama tebal di kedua kondisi
+		   supaya ukuran kotaknya sejajar (border ikut disamakan warnanya dgn latar saat aktif). */
 		.nav-tabs .nav-link {
-			background-color: #E34F05; color: #fff; font-weight: 700; border: none; margin-right: .35rem;
+			background-color: #fff; color: #E34F05; font-weight: 700; border: 2px solid #E34F05; margin-right: .35rem;
 		}
-		.nav-tabs .nav-link.active { background-color: #E34F05; color: #fff; }
+		.nav-tabs .nav-link.active { background-color: #E34F05; color: #fff; border-color: #E34F05; }
 
 		/* Perbesar tulisan kartu Harga Baru per Channel & Harga Kompetitor ~10% di Update Harga */
 		.channel-price-section, .competitor-price-section { font-size: 1.1em; }
@@ -106,6 +114,23 @@
 		   turun baris (override text-nowrap bawaan) supaya tidak keluar dari kotak putihnya, tanpa
 		   mengecilkan ukuran font-nya (disamakan dgn Markup/Margin di sebelahnya). */
 		.rrp-figure { white-space: normal !important; overflow-wrap: break-word; line-height: 1.15; }
+
+		/* Input Harga Jual & Modal di Update Harga: matikan panah spinner naik/turun bawaan
+		   browser (mengganggu saat mengetik nominal besar). */
+		.channel-price-input::-webkit-inner-spin-button,
+		.channel-price-input::-webkit-outer-spin-button,
+		input[name="modal"]::-webkit-inner-spin-button,
+		input[name="modal"]::-webkit-outer-spin-button {
+			-webkit-appearance: none; margin: 0;
+		}
+		.channel-price-input, input[name="modal"] { -moz-appearance: textfield; }
+
+		/* Badge status notifikasi ("Pending"/"Sent") khusus di halaman Riwayat Perubahan Harga:
+		   Pending latar oranye tulisan putih, Sent dibalik jadi outline (latar putih, tulisan &
+		   frame oranye) — border & lebar disamakan supaya ukuran badge sejajar antar status. */
+		.notify-status-cell .badge { display: inline-block; width: 6.5rem; }
+		.notify-status-cell .badge.bg-warning { background-color: #E34F05 !important; color: #fff !important; border: 2px solid #E34F05; }
+		.notify-status-cell .badge.bg-success { background-color: #fff !important; color: #E34F05 !important; border: 2px solid #E34F05; }
 	</style>
 </head>
 <body>

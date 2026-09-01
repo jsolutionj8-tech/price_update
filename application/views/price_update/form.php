@@ -1,5 +1,5 @@
 <div class="card card-stat bg-brand p-3 mb-3">
-	<div class="d-flex justify-content-between align-items-start">
+	<div class="d-flex justify-content-between align-items-center">
 		<div>
 			<h5 class="fw-bold mb-0 text-white fs-3"><?= htmlspecialchars($product['product_name']) ?></h5>
 			<div class="text-white-50 product-header-sub">Kode: <?= htmlspecialchars($product['product_code']) ?> &nbsp;|&nbsp; Brand: <?= htmlspecialchars($product['brand_name'] ?? '-') ?></div>
@@ -17,22 +17,27 @@
 	<div class="alert alert-warning">Belum ada data vendor untuk produk ini. Tambahkan vendor terlebih dahulu di bawah ini.</div>
 <?php endif; ?>
 
-<?php if (!empty($available_vendors)): ?>
+<?php if (!empty($available_vendors) || !empty($vendor_costs)): ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
 <div class="card card-stat p-3 mb-3" id="addVendorCard">
-	<form method="post" action="<?= base_url('price-update/add-vendor/' . $product['id']) ?>" id="addVendorForm" class="d-flex align-items-end gap-2">
-		<div style="min-width:280px;">
-			<label class="form-label mb-1">Tambah Vendor</label>
-			<select name="vendor_id" id="vendorSelect" class="form-select" style="width:100%" required>
-				<option value="">-- Pilih Vendor --</option>
-				<?php foreach ($available_vendors as $v): ?>
-					<option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['vendor_name']) ?></option>
-				<?php endforeach; ?>
-			</select>
-		</div>
-		<button type="submit" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Tambah</button>
-	</form>
+	<div class="d-flex align-items-end gap-2 flex-wrap">
+		<?php if (!empty($available_vendors)): ?>
+		<form method="post" action="<?= base_url('price-update/add-vendor/' . $product['id']) ?>" id="addVendorForm" class="d-flex align-items-end gap-2 mb-0">
+			<div style="min-width:280px;">
+				<label class="form-label mb-1">Tambah Vendor</label>
+				<select name="vendor_id" id="vendorSelect" class="form-select" style="width:100%" required>
+					<option value="">-- Pilih Vendor --</option>
+					<?php foreach ($available_vendors as $v): ?>
+						<option value="<?= $v['id'] ?>"><?= htmlspecialchars($v['vendor_name']) ?></option>
+					<?php endforeach; ?>
+				</select>
+			</div>
+			<button type="submit" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Tambah</button>
+		</form>
+		<?php endif; ?>
+		<button type="button" id="cancelActiveVendorBtn" class="btn btn-outline-danger"<?= empty($vendor_costs) ? ' style="display:none"' : '' ?>><i class="bi bi-x-circle"></i> Batalkan Vendor Ini</button>
+	</div>
 </div>
 <?php endif; ?>
 
@@ -119,7 +124,7 @@ function wireForm(form) {
 		const canSrp = modalVal > 0 && marginVal > 0 && marginVal < 100;
 		const srpVal = canSrp ? modalVal / (1 - marginVal / 100) : null;
 		form.querySelectorAll('.out-channel-srp').forEach(el => {
-			el.value = srpVal !== null ? Math.round(srpVal).toLocaleString('id-ID') : '—';
+			el.value = srpVal !== null ? 'Rp ' + Math.round(srpVal).toLocaleString('id-ID') : '—';
 		});
 
 		channelInputs.forEach(input => {
@@ -174,6 +179,25 @@ function wireForm(form) {
 	channelInputs.forEach(input => input.addEventListener('input', updateChannelOutputs));
 	recalc();
 
+	// Enter di salah satu input Harga Jual jangan langsung submit form — pindah fokus ke
+	// input Harga Jual berikutnya dulu (urutan kanal spt tampil di layar, termasuk Offline).
+	// Form baru submit setelah Enter ditekan di input Harga Jual yang TERAKHIR.
+	const allPriceInputs = Array.from(form.querySelectorAll('.channel-price-input'));
+	allPriceInputs.forEach((input, idx) => {
+		input.addEventListener('keydown', function (e) {
+			if (e.key !== 'Enter') return;
+			e.preventDefault();
+			const next = allPriceInputs[idx + 1];
+			if (next) {
+				next.focus();
+				next.select();
+				return;
+			}
+			const submitBtn = form.querySelector('button[type=submit]');
+			if (submitBtn) submitBtn.click();
+		});
+	});
+
 	form.querySelector('.btn-preview').addEventListener('click', () => {
 		const fd = new FormData(form);
 		fetch(previewUrl, { method: 'POST', body: fd })
@@ -185,40 +209,45 @@ function wireForm(form) {
 document.querySelectorAll('.price-form').forEach(wireForm);
 window.priceUpdateWireForm = wireForm;
 
-// Batalkan Vendor: hapus data Modal/Margin vendor ini utk produk ini, lalu reload
-// agar tab, dropdown "Tambah Vendor", & select2 kembali sinkron dgn state server.
+// Batalkan Vendor: hapus data Modal/Margin vendor yang sedang aktif (tab terbuka) utk
+// produk ini, lalu reload agar tab, dropdown "Tambah Vendor", & select2 kembali sinkron
+// dgn state server. Tombolnya ditaruh di sebelah "+Tambah" (bukan per-tab), jadi cukup
+// baca vendor dari .tab-pane yang sedang aktif saat diklik.
 const removeVendorUrl = "<?= base_url('price-update/remove-vendor/' . $product['id']) ?>";
-document.querySelector('.tab-content').addEventListener('click', function (e) {
-	const btn = e.target.closest('.btn-cancel-vendor');
-	if (!btn) return;
+const cancelVendorBtn = document.getElementById('cancelActiveVendorBtn');
+if (cancelVendorBtn) {
+	cancelVendorBtn.addEventListener('click', function () {
+		const activePane = document.querySelector('.tab-content .tab-pane.active');
+		if (!activePane) return;
+		const vendorId = activePane.dataset.vendorId;
+		const vendorName = activePane.dataset.vendorName;
+		if (!vendorId) return;
+		if (!confirm('Batalkan vendor "' + vendorName + '" untuk produk ini? Data Modal & Margin yang sudah diisi untuk vendor ini akan dihapus, termasuk notifikasi yang belum terkirim.')) return;
 
-	const vendorId = btn.dataset.vendorId;
-	const vendorName = btn.dataset.vendorName;
-	if (!confirm('Batalkan vendor "' + vendorName + '" untuk produk ini? Data Modal & Margin yang sudah diisi untuk vendor ini akan dihapus, termasuk notifikasi yang belum terkirim.')) return;
-
-	btn.disabled = true;
-	fetch(removeVendorUrl, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'X-Requested-With': 'XMLHttpRequest'
-		},
-		body: 'vendor_id=' + encodeURIComponent(vendorId)
-	})
-	.then(r => r.json())
-	.then(function (d) {
-		if (!d.success) {
-			alert(d.message || 'Gagal membatalkan vendor.');
-			btn.disabled = false;
-			return;
-		}
-		window.location.reload();
-	})
-	.catch(function () {
-		alert('Gagal membatalkan vendor. Coba lagi.');
-		btn.disabled = false;
+		cancelVendorBtn.disabled = true;
+		fetch(removeVendorUrl, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded',
+				'X-Requested-With': 'XMLHttpRequest'
+			},
+			body: 'vendor_id=' + encodeURIComponent(vendorId)
+		})
+		.then(r => r.json())
+		.then(function (d) {
+			if (!d.success) {
+				alert(d.message || 'Gagal membatalkan vendor.');
+				cancelVendorBtn.disabled = false;
+				return;
+			}
+			window.location.reload();
+		})
+		.catch(function () {
+			alert('Gagal membatalkan vendor. Coba lagi.');
+			cancelVendorBtn.disabled = false;
+		});
 	});
-});
+}
 });
 </script>
 
@@ -297,8 +326,11 @@ jQuery(function ($) {
 			$('#vendorSelect option[value="' + vendorId + '"]').remove();
 			$('#vendorSelect').val('').trigger('change');
 			if ($('#vendorSelect option[value!=""]').length === 0) {
-				document.getElementById('addVendorCard').remove();
+				addVendorForm.remove();
 			}
+
+			const cancelBtn = document.getElementById('cancelActiveVendorBtn');
+			if (cancelBtn) cancelBtn.style.display = '';
 
 			navBtn.click();
 		})

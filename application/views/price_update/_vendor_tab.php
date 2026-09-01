@@ -6,12 +6,7 @@
  * Variabel wajib: $product, $vc, $channels, $competitors, $competitor_prices, $active.
  */
 ?>
-<div class="tab-pane fade <?= $active ? 'show active' : '' ?>" id="vendor<?= $vc['vendor_id'] ?>">
-<div class="d-flex justify-content-end mb-2">
-	<button type="button" class="btn btn-sm btn-outline-danger btn-cancel-vendor" data-vendor-id="<?= $vc['vendor_id'] ?>" data-vendor-name="<?= htmlspecialchars($vc['vendor_name']) ?>">
-		<i class="bi bi-x-circle"></i> Batalkan Vendor Ini
-	</button>
-</div>
+<div class="tab-pane fade <?= $active ? 'show active' : '' ?>" id="vendor<?= $vc['vendor_id'] ?>" data-vendor-id="<?= $vc['vendor_id'] ?>" data-vendor-name="<?= htmlspecialchars($vc['vendor_name']) ?>">
 <form class="price-form" method="post" action="<?= base_url('price-update/save') ?>">
 	<input type="hidden" name="product_id" value="<?= $product['id'] ?>">
 	<input type="hidden" name="vendor_id" value="<?= $vc['vendor_id'] ?>">
@@ -21,7 +16,7 @@
 		<div class="row g-3">
 			<div class="col-md-4">
 				<label class="form-label">Modal (Rp)</label>
-				<input type="number" step="0.01" name="modal" class="form-control input-calc" value="<?= $vc['modal'] ?>" required>
+				<input type="number" step="1" name="modal" class="form-control input-calc" value="<?= (int) round($vc['modal']) ?>" required>
 			</div>
 			<div class="col-md-4">
 				<label class="form-label">Margin (%)</label>
@@ -42,15 +37,14 @@
 								<span class="channel-icon"><i class="bi <?= channel_icon($ch['channel_code']) ?>"></i></span>
 								<?= htmlspecialchars($ch['channel_name']) ?>
 							</div>
-							<div class="small text-white-50 mb-1">RRP</div>
 							<div class="input-group input-group-lg mb-2">
-								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
-								<input type="text" class="form-control bg-white border-0 fw-bold text-markup-positive out-channel-srp" value="—" readonly tabindex="-1">
+								<span class="input-group-text bg-white border-0 fw-bold">RRP</span>
+								<input type="text" class="form-control bg-white border-0 fw-bold text-markup-positive text-end out-channel-srp" value="—" readonly tabindex="-1">
 							</div>
 							<div class="input-group input-group-lg mb-2">
 								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
-								<input type="number" step="0.01" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
-									value="<?= $vc['current_prices'][$ch['channel_code']] ?? '' ?>">
+								<input type="number" step="1" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+									value="<?= isset($vc['current_prices'][$ch['channel_code']]) ? (int) round($vc['current_prices'][$ch['channel_code']]) : '' ?>">
 							</div>
 							<div class="row g-2 text-center">
 								<div class="col-4">
