@@ -67,7 +67,7 @@
 						<tr>
 							<td><?= htmlspecialchars($b['product_name']) ?></td>
 							<td><?= tgl_indo($b['effective_date']) ?></td>
-							<td><?= status_badge($b['notify_status']) ?></td>
+							<td class="notify-status-cell"><?= status_badge($b['notify_status']) ?></td>
 							<td><a href="<?= base_url('price-history/detail/' . $b['id']) ?>" class="btn btn-sm btn-outline-secondary">Detail</a></td>
 						</tr>
 					<?php endforeach; ?>

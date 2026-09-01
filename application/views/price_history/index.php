@@ -38,7 +38,7 @@
 		<div class="col-md-2">
 			<select name="status" class="form-select">
 				<option value="">Semua Status</option>
-				<?php foreach (array('pending','processing','sent','partial','failed') as $s): ?>
+				<?php foreach (array('pending','sent') as $s): ?>
 					<option value="<?= $s ?>" <?= ($filters['status'] ?? '') === $s ? 'selected' : '' ?>><?= ucfirst($s) ?></option>
 				<?php endforeach; ?>
 			</select>
