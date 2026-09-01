@@ -106,21 +106,16 @@ function wireForm(form) {
 			const marginEl = wrap.querySelector('.out-margin-channel');
 			const biayaNominal = parseFloat(input.dataset.biaya) || 0;
 			const biayaPct = parseFloat(input.dataset.biayaPct) || 0; // dalam %, mis. 7.5 untuk 7,5%
-			if (srpEl) {
-				// RRP Suggest per kanal, dgn biaya persen dihitung dari HARGA JUAL (bukan Modal) —
-				// sesuai cara marketplace memotong komisi (mis. Komisi 6,5% x harga jual, bukan x modal).
-				// Diturunkan dari: Margin% = (RRP - TotalBiaya - Modal) / RRP, TotalBiaya = biayaNominal + biayaPct%*RRP
-				// -> RRP = (Modal + biayaNominal) / (1 - Margin%/100 - biayaPct/100)
-				const denom = 1 - (marginVal / 100) - (biayaPct / 100);
-				const canSrp = modalVal > 0 && marginVal > 0 && denom > 0;
-				srpEl.textContent = canSrp ? 'Rp ' + Math.round((modalVal + biayaNominal) / denom).toLocaleString('id-ID') : '—';
-			}
 			const priceVal = parseFloat(input.value) || 0;
 			const canPct = modalVal > 0 && priceVal > 0;
 			// Total Biaya kanal dari Harga Jual aktual = biaya nominal (Rp) + (biaya persen % x Harga Jual).
-			// Laba Bersih = Harga Jual - Total Biaya - Modal.
+			// Laba Bersih (Profit) = Harga Jual - Total Biaya - Modal, mis. Modal 800.000 & Harga Jual
+			// 1.000.000 (tanpa Biaya kanal) -> Profit 200.000.
 			const totalBiaya = biayaNominal + (priceVal * biayaPct / 100);
 			const labaBersih = priceVal - totalBiaya - modalVal;
+			if (srpEl) {
+				srpEl.textContent = canPct ? 'Rp ' + Math.round(labaBersih).toLocaleString('id-ID') : '—';
+			}
 			// Markup % = Laba Bersih / (Modal + Total Biaya) * 100
 			const totalModal = modalVal + totalBiaya;
 			setPctText(markupEl, canPct && totalModal > 0 ? (labaBersih / totalModal) * 100 : 0, canPct && totalModal > 0, 'text-markup-positive');
@@ -137,7 +132,11 @@ function wireForm(form) {
 			body
 		}).then(r => r.json()).then(d => {
 			const hasSrp = Number(d.srp_suggest) > 0;
-			outSrp.textContent = hasSrp ? 'Rp ' + Math.round(Number(d.srp_suggest)).toLocaleString('id-ID') : '—';
+			// Profit (Rp) = Modal x Markup% — sama dgn Harga Jual Aktual - Modal (Markup% sudah dihitung
+			// backend dari selisih itu), mis. Modal 800.000 & Harga Jual 1.000.000 -> Profit 200.000.
+			const modalVal = parseFloat(modal.value) || 0;
+			const profitRupiah = modalVal * (Number(d.markup_pct) / 100);
+			outSrp.textContent = hasSrp ? 'Rp ' + Math.round(profitRupiah).toLocaleString('id-ID') : '—';
 			setPctText(outMarkup, Number(d.markup_pct), hasSrp, 'text-markup-positive');
 			setPctText(outMargin, Number(d.margin_pct), hasSrp);
 			updateChannelOutputs();
