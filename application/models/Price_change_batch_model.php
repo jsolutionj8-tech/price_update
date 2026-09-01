@@ -72,7 +72,7 @@ class Price_change_batch_model extends CI_Model
 	 */
 	public function get_pending_detail()
 	{
-		return $this->db->select('price_change_batches.*, products.product_name, products.product_code, vendors.vendor_code, users.full_name as changed_by_name')
+		return $this->db->select('price_change_batches.*, products.product_name, products.product_code, vendors.vendor_code, vendors.vendor_name, users.full_name as changed_by_name')
 			->from($this->table)
 			->join('products', 'products.id = price_change_batches.product_id')
 			->join('vendors', 'vendors.id = price_change_batches.vendor_id')

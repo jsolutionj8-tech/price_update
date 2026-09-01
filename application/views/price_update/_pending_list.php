@@ -13,7 +13,7 @@
 			<tr>
 				<td><?= tgl_indo($b['effective_date']) ?></td>
 				<td><?= htmlspecialchars($b['product_name']) ?> <small class="text-muted d-block"><?= htmlspecialchars($b['product_code']) ?></small></td>
-				<td><?= htmlspecialchars($b['vendor_code']) ?></td>
+				<td><?= htmlspecialchars($b['vendor_name']) ?></td>
 				<td><?= htmlspecialchars($b['changed_by_name']) ?></td>
 				<td>
 					<div class="d-flex gap-1">
