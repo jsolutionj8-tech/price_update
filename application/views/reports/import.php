@@ -5,8 +5,8 @@
 		<div class="mb-3">
 			<input type="file" name="import_file" class="form-control" accept=".xlsx,.xls,.csv" required>
 		</div>
-		<button class="btn btn-primary"><i class="bi bi-upload"></i> Import</button>
+		<button class="btn btn-primary"><i class="bi bi-upload me-1"></i>Import</button>
 	</form>
 	<hr>
-	<a href="<?= base_url('reports/export') ?>" class="btn btn-outline-secondary"><i class="bi bi-download"></i> Export Laporan Riwayat Harga (Excel)</a>
+	<a href="<?= base_url('reports/export') ?>" class="btn btn-outline-secondary"><i class="bi bi-download me-1"></i>Export Laporan Riwayat Harga (Excel)</a>
 </div>

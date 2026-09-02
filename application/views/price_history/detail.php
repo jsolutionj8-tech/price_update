@@ -7,7 +7,7 @@
 			<div class="mt-1 notify-status-cell">Status Notifikasi: <?= status_badge($batch['notify_status']) ?></div>
 		</div>
 		<div>
-			<a href="<?= base_url('price-history/resend/' . $batch['id']) ?>" class="btn btn-outline-primary btn-sm" onclick="return confirm('Kirim ulang notifikasi email untuk perubahan ini?')"><i class="bi bi-arrow-repeat"></i> Kirim Ulang Notifikasi</a>
+			<a href="<?= base_url('price-history/resend/' . $batch['id']) ?>" class="btn btn-outline-primary btn-sm" onclick="return confirm('Kirim ulang notifikasi email untuk perubahan ini?')"><i class="bi bi-arrow-repeat me-1"></i>Kirim Ulang Notifikasi</a>
 			<a href="<?= base_url('price-history') ?>" class="btn btn-outline-secondary btn-sm">Kembali</a>
 		</div>
 	</div>

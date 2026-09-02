@@ -20,7 +20,7 @@
 						<?php if ($can_view_detail): ?>
 							<a href="<?= base_url('price-history/detail/' . $b['id']) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">Detail</a>
 						<?php endif; ?>
-						<button type="button" class="btn btn-sm btn-outline-danger btn-cancel-pending" data-batch-id="<?= $b['id'] ?>" data-product-name="<?= htmlspecialchars($b['product_name']) ?>"><i class="bi bi-x-circle"></i> Batalkan</button>
+						<button type="button" class="btn btn-sm btn-outline-danger btn-cancel-pending" data-batch-id="<?= $b['id'] ?>" data-product-name="<?= htmlspecialchars($b['product_name']) ?>"><i class="bi bi-x-circle me-1"></i>Batalkan</button>
 					</div>
 				</td>
 			</tr>

@@ -49,7 +49,7 @@
 			</select>
 		</div>
 		<div class="col-md-2">
-			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
+			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel me-1"></i>Filter</button>
 		</div>
 
 		<div class="col-md-4" style="display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:.5rem;">
@@ -58,8 +58,8 @@
 		</div>
 		<div class="col-md-6"></div>
 		<div class="col-md-2 d-flex gap-2">
-			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-success flex-fill"><i class="bi bi-file-earmark-excel"></i> Excel</a>
-			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-danger flex-fill"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-success flex-fill"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-danger flex-fill"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
 		</div>
 	</form>
 </div>

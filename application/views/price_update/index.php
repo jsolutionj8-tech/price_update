@@ -5,7 +5,7 @@
 			<input type="text" name="keyword" class="form-control" placeholder="Cari produk berdasarkan kode / nama..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
 		</div>
 		<div class="col-md-4">
-			<button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Cari</button>
+			<button class="btn btn-outline-secondary w-100"><i class="bi bi-search me-1"></i>Cari</button>
 		</div>
 	</form>
 </div>
@@ -20,7 +20,7 @@
 					<td><?= htmlspecialchars($p['product_code']) ?></td>
 					<td><?= htmlspecialchars($p['product_name']) ?></td>
 					<td><?= htmlspecialchars($p['brand_name'] ?? '-') ?></td>
-					<td class="text-end"><a href="<?= base_url('price-update/form/' . $p['id']) ?>" class="btn btn-sm btn-primary"><i class="bi bi-pencil-square"></i> Update Harga</a></td>
+					<td class="text-end"><a href="<?= base_url('price-update/form/' . $p['id']) ?>" class="btn btn-sm btn-primary"><i class="bi bi-pencil-square me-1"></i>Update Harga</a></td>
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($products)): ?>

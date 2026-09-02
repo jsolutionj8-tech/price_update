@@ -3,9 +3,9 @@
 		<div class="col-md-6">
 			<input type="text" name="keyword" class="form-control" placeholder="Cari kode / nama produk / nama kompetitor..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
 		</div>
-		<div class="col-6 col-md-3"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Cari</button></div>
+		<div class="col-6 col-md-3"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search me-1"></i>Cari</button></div>
 		<div class="col-6 col-md-3">
-			<a href="<?= base_url('competitor-price/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Tambah Harga Kompetitor</a>
+			<a href="<?= base_url('competitor-price/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Tambah Harga Kompetitor</a>
 		</div>
 	</form>
 </div>

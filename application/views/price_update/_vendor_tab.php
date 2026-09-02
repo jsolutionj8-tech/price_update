@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Partial: satu tab-pane vendor pada form Update Harga.
  * Dipakai baik oleh price_update/form.php (render awal, semua vendor) maupun
@@ -22,7 +22,7 @@
 				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= (float) $vc['target_hpp_pct'] ?>" required>
 			</div>
 		</div>
-		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> Profit, Markup % &amp; Margin % di bawah tiap kolom Harga Kanal dihitung otomatis dari <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal), mis. Modal 800.000 &amp; Harga Jual 1.000.000 (tanpa Biaya kanal) &rarr; Profit 200.000: Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest (Modal ÷ (1 &minus; Margin%)).</small>
+		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Profit, Markup % &amp; Margin % di bawah tiap kolom Harga Kanal dihitung otomatis dari <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal), mis. Modal 800.000 &amp; Harga Jual 1.000.000 (tanpa Biaya kanal) &rarr; Profit 200.000: Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest (Modal ÷ (1 &minus; Margin%)).</small>
 	</div>
 
 	<div class="row g-3 mt-3">
@@ -121,9 +121,9 @@
 	</div>
 
 	<div class="mt-3">
-		<button type="button" class="btn btn-outline-primary btn-preview"><i class="bi bi-envelope"></i> Preview Email</button>
-		<button type="submit" class="btn btn-primary" onclick="return confirm('Simpan perubahan harga ini? Notifikasi belum langsung terkirim &mdash; klik &quot;Kirim Notifikasi Sekarang&quot; setelah semua produk selesai diupdate.')"><i class="bi bi-save"></i> Simpan Perubahan Harga</button>
-		<div class="form-text mt-3"><i class="bi bi-info-circle"></i> Notifikasi email dikirim belakangan lewat tombol <b>"Kirim Notifikasi Sekarang"</b> di bagian atas halaman, sehingga beberapa produk yang diupdate berurutan cukup mengirim satu email gabungan.</div>
+		<button type="button" class="btn btn-outline-primary btn-preview"><i class="bi bi-envelope me-1"></i>Preview Email</button>
+		<button type="submit" class="btn btn-primary" onclick="return confirm('Simpan perubahan harga ini? Notifikasi belum langsung terkirim &mdash; klik &quot;Kirim Notifikasi Sekarang&quot; setelah semua produk selesai diupdate.')"><i class="bi bi-save me-1"></i>Simpan Perubahan Harga</button>
+		<div class="form-text mt-3"><i class="bi bi-info-circle me-1"></i>Notifikasi email dikirim belakangan lewat tombol <b>"Kirim Notifikasi Sekarang"</b> di bagian atas halaman, sehingga beberapa produk yang diupdate berurutan cukup mengirim satu email gabungan.</div>
 	</div>
 </form>
 </div>

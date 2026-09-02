@@ -21,7 +21,7 @@
 		</div>
 		<div class="col-6 col-md-1"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i></button></div>
 		<div class="col-6 col-md-3 text-end">
-			<a href="<?= base_url('products/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Tambah Produk</a>
+			<a href="<?= base_url('products/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Tambah Produk</a>
 		</div>
 	</form>
 </div>
@@ -40,7 +40,7 @@
 					<td><?= htmlspecialchars($p['brand_name'] ?? '-') ?></td>
 					<td><?= htmlspecialchars($p['category_name'] ?? '-') ?></td>
 					<td class="text-end">
-						<a href="<?= base_url('price-update/form/' . $p['id']) ?>" class="btn btn-sm btn-primary"><i class="bi bi-currency-exchange"></i> Update Harga</a>
+						<a href="<?= base_url('price-update/form/' . $p['id']) ?>" class="btn btn-sm btn-primary"><i class="bi bi-currency-exchange me-1"></i>Update Harga</a>
 						<a href="<?= base_url('products/edit/' . $p['id']) ?>" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
 						<a href="<?= base_url('products/delete/' . $p['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Nonaktifkan produk ini?')"><i class="bi bi-trash"></i></a>
 					</td>

@@ -8,9 +8,9 @@
 		<div class="col-md-6">
 			<input type="text" name="keyword" class="form-control" placeholder="Cari nama sales channel..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
 		</div>
-		<div class="col-6 col-md-3"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search"></i> Cari</button></div>
+		<div class="col-6 col-md-3"><button class="btn btn-outline-secondary w-100"><i class="bi bi-search me-1"></i>Cari</button></div>
 		<div class="col-6 col-md-3">
-			<a href="<?= base_url('marketplaces/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i> Tambah Sales Channel</a>
+			<a href="<?= base_url('marketplaces/create') ?>" class="btn btn-primary w-100"><i class="bi bi-plus-lg me-1"></i>Tambah Sales Channel</a>
 		</div>
 	</form>
 </div>

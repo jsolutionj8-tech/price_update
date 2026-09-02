@@ -24,7 +24,7 @@
 					<?php endforeach; ?>
 				</select>
 			</div>
-			<button type="submit" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Tambah</button>
+			<button type="submit" class="btn btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>Tambah</button>
 		</form>
 		<?php endif; ?>
 		<button type="button" id="cancelActiveVendorBtn" class="btn btn-outline-danger"<?= empty($vendor_costs) ? ' style="display:none"' : '' ?>><i class="bi bi-x-circle me-1"></i>Batalkan Vendor Ini</button>

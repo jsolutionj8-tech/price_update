@@ -1,6 +1,6 @@
 <div class="card card-stat p-3">
 	<div class="d-flex justify-content-end mb-3">
-		<a href="<?= base_url('notification-groups/create') ?>" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Tambah Grup</a>
+		<a href="<?= base_url('notification-groups/create') ?>" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>Tambah Grup</a>
 	</div>
 	<div class="table-responsive">
 		<table class="table align-middle">

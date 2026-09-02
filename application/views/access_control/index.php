@@ -41,7 +41,7 @@
 			</table>
 		</div>
 		<div class="mt-3">
-			<button class="btn btn-primary"><i class="bi bi-save"></i> Simpan Hak Akses</button>
+			<button class="btn btn-primary"><i class="bi bi-save me-1"></i>Simpan Hak Akses</button>
 		</div>
 	</div>
 </form>
