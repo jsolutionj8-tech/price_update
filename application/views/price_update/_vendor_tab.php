@@ -15,7 +15,7 @@
 		<div class="row g-3">
 			<div class="col-md-4">
 				<label class="form-label">Modal (Rp)</label>
-				<input type="number" step="1" name="modal" class="form-control input-calc" value="<?= (int) round($vc['modal']) ?>" required>
+				<input type="text" inputmode="numeric" name="modal" class="form-control input-calc rupiah-input" value="<?= number_format((int) round($vc['modal']), 0, ',', '.') ?>" required>
 			</div>
 			<div class="col-md-4">
 				<label class="form-label">Margin (%)</label>
@@ -47,8 +47,8 @@
 							<label class="small text-white-50 mb-1 d-block">Harga Jual Aktual</label>
 							<div class="input-group input-group-lg mb-2">
 								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
-								<input type="number" step="1" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input ps-2" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
-									value="<?= isset($vc['current_prices'][$ch['channel_code']]) ? (int) round($vc['current_prices'][$ch['channel_code']]) : '' ?>">
+								<input type="text" inputmode="numeric" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input rupiah-input ps-2" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+									value="<?= isset($vc['current_prices'][$ch['channel_code']]) ? number_format((int) round($vc['current_prices'][$ch['channel_code']]), 0, ',', '.') : '' ?>">
 							</div>
 							<div class="row g-2 text-center">
 								<div class="col-4">
@@ -96,7 +96,7 @@
 						</label>
 						<div class="input-group input-group-sm">
 							<span class="input-group-text">Rp</span>
-							<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control competitor-price-input" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
+							<input type="text" inputmode="numeric" name="competitor_price[<?= $c['id'] ?>]" class="form-control competitor-price-input rupiah-input" value="<?= isset($competitor_prices[$c['competitor_code']]) ? number_format((int) round($competitor_prices[$c['competitor_code']]), 0, ',', '.') : '' ?>">
 						</div>
 					</div>
 				<?php endforeach; ?>
@@ -123,7 +123,7 @@
 	<div class="mt-3">
 		<button type="button" class="btn btn-outline-primary btn-preview"><i class="bi bi-envelope"></i> Preview Email</button>
 		<button type="submit" class="btn btn-primary" onclick="return confirm('Simpan perubahan harga ini? Notifikasi belum langsung terkirim &mdash; klik &quot;Kirim Notifikasi Sekarang&quot; setelah semua produk selesai diupdate.')"><i class="bi bi-save"></i> Simpan Perubahan Harga</button>
-		<div class="form-text mt-1"><i class="bi bi-info-circle"></i> Notifikasi email dikirim belakangan lewat tombol <b>"Kirim Notifikasi Sekarang"</b> di bagian atas halaman, sehingga beberapa produk yang diupdate berurutan cukup mengirim satu email gabungan.</div>
+		<div class="form-text mt-3"><i class="bi bi-info-circle"></i> Notifikasi email dikirim belakangan lewat tombol <b>"Kirim Notifikasi Sekarang"</b> di bagian atas halaman, sehingga beberapa produk yang diupdate berurutan cukup mengirim satu email gabungan.</div>
 	</div>
 </form>
 </div>

@@ -73,7 +73,46 @@ const calcUrl = "<?= base_url('price-update/calculate') ?>";
 const previewUrl = "<?= base_url('price-update/preview-email') ?>";
 const previewTrigger = document.getElementById('previewModalTrigger');
 
+// Format ribuan (titik) utk input Modal/Harga Jual/Harga Kompetitor (.rupiah-input) — inputnya
+// type=text (bukan type=number) krn browser tidak bisa menampilkan pemisah ribuan di input
+// number. Yang dikirim ke server tetap angka mentah tanpa titik (lihat wireRupiahInput,
+// getFormDataRupiahSafe, & listener 'submit' di bawah yg membersihkan titik sebelum submit).
+function rupiahDigits(str) {
+	return String(str || '').replace(/\D/g, '');
+}
+function rupiahNumber(str) {
+	const digits = rupiahDigits(str);
+	return digits ? parseInt(digits, 10) : 0;
+}
+function formatRupiahDigits(digits) {
+	return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+function wireRupiahInput(el) {
+	el.addEventListener('input', function () {
+		const digitsBeforeCursor = rupiahDigits(el.value.slice(0, el.selectionStart));
+		const digits = rupiahDigits(el.value);
+		el.value = formatRupiahDigits(digits);
+		const newPos = formatRupiahDigits(digitsBeforeCursor).length;
+		el.setSelectionRange(newPos, newPos);
+	});
+}
+// Dipakai sebelum new FormData(form) (preview email) — sementara ganti nilai .rupiah-input jadi
+// angka mentah spy FormData yg dikirim ke server benar, lalu kembalikan tampilan formatnya.
+function getFormDataRupiahSafe(form) {
+	const rupiahEls = Array.from(form.querySelectorAll('.rupiah-input'));
+	const originals = rupiahEls.map(el => el.value);
+	rupiahEls.forEach(el => { el.value = rupiahDigits(el.value); });
+	const fd = new FormData(form);
+	rupiahEls.forEach((el, i) => { el.value = originals[i]; });
+	return fd;
+}
+
 function wireForm(form) {
+	Array.from(form.querySelectorAll('.rupiah-input')).forEach(wireRupiahInput);
+	form.addEventListener('submit', function () {
+		form.querySelectorAll('.rupiah-input').forEach(el => { el.value = rupiahDigits(el.value); });
+	});
+
 	const modal = form.querySelector('[name=modal]');
 	const margin = form.querySelector('[name=margin_pct]');
 	const offlinePrice = form.querySelector('[name=price_OFFLINE]');
@@ -115,23 +154,24 @@ function wireForm(form) {
 		}
 	}
 
-	// RRP (Recommended Selling Price) per kanal = (Modal + Biaya Tetap kanal) / (1 - Margin%/100
-	// - Biaya Persentase kanal/100) — solusi dari persamaan Margin% = (RRP - TotalBiaya - Modal) /
-	// RRP dgn TotalBiaya = biayaNominal + biayaPct%*RRP. Biaya per kanal diambil dari Master Biaya
-	// (Sales Channel) via data-biaya/data-biaya-pct di tiap input Harga Jual, jadi RRP-nya beda2
-	// per kanal sesuai kombinasi Biaya Tetap & Biaya Persentase yang di-set di sana, mis. Modal
-	// 800.000 & Margin 10%: kanal tanpa biaya -> RRP 888.889, kanal dgn Biaya Persentase 2,8% &
-	// Biaya Tetap 9.220 -> RRP (800.000+9.220)/(1-0,10-0,028) = 923.981.
+	// RRP (Recommended Selling Price) per kanal = "Suggested Selling Price" — Harga Jual Minimum
+	// (Modal/(1-Margin%) + Biaya Tetap kanal) / (1 - Biaya Persentase kanal), dibulatkan NAIK ke
+	// kelipatan Rp5.000 terdekat spy jadi harga jual yg "rapi". Biaya per kanal diambil dari
+	// Master Biaya (Sales Channel) via data-biaya/data-biaya-pct di tiap input Harga Jual. Mis.
+	// Modal 800.000 & Margin 10%, kanal Biaya Persentase 2,8% & Biaya Tetap 9.220 -> Harga Jual
+	// Minimum 923.981 -> dibulatkan naik -> RRP 925.000.
 	function calcRrp(input, modalVal, marginVal) {
 		const biayaNominal = parseFloat(input.dataset.biaya) || 0;
 		const biayaPct = parseFloat(input.dataset.biayaPct) || 0;
-		const denom = 1 - (marginVal / 100) - (biayaPct / 100);
-		const canRrp = modalVal > 0 && marginVal > 0 && marginVal < 100 && denom > 0;
-		return canRrp ? (modalVal + biayaNominal) / denom : null;
+		const biayaPctFactor = 1 - (biayaPct / 100);
+		const canRrp = modalVal > 0 && marginVal > 0 && marginVal < 100 && biayaPctFactor > 0;
+		if (!canRrp) return null;
+		const hargaJualMinimum = (modalVal / (1 - marginVal / 100) + biayaNominal) / biayaPctFactor;
+		return Math.ceil(hargaJualMinimum / 5000) * 5000;
 	}
 
 	function updateChannelOutputs() {
-		const modalVal = parseFloat(modal.value) || 0;
+		const modalVal = rupiahNumber(modal.value);
 		const marginVal = parseFloat(margin.value) || 0;
 
 		form.querySelectorAll('.channel-price-input').forEach(input => {
@@ -154,7 +194,7 @@ function wireForm(form) {
 			const marginEl = wrap.querySelector('.out-margin-channel');
 			const biayaNominal = parseFloat(input.dataset.biaya) || 0;
 			const biayaPct = parseFloat(input.dataset.biayaPct) || 0; // dalam %, mis. 7.5 untuk 7,5%
-			const priceVal = parseFloat(input.value) || 0;
+			const priceVal = rupiahNumber(input.value);
 			const canPct = modalVal > 0 && priceVal > 0;
 			// Total Biaya kanal dari Harga Jual aktual = biaya nominal (Rp) + (biaya persen % x Harga Jual).
 			// Laba Bersih (Profit) = Harga Jual - Total Biaya - Modal, mis. Modal 800.000 & Harga Jual
@@ -174,7 +214,7 @@ function wireForm(form) {
 	}
 
 	function recalc() {
-		const body = `modal=${modal.value}&margin_pct=${margin.value}&actual_price=${offlinePrice ? offlinePrice.value : ''}`;
+		const body = `modal=${rupiahNumber(modal.value)}&margin_pct=${margin.value}&actual_price=${offlinePrice ? rupiahNumber(offlinePrice.value) : ''}`;
 		fetch(calcUrl, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -183,7 +223,7 @@ function wireForm(form) {
 			const hasSrp = Number(d.srp_suggest) > 0;
 			// Profit (Rp) = Modal x Markup% — sama dgn Harga Jual Aktual - Modal (Markup% sudah dihitung
 			// backend dari selisih itu), mis. Modal 800.000 & Harga Jual 1.000.000 -> Profit 200.000.
-			const modalVal = parseFloat(modal.value) || 0;
+			const modalVal = rupiahNumber(modal.value);
 			const profitRupiah = modalVal * (Number(d.markup_pct) / 100);
 			outSrp.textContent = hasSrp ? 'Rp ' + Math.round(profitRupiah).toLocaleString('id-ID') : '—';
 			setValueColor(outSrp, profitRupiah, hasSrp, 'text-markup-positive');
@@ -244,7 +284,7 @@ function wireForm(form) {
 	}, true);
 
 	form.querySelector('.btn-preview').addEventListener('click', () => {
-		const fd = new FormData(form);
+		const fd = getFormDataRupiahSafe(form);
 		fetch(previewUrl, { method: 'POST', body: fd })
 			.then(r => r.text())
 			.then(html => { document.getElementById('previewBody').innerHTML = html; previewTrigger.click(); });
