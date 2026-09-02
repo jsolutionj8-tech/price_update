@@ -12,7 +12,6 @@
 	<input type="hidden" name="vendor_id" value="<?= $vc['vendor_id'] ?>">
 
 	<div class="card card-stat p-3">
-		<h6 class="fw-bold">Modal & Margin</h6>
 		<div class="row g-3">
 			<div class="col-md-4">
 				<label class="form-label">Modal (Rp)</label>
@@ -38,8 +37,8 @@
 								<?= htmlspecialchars($ch['channel_name']) ?>
 							</div>
 							<div class="input-group input-group-lg mb-2">
-								<span class="input-group-text bg-white border-0 fw-bold">RRP</span>
-								<input type="text" class="form-control bg-white border-0 fw-bold text-markup-positive text-end out-channel-srp" value="—" readonly tabindex="-1">
+								<span class="input-group-text bg-light border-0 fw-bold">Recommended Selling Price</span>
+								<input type="text" class="form-control bg-light border-0 fw-bold text-markup-positive text-end out-channel-srp" value="—" readonly tabindex="-1">
 							</div>
 							<div class="input-group input-group-lg mb-2">
 								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
