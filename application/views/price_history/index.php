@@ -47,9 +47,9 @@
 			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
 		</div>
 
-		<div class="col-md-4 d-flex gap-2">
-			<input type="date" name="date_from" class="form-control flex-fill" style="min-width:0;" value="<?= htmlspecialchars($filters['date_from'] ?: date('Y-m-d')) ?>" placeholder="Dari">
-			<input type="date" name="date_to" class="form-control flex-fill" style="min-width:0;" value="<?= htmlspecialchars($filters['date_to'] ?: date('Y-m-d')) ?>" placeholder="Sampai">
+		<div class="col-md-4" style="display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:.5rem;">
+			<input type="date" name="date_from" class="form-control" value="<?= htmlspecialchars($filters['date_from'] ?: date('Y-m-d')) ?>" placeholder="Dari">
+			<input type="date" name="date_to" class="form-control" value="<?= htmlspecialchars($filters['date_to'] ?: date('Y-m-d')) ?>" placeholder="Sampai">
 		</div>
 		<div class="col-md-6"></div>
 		<div class="col-md-2 d-flex gap-2">
