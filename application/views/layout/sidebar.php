@@ -188,9 +188,9 @@
 				<div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2" id="pendingNotifyBanner">
 					<div><i class="bi bi-envelope-exclamation-fill me-1"></i><span id="pendingNotifyCount"><?= $pending_notify_count ?></span> perubahan harga menunggu dikirim notifikasi.</div>
 					<div class="d-flex gap-2">
-						<button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#pendingNotifyModal"><i class="bi bi-eye"></i> Lihat Detail</button>
+						<button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#pendingNotifyModal"><i class="bi bi-eye me-1"></i>Lihat Detail</button>
 						<form method="post" action="<?= base_url('price-update/send-pending') ?>" class="d-inline">
-							<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk seluruh perubahan harga yang menunggu sekarang?')"><i class="bi bi-send-fill"></i> Kirim Notifikasi Sekarang</button>
+							<button class="btn btn-sm btn-warning" onclick="return confirm('Kirim satu email notifikasi untuk seluruh perubahan harga yang menunggu sekarang?')"><i class="bi bi-send-fill me-1"></i>Kirim Notifikasi Sekarang</button>
 						</form>
 					</div>
 				</div>

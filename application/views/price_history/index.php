@@ -13,6 +13,11 @@
 	$can_view_detail = in_array($logged_in_user['role'] ?? '', array('ADMIN', 'EDITOR'), TRUE);
 ?>
 
+<!-- Flatpickr dipakai utk kalender tanggal Dari/Sampai supaya tampilannya seragam persis di
+     semua browser (kalender native Safari adalah widget OS, ukurannya tidak bisa diatur CSS
+     & beda dgn kalender kustom Chrome). -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+
 <div class="card card-stat p-3 mb-3">
 	<!-- Filter brand/kategori/kode-nama disamakan dgn menu Master Data -> Produk. -->
 	<form method="get" class="row g-2">
@@ -47,11 +52,11 @@
 			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
 		</div>
 
-		<div class="col-md-6" style="display:grid; grid-template-columns: minmax(160px,1fr) minmax(160px,1fr); gap:.5rem;">
-			<input type="date" name="date_from" class="form-control" value="<?= htmlspecialchars($filters['date_from'] ?: date('Y-m-d')) ?>" placeholder="Dari">
-			<input type="date" name="date_to" class="form-control" value="<?= htmlspecialchars($filters['date_to'] ?: date('Y-m-d')) ?>" placeholder="Sampai">
+		<div class="col-md-4" style="display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:.5rem;">
+			<input type="text" name="date_from" class="form-control flatpickr-date" autocomplete="off" value="<?= htmlspecialchars($filters['date_from'] ?: date('Y-m-d')) ?>" placeholder="Dari">
+			<input type="text" name="date_to" class="form-control flatpickr-date" autocomplete="off" value="<?= htmlspecialchars($filters['date_to'] ?: date('Y-m-d')) ?>" placeholder="Sampai">
 		</div>
-		<div class="col-md-4"></div>
+		<div class="col-md-6"></div>
 		<div class="col-md-2 d-flex gap-2">
 			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-success flex-fill"><i class="bi bi-file-earmark-excel"></i> Excel</a>
 			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-danger flex-fill"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
@@ -122,3 +127,15 @@
 		</form>
 	</div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	flatpickr('.flatpickr-date', {
+		dateFormat: 'Y-m-d',
+		altInput: true,
+		altFormat: 'd-m-Y',
+		allowInput: true
+	});
+});
+</script>

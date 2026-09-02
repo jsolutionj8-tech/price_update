@@ -94,7 +94,10 @@
 								<?= htmlspecialchars($c['competitor_name']) ?>
 							<?php endif; ?>
 						</label>
-						<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control form-control-sm competitor-price-input" placeholder="Rp" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
+						<div class="input-group input-group-sm">
+							<span class="input-group-text">Rp</span>
+							<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control competitor-price-input" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
+						</div>
 					</div>
 				<?php endforeach; ?>
 				<?php if (empty($competitors)): ?>

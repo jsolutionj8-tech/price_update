@@ -8,15 +8,6 @@
 	</div>
 </div>
 
-<ul class="nav nav-tabs mb-3">
-	<?php $i = 0; foreach ($vendor_costs as $vc): $i++; ?>
-	<li class="nav-item"><button class="nav-link <?= $i === 1 ? 'active' : '' ?>" data-bs-toggle="tab" data-bs-target="#vendor<?= $vc['vendor_id'] ?>"><?= htmlspecialchars($vc['vendor_name']) ?></button></li>
-	<?php endforeach; ?>
-</ul>
-<?php if (empty($vendor_costs)): ?>
-	<div class="alert alert-warning" id="noVendorWarning">Belum ada data vendor untuk produk ini. Tambahkan vendor terlebih dahulu di bawah ini.</div>
-<?php endif; ?>
-
 <?php if (!empty($available_vendors) || !empty($vendor_costs)): ?>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css">
@@ -39,6 +30,15 @@
 		<button type="button" id="cancelActiveVendorBtn" class="btn btn-outline-danger"<?= empty($vendor_costs) ? ' style="display:none"' : '' ?>><i class="bi bi-x-circle me-1"></i>Batalkan Vendor Ini</button>
 	</div>
 </div>
+<?php endif; ?>
+
+<ul class="nav nav-tabs mb-0" style="margin-bottom:-1.5rem !important;">
+	<?php $i = 0; foreach ($vendor_costs as $vc): $i++; ?>
+	<li class="nav-item"><button class="nav-link <?= $i === 1 ? 'active' : '' ?>" data-bs-toggle="tab" data-bs-target="#vendor<?= $vc['vendor_id'] ?>"><?= htmlspecialchars($vc['vendor_name']) ?></button></li>
+	<?php endforeach; ?>
+</ul>
+<?php if (empty($vendor_costs)): ?>
+	<div class="alert alert-warning" id="noVendorWarning">Belum ada data vendor untuk produk ini. Tambahkan vendor terlebih dahulu di bawah ini.</div>
 <?php endif; ?>
 
 <div class="tab-content">
