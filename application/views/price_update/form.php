@@ -36,7 +36,7 @@
 			<button type="submit" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Tambah</button>
 		</form>
 		<?php endif; ?>
-		<button type="button" id="cancelActiveVendorBtn" class="btn btn-outline-danger"<?= empty($vendor_costs) ? ' style="display:none"' : '' ?>><i class="bi bi-x-circle"></i> Batalkan Vendor Ini</button>
+		<button type="button" id="cancelActiveVendorBtn" class="btn btn-outline-danger"<?= empty($vendor_costs) ? ' style="display:none"' : '' ?>><i class="bi bi-x-circle me-1"></i>Batalkan Vendor Ini</button>
 	</div>
 </div>
 <?php endif; ?>
@@ -127,7 +127,7 @@ function wireForm(form) {
 			el.textContent = srpVal !== null ? 'Rp ' + Math.round(srpVal).toLocaleString('id-ID') : '—';
 		});
 		form.querySelectorAll('.out-channel-srp-caption').forEach(el => {
-			el.textContent = canSrp ? 'Minimum untuk mencapai target margin ' + marginVal + '%' : 'Minimum untuk mencapai target margin';
+			el.textContent = 'Minimum untuk mencapai target margin';
 		});
 
 		channelInputs.forEach(input => {
