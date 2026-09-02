@@ -124,7 +124,10 @@ function wireForm(form) {
 		const canSrp = modalVal > 0 && marginVal > 0 && marginVal < 100;
 		const srpVal = canSrp ? modalVal / (1 - marginVal / 100) : null;
 		form.querySelectorAll('.out-channel-srp').forEach(el => {
-			el.value = srpVal !== null ? 'Rp ' + Math.round(srpVal).toLocaleString('id-ID') : '—';
+			el.textContent = srpVal !== null ? 'Rp ' + Math.round(srpVal).toLocaleString('id-ID') : '—';
+		});
+		form.querySelectorAll('.out-channel-srp-caption').forEach(el => {
+			el.textContent = canSrp ? 'Minimum untuk mencapai target margin ' + marginVal + '%' : 'Minimum untuk mencapai target margin';
 		});
 
 		channelInputs.forEach(input => {
