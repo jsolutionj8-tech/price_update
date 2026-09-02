@@ -182,22 +182,23 @@ function wireForm(form) {
 	channelInputs.forEach(input => input.addEventListener('input', updateChannelOutputs));
 	recalc();
 
-	// Enter di salah satu input Harga Jual jangan langsung submit form — pindah fokus ke
-	// input Harga Jual berikutnya dulu (urutan kanal spt tampil di layar, termasuk Offline).
-	// Form baru submit setelah Enter ditekan di input Harga Jual yang TERAKHIR.
+	// Enter jangan langsung submit form — pindah fokus berurutan: Modal -> Margin -> tiap
+	// input Harga Jual (urutan kanal spt tampil di layar, termasuk Offline). Form baru
+	// submit setelah Enter ditekan di input Harga Jual yang TERAKHIR.
 	// Dipasang di FORM (delegasi) dgn capture:true, bukan per-input — Safari tidak selalu
 	// memicu 'keydown' scr konsisten di <input type=number> sebelum submission implisit
 	// jalan duluan (beda dgn Chrome), sedangkan capture phase di form pasti kebagian
 	// duluan sebelum browser memutuskan submit form-nya.
 	const allPriceInputs = Array.from(form.querySelectorAll('.channel-price-input'));
+	const enterChain = [modal, margin, ...allPriceInputs];
 	form.addEventListener('keydown', function (e) {
 		if (e.key !== 'Enter' && e.keyCode !== 13) return;
-		const idx = allPriceInputs.indexOf(e.target);
+		const idx = enterChain.indexOf(e.target);
 		if (idx === -1) return;
 
 		e.preventDefault();
 		e.stopPropagation();
-		const next = allPriceInputs[idx + 1];
+		const next = enterChain[idx + 1];
 		if (next) {
 			next.focus();
 			next.select();
