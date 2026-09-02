@@ -86,6 +86,42 @@ class Price_history extends MY_Controller
 	}
 
 	/**
+	 * Kirim ulang notifikasi untuk BEBERAPA batch sekaligus (dicentang di halaman list) —
+	 * pakai Notifier::dispatch_group() yg sama dgn Price_update::send_pending(), digabung
+	 * jadi satu email per penerima. Sama spt resend() tunggal, dibatasi ke ADMIN/EDITOR.
+	 */
+	public function resend_bulk()
+	{
+		$this->auth_lib->require_role(array('ADMIN', 'EDITOR'));
+
+		$batchIds = array_filter(array_map('intval', (array) $this->input->post('batch_ids')));
+
+		if (empty($batchIds)) {
+			$this->session->set_flashdata('error', 'Pilih minimal satu item untuk dikirim ulang.');
+			redirect($this->_safe_referer());
+		}
+
+		$this->load->library('notifier');
+		$result = $this->notifier->dispatch_group($batchIds);
+
+		if ($result['success']) {
+			$msg = "Notifikasi dikirim ulang: {$result['batches']} produk ke {$result['recipients']} penerima ({$result['sent']} email berhasil";
+			$msg .= $result['failed'] > 0 ? ", {$result['failed']} gagal)." : ').';
+			$this->session->set_flashdata('success', $msg);
+		} else {
+			$this->session->set_flashdata('error', $result['message']);
+		}
+
+		redirect($this->_safe_referer());
+	}
+
+	protected function _safe_referer()
+	{
+		$referer = $this->input->server('HTTP_REFERER');
+		return $referer ?: 'price-history';
+	}
+
+	/**
 	 * Export Excel langsung dari halaman Riwayat Perubahan — terbuka untuk semua
 	 * role yang bisa melihat halaman ini (mengikuti $menu_key di atas, bukan
 	 * dibatasi tambahan seperti detail()/resend()).

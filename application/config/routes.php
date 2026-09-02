@@ -142,6 +142,7 @@ $route['competitor-price/delete/(:num)']      = 'competitor_price/delete/$1';
 $route['price-history']                = 'price_history/index';
 $route['price-history/detail/(:num)']  = 'price_history/detail/$1';
 $route['price-history/resend/(:num)']  = 'price_history/resend/$1';
+$route['price-history/resend-bulk']    = 'price_history/resend_bulk';
 $route['price-history/export']         = 'price_history/export';
 $route['price-history/export-pdf']     = 'price_history/export_pdf';
 

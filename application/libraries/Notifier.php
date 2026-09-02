@@ -201,6 +201,15 @@ class Notifier
 			$this->CI->email->subject($subject);
 			$this->CI->email->message($body);
 
+			// Lampiran PDF berisi ringkasan yang sama dgn isi email (hanya kanal yg dilanggan
+			// penerima ini) — supaya penerima punya salinan yang bisa dicetak/diarsipkan.
+			// Dilewati diam-diam kalau Dompdf belum terpasang, biar pengiriman notifikasi
+			// tidak ikut gagal gara-gara lampiran.
+			if (class_exists('\Dompdf\Dompdf')) {
+				$pdfContent = $this->_build_group_pdf($info['items']);
+				$this->CI->email->attach($pdfContent, 'attachment', 'ringkasan-update-harga-' . date('Ymd') . '.pdf', 'application/pdf');
+			}
+
 			try {
 				$ok = $this->CI->email->send();
 			} catch (Exception $e) {
@@ -260,9 +269,9 @@ class Notifier
 			}
 
 			$blocks .= '<div style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">'
-				. '<div style="background:#1F3864;color:#fff;padding:8px 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;">'
-				. htmlspecialchars($batch['product_name'])
-				. ' <span style="font-weight:normal;font-size:12px;">(' . htmlspecialchars($batch['product_code']) . ')</span></div>'
+				. '<div style="background:#3D5C6C;color:#fff;padding:8px 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;">'
+				. htmlspecialchars($batch['product_code']) . ' - ' . htmlspecialchars($batch['product_name'])
+				. '</div>'
 				. '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;width:100%;">'
 				. '<tr style="background:#f4f6f9;"><th align="left">Kanal</th><th align="left">Harga Lama</th><th align="left">Harga Baru</th></tr>'
 				. $rows
@@ -278,6 +287,54 @@ class Notifier
 			. $blocks
 			. '<p style="font-size:12px;color:#5b6b7d;">Email ini dikirim otomatis oleh Sistem Update Harga.</p>'
 			. '</div>';
+	}
+
+	/**
+	 * Bangun PDF lampiran email gabungan (isinya sama dengan render_group_template(),
+	 * hanya kanal yg dilanggan penerima ini) — dipakai supaya penerima punya salinan
+	 * ringkasan yang bisa dicetak/diarsipkan lepas dari isi HTML email.
+	 * @param array $items Sama seperti parameter render_group_template().
+	 * @return string Isi biner PDF (belum disimpan ke file).
+	 */
+	protected function _build_group_pdf(array $items)
+	{
+		$html = '<html><head><meta charset="utf-8"><style>
+			body { font-family: sans-serif; font-size: 11px; color:#1c2b36; }
+			h3 { margin: 0 0 14px; color:#3D5C6C; }
+			.product-title { background:#3D5C6C; color:#fff; padding:6px 10px; font-weight:bold; font-size:12px; }
+			table { width: 100%; border-collapse: collapse; margin-bottom:18px; }
+			th, td { border: 1px solid #ccc; padding: 5px 8px; text-align: left; }
+			th { background: #f4f6f9; }
+			td.num { text-align: right; }
+			.meta { font-size:10px; color:#5b6b7d; margin:-14px 0 18px; }
+		</style></head><body>';
+		$html .= '<h3>Ringkasan ' . count($items) . ' Perubahan Harga Produk</h3>';
+
+		foreach ($items as $item) {
+			$batch = $item['batch'];
+			$new = json_decode($batch['new_values'], TRUE);
+			$old = json_decode($batch['old_values'], TRUE);
+
+			$html .= '<div class="product-title">' . htmlspecialchars($batch['product_code']) . ' - ' . htmlspecialchars($batch['product_name']) . '</div>';
+			$html .= '<div class="meta">Efektif ' . tgl_indo($batch['effective_date']) . ' &middot; Diubah oleh ' . htmlspecialchars($batch['changed_by_name']) . '</div>';
+			$html .= '<table><thead><tr><th>Kanal</th><th>Harga Lama</th><th>Harga Baru</th></tr></thead><tbody>';
+			if (!empty($new['channel_prices'])) {
+				foreach ($new['channel_prices'] as $channel => $new_price) {
+					if (!in_array($channel, $item['visible_channels'], TRUE)) continue;
+					$old_price = $old['channel_prices'][$channel] ?? '-';
+					$html .= '<tr><td>' . htmlspecialchars($channel) . '</td><td class="num">' . rupiah($old_price) . '</td><td class="num"><b>' . rupiah($new_price) . '</b></td></tr>';
+				}
+			}
+			$html .= '</tbody></table>';
+		}
+
+		$html .= '</body></html>';
+
+		$dompdf = new \Dompdf\Dompdf(array('isRemoteEnabled' => FALSE));
+		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->loadHtml($html);
+		$dompdf->render();
+		return $dompdf->output();
 	}
 
 	protected function subject_template()

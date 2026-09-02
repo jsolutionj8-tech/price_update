@@ -65,20 +65,37 @@
 </div>
 
 <div class="card card-stat p-3">
+	<?php if ($can_view_detail): ?>
+	<form method="post" action="<?= base_url('price-history/resend-bulk') ?>" id="bulkResendForm">
+		<div class="d-flex justify-content-between align-items-center mb-2">
+			<div class="form-check">
+				<input type="checkbox" class="form-check-input" id="selectAllBatches">
+				<label class="form-check-label small" for="selectAllBatches">Pilih Semua</label>
+			</div>
+			<button type="submit" class="btn btn-sm btn-outline-primary" id="bulkResendBtn" disabled onclick="return confirm('Kirim ulang notifikasi utk item yang dipilih?')"><i class="bi bi-arrow-repeat me-1"></i>Kirim Ulang Notifikasi Terpilih</button>
+		</div>
+	<?php endif; ?>
 	<div class="table-responsive">
 		<table class="table align-middle">
-			<thead><tr><th>Tanggal Efektif</th><th>Produk</th><th>Vendor</th><th>Diubah Oleh</th><th>Status Email</th><th></th></tr></thead>
+			<thead><tr>
+				<?php if ($can_view_detail): ?><th style="width:2rem;"></th><?php endif; ?>
+				<th>Tanggal Efektif</th><th>Produk</th><th>Vendor</th><th>Diubah Oleh</th><th>Status Email</th><th></th>
+			</tr></thead>
 			<tbody>
 			<?php foreach ($batches as $b): ?>
 				<tr>
+					<?php if ($can_view_detail): ?>
+						<td><input type="checkbox" class="form-check-input batch-checkbox" name="batch_ids[]" value="<?= $b['id'] ?>"></td>
+					<?php endif; ?>
 					<td><?= tgl_indo($b['effective_date']) ?></td>
 					<td><?= htmlspecialchars($b['product_name']) ?> <small class="text-muted d-block"><?= htmlspecialchars($b['product_code']) ?></small></td>
 					<td><?= htmlspecialchars($b['vendor_code']) ?></td>
 					<td><?= htmlspecialchars($b['changed_by_name']) ?></td>
 					<td class="notify-status-cell"><?= status_badge($b['notify_status']) ?></td>
-					<td>
+					<td class="d-flex gap-1">
 						<?php if ($can_view_detail): ?>
 							<a href="<?= base_url('price-history/detail/' . $b['id']) ?>" class="btn btn-sm btn-outline-secondary">Detail</a>
+							<a href="<?= base_url('price-update/form/' . $b['product_id']) ?>" class="btn btn-sm btn-outline-primary" title="Edit Update Harga produk ini"><i class="bi bi-pencil-square"></i></a>
 						<?php else: ?>
 							<button type="button" class="btn btn-sm btn-outline-secondary" disabled title="Hanya ADMIN/EDITOR yang bisa melihat detail">Detail</button>
 						<?php endif; ?>
@@ -86,11 +103,14 @@
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($batches)): ?>
-				<tr><td colspan="6" class="text-center text-muted py-3">Belum ada riwayat perubahan harga.</td></tr>
+				<tr><td colspan="<?= $can_view_detail ? 7 : 6 ?>" class="text-center text-muted py-3">Belum ada riwayat perubahan harga.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>
 	</div>
+	<?php if ($can_view_detail): ?>
+	</form>
+	<?php endif; ?>
 
 	<?php
 		$start = $pagination['total'] > 0 ? (($pagination['page'] - 1) * $pagination['per_page']) + 1 : 0;
@@ -137,5 +157,24 @@ document.addEventListener('DOMContentLoaded', function () {
 		altFormat: 'd-m-Y',
 		allowInput: true
 	});
+
+	// Centang "Pilih Semua" & aktifkan tombol "Kirim Ulang Notifikasi Terpilih" hanya
+	// kalau minimal satu baris dicentang.
+	const selectAll = document.getElementById('selectAllBatches');
+	const checkboxes = Array.from(document.querySelectorAll('.batch-checkbox'));
+	const bulkBtn = document.getElementById('bulkResendBtn');
+	if (selectAll && bulkBtn) {
+		function updateBulkBtn() {
+			const anyChecked = checkboxes.some(cb => cb.checked);
+			bulkBtn.disabled = !anyChecked;
+			selectAll.checked = checkboxes.length > 0 && checkboxes.every(cb => cb.checked);
+		}
+		selectAll.addEventListener('change', function () {
+			checkboxes.forEach(cb => { cb.checked = selectAll.checked; });
+			updateBulkBtn();
+		});
+		checkboxes.forEach(cb => cb.addEventListener('change', updateBulkBtn));
+		updateBulkBtn();
+	}
 });
 </script>
