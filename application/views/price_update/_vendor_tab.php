@@ -19,7 +19,7 @@
 			</div>
 			<div class="col-md-4">
 				<label class="form-label">Margin (%)</label>
-				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= $vc['target_hpp_pct'] ?>" required>
+				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= (float) $vc['target_hpp_pct'] ?>" required>
 			</div>
 		</div>
 		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle"></i> Profit, Markup % &amp; Margin % di bawah tiap kolom Harga Kanal dihitung otomatis dari <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal), mis. Modal 800.000 &amp; Harga Jual 1.000.000 (tanpa Biaya kanal) &rarr; Profit 200.000: Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest (Modal ÷ (1 &minus; Margin%)).</small>
@@ -41,7 +41,7 @@
 									<span class="small text-muted fw-bold text-uppercase" style="font-size:.7rem;">Recommended Selling Price</span>
 								</div>
 								<div class="fw-bold text-markup-positive fs-3 out-channel-srp">—</div>
-								<div class="text-muted out-channel-srp-caption" style="font-size:.7rem;">Minimum untuk mencapai target margin</div>
+								<div class="text-muted out-channel-srp-caption mt-2" style="font-size:.7rem;">Minimum untuk mencapai target margin</div>
 							</div>
 
 							<label class="small text-white-50 mb-1 d-block">Harga Jual Aktual</label>

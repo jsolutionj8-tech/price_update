@@ -16,7 +16,7 @@
 <div class="card card-stat p-3 mb-3">
 	<!-- Filter brand/kategori/kode-nama disamakan dgn menu Master Data -> Produk. -->
 	<form method="get" class="row g-2">
-		<div class="col-md-3">
+		<div class="col-md-4">
 			<input type="text" name="keyword" class="form-control" placeholder="Cari kode / nama produk..." value="<?= htmlspecialchars($filters['keyword'] ?? '') ?>">
 		</div>
 		<div class="col-md-2">
@@ -43,14 +43,20 @@
 				<?php endforeach; ?>
 			</select>
 		</div>
-		<div class="col-md-3">
+		<div class="col-md-2">
 			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
 		</div>
-		<div class="col-md-3"><input type="date" name="date_from" class="form-control" value="<?= $filters['date_from'] ?? '' ?>" placeholder="Dari"></div>
-		<div class="col-md-3"><input type="date" name="date_to" class="form-control" value="<?= $filters['date_to'] ?? '' ?>" placeholder="Sampai"></div>
-		<div class="col-md-6 d-flex gap-2 justify-content-end">
-			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-success"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
-			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
+
+		<div class="col-md-4">
+			<input type="date" name="date_from" class="form-control" value="<?= htmlspecialchars($filters['date_from'] ?: date('Y-m-d')) ?>" placeholder="Dari">
+		</div>
+		<div class="col-md-4">
+			<input type="date" name="date_to" class="form-control" value="<?= htmlspecialchars($filters['date_to'] ?: date('Y-m-d')) ?>" placeholder="Sampai">
+		</div>
+		<div class="col-md-2"></div>
+		<div class="col-md-2 d-flex gap-2">
+			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-success flex-fill"><i class="bi bi-file-earmark-excel"></i> Excel</a>
+			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-danger flex-fill"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
 		</div>
 	</form>
 </div>

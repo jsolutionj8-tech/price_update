@@ -92,4 +92,14 @@ class Product_model extends CI_Model
 	{
 		return $this->db->where('status', 'active')->count_all_results($this->table);
 	}
+
+	/**
+	 * Jumlah produk baru yang ditambahkan sejak tanggal 1 bulan ini — dipakai kartu
+	 * "Produk Baru Bulan Ini" di Dashboard.
+	 */
+	public function count_new_this_month()
+	{
+		return $this->db->where('created_at >=', date('Y-m-01 00:00:00'))
+			->count_all_results($this->table);
+	}
 }
