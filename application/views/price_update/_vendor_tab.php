@@ -36,13 +36,12 @@
 								<span class="channel-icon"><i class="bi <?= channel_icon($ch['channel_code']) ?>"></i></span>
 								<?= htmlspecialchars($ch['channel_name']) ?>
 							</div>
-							<div class="bg-white rounded-3 p-3 mb-2">
-								<div class="d-flex justify-content-between align-items-center mb-1">
+							<div class="bg-light rounded-3 p-3 mb-2">
+								<div class="mb-1">
 									<span class="small text-muted fw-bold text-uppercase" style="font-size:.7rem;">Recommended Selling Price</span>
-									<span class="badge bg-light text-primary" style="font-size:.65rem;">SYSTEM</span>
 								</div>
 								<div class="fw-bold text-markup-positive fs-3 out-channel-srp">—</div>
-								<div class="small text-muted out-channel-srp-caption">Minimum untuk mencapai target margin</div>
+								<div class="text-muted out-channel-srp-caption" style="font-size:.7rem;">Minimum untuk mencapai target margin</div>
 							</div>
 
 							<label class="small text-white-50 mb-1 d-block">Harga Jual Aktual</label>
