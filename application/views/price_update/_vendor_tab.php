@@ -15,11 +15,11 @@
 		<div class="row g-3">
 			<div class="col-md-4">
 				<label class="form-label">Modal (Rp)</label>
-				<input type="text" inputmode="numeric" name="modal" class="form-control input-calc rupiah-input" value="<?= number_format((int) round($vc['modal']), 0, ',', '.') ?>" required>
+				<input type="text" inputmode="numeric" name="modal" class="form-control input-calc rupiah-input" placeholder="0" value="<?= $vc['modal'] > 0 ? number_format((int) round($vc['modal']), 0, ',', '.') : '' ?>" required>
 			</div>
 			<div class="col-md-4">
 				<label class="form-label">Margin (%)</label>
-				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" value="<?= (float) $vc['target_hpp_pct'] ?>" required>
+				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" placeholder="0" value="<?= $vc['target_hpp_pct'] > 0 ? (float) $vc['target_hpp_pct'] : '' ?>" required>
 			</div>
 		</div>
 		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Profit, Markup % &amp; Margin % di bawah tiap kolom Harga Kanal dihitung otomatis dari <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal), mis. Modal 800.000 &amp; Harga Jual 1.000.000 (tanpa Biaya kanal) &rarr; Profit 200.000: Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest (Modal ÷ (1 &minus; Margin%)).</small>
@@ -46,8 +46,8 @@
 
 							<label class="small text-white-50 mb-1 d-block">Harga Jual Aktual</label>
 							<div class="input-group input-group-lg mb-2">
-								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
-								<input type="text" inputmode="numeric" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input rupiah-input ps-2" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+								<span class="input-group-text bg-white border-0 fw-bold pe-1">Rp</span>
+								<input type="text" inputmode="numeric" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input rupiah-input ps-1" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= isset($vc['current_prices'][$ch['channel_code']]) ? number_format((int) round($vc['current_prices'][$ch['channel_code']]), 0, ',', '.') : '' ?>">
 							</div>
 							<div class="row g-2 text-center">
