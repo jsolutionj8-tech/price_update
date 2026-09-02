@@ -13,10 +13,10 @@
 	<div class="col-md-4">
 		<div class="card">
 			<div class="card-body d-flex align-items-center gap-3">
-				<span class="stat-icon tone-good"><i class="bi bi-envelope-check"></i></span>
+				<span class="stat-icon tone-accent"><i class="bi bi-box-seam"></i></span>
 				<div>
-					<div class="subheader">Email Terkirim (Bulan Ini)</div>
-					<div class="h1 mb-0"><?= number_format($emails_sent, 0, ',', '.') ?></div>
+					<div class="subheader">Produk Baru Bulan Ini</div>
+					<div class="h1 mb-0"><?= number_format($new_products, 0, ',', '.') ?></div>
 				</div>
 			</div>
 		</div>
@@ -24,10 +24,10 @@
 	<div class="col-md-4">
 		<div class="card">
 			<div class="card-body d-flex align-items-center gap-3">
-				<span class="stat-icon tone-accent"><i class="bi bi-box-seam"></i></span>
+				<span class="stat-icon tone-accent"><i class="bi bi-currency-exchange"></i></span>
 				<div>
-					<div class="subheader">Produk Baru Bulan Ini</div>
-					<div class="h1 mb-0"><?= number_format($new_products, 0, ',', '.') ?></div>
+					<div class="subheader">Update Minggu Ini</div>
+					<div class="h1 mb-0"><?= number_format($updates_this_week, 0, ',', '.') ?></div>
 				</div>
 			</div>
 		</div>
