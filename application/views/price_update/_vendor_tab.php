@@ -47,7 +47,7 @@
 							<label class="small text-white-50 mb-1 d-block">Harga Jual Aktual</label>
 							<div class="input-group input-group-lg mb-2">
 								<span class="input-group-text bg-white border-0 fw-bold">Rp</span>
-								<input type="number" step="1" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
+								<input type="number" step="1" name="price_<?= $ch['channel_code'] ?>" class="form-control bg-white border-0 fw-bold text-markup-positive channel-price-input ps-2" data-channel="<?= htmlspecialchars($ch['channel_code']) ?>" data-biaya="<?= (float) ($ch['total_biaya_nominal'] ?? 0) ?>" data-biaya-pct="<?= (float) ($ch['total_biaya_percent'] ?? 0) ?>" placeholder="0"
 									value="<?= isset($vc['current_prices'][$ch['channel_code']]) ? (int) round($vc['current_prices'][$ch['channel_code']]) : '' ?>">
 							</div>
 							<div class="row g-2 text-center">
@@ -94,7 +94,7 @@
 								<?= htmlspecialchars($c['competitor_name']) ?>
 							<?php endif; ?>
 						</label>
-						<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control form-control-sm" placeholder="Rp" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
+						<input type="number" step="0.01" name="competitor_price[<?= $c['id'] ?>]" class="form-control form-control-sm competitor-price-input" placeholder="Rp" value="<?= $competitor_prices[$c['competitor_code']] ?? '' ?>">
 					</div>
 				<?php endforeach; ?>
 				<?php if (empty($competitors)): ?>

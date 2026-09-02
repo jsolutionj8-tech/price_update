@@ -14,7 +14,7 @@
 	<?php endforeach; ?>
 </ul>
 <?php if (empty($vendor_costs)): ?>
-	<div class="alert alert-warning">Belum ada data vendor untuk produk ini. Tambahkan vendor terlebih dahulu di bawah ini.</div>
+	<div class="alert alert-warning" id="noVendorWarning">Belum ada data vendor untuk produk ini. Tambahkan vendor terlebih dahulu di bawah ini.</div>
 <?php endif; ?>
 
 <?php if (!empty($available_vendors) || !empty($vendor_costs)): ?>
@@ -115,16 +115,32 @@ function wireForm(form) {
 		}
 	}
 
+	// RRP (Recommended Selling Price) per kanal = (Modal + Biaya Tetap kanal) / (1 - Margin%/100
+	// - Biaya Persentase kanal/100) — solusi dari persamaan Margin% = (RRP - TotalBiaya - Modal) /
+	// RRP dgn TotalBiaya = biayaNominal + biayaPct%*RRP. Biaya per kanal diambil dari Master Biaya
+	// (Sales Channel) via data-biaya/data-biaya-pct di tiap input Harga Jual, jadi RRP-nya beda2
+	// per kanal sesuai kombinasi Biaya Tetap & Biaya Persentase yang di-set di sana, mis. Modal
+	// 800.000 & Margin 10%: kanal tanpa biaya -> RRP 888.889, kanal dgn Biaya Persentase 2,8% &
+	// Biaya Tetap 9.220 -> RRP (800.000+9.220)/(1-0,10-0,028) = 923.981.
+	function calcRrp(input, modalVal, marginVal) {
+		const biayaNominal = parseFloat(input.dataset.biaya) || 0;
+		const biayaPct = parseFloat(input.dataset.biayaPct) || 0;
+		const denom = 1 - (marginVal / 100) - (biayaPct / 100);
+		const canRrp = modalVal > 0 && marginVal > 0 && marginVal < 100 && denom > 0;
+		return canRrp ? (modalVal + biayaNominal) / denom : null;
+	}
+
 	function updateChannelOutputs() {
 		const modalVal = parseFloat(modal.value) || 0;
 		const marginVal = parseFloat(margin.value) || 0;
 
-		// RRP = Modal / (1 - Margin%), sama utk semua kanal (tidak dipengaruhi Biaya kanal
-		// ataupun Harga Jual yg sudah diisi) — ditampilkan di atas tiap input Harga Jual.
-		const canSrp = modalVal > 0 && marginVal > 0 && marginVal < 100;
-		const srpVal = canSrp ? modalVal / (1 - marginVal / 100) : null;
-		form.querySelectorAll('.out-channel-srp').forEach(el => {
-			el.textContent = srpVal !== null ? 'Rp ' + Math.round(srpVal).toLocaleString('id-ID') : '—';
+		form.querySelectorAll('.channel-price-input').forEach(input => {
+			const wrap = input.closest('.col-md-6');
+			if (!wrap) return;
+			const rrpEl = wrap.querySelector('.out-channel-srp');
+			if (!rrpEl) return;
+			const rrpVal = calcRrp(input, modalVal, marginVal);
+			rrpEl.textContent = rrpVal !== null ? 'Rp ' + Math.round(rrpVal).toLocaleString('id-ID') : '—';
 		});
 		form.querySelectorAll('.out-channel-srp-caption').forEach(el => {
 			el.textContent = 'Minimum untuk mencapai target margin';
@@ -206,6 +222,25 @@ function wireForm(form) {
 		}
 		const submitBtn = form.querySelector('button[type=submit]');
 		if (submitBtn) submitBtn.click();
+	}, true);
+
+	// Enter di salah satu input Harga Kompetitor pindah ke input kompetitor berikutnya
+	// (bukan bagian dari rantai Modal/Margin/Harga Jual di atas — di Enter terakhir cukup
+	// berhenti, tidak ikut submit form). Sama spt di atas, dipasang di FORM dgn capture:true
+	// supaya konsisten jalan di Safari maupun Chrome.
+	const competitorInputs = Array.from(form.querySelectorAll('.competitor-price-input'));
+	form.addEventListener('keydown', function (e) {
+		if (e.key !== 'Enter' && e.keyCode !== 13) return;
+		const idx = competitorInputs.indexOf(e.target);
+		if (idx === -1) return;
+
+		e.preventDefault();
+		e.stopPropagation();
+		const next = competitorInputs[idx + 1];
+		if (next) {
+			next.focus();
+			next.select();
+		}
 	}, true);
 
 	form.querySelector('.btn-preview').addEventListener('click', () => {
@@ -299,7 +334,7 @@ jQuery(function ($) {
 				return;
 			}
 
-			const warn = document.querySelector('.alert-warning');
+			const warn = document.getElementById('noVendorWarning');
 			if (warn) warn.remove();
 
 			const li = document.createElement('li');

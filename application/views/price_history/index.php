@@ -47,11 +47,11 @@
 			<button class="btn btn-outline-secondary w-100"><i class="bi bi-funnel"></i> Filter</button>
 		</div>
 
-		<div class="col-md-4" style="display:grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap:.5rem;">
+		<div class="col-md-6" style="display:grid; grid-template-columns: minmax(160px,1fr) minmax(160px,1fr); gap:.5rem;">
 			<input type="date" name="date_from" class="form-control" value="<?= htmlspecialchars($filters['date_from'] ?: date('Y-m-d')) ?>" placeholder="Dari">
 			<input type="date" name="date_to" class="form-control" value="<?= htmlspecialchars($filters['date_to'] ?: date('Y-m-d')) ?>" placeholder="Sampai">
 		</div>
-		<div class="col-md-6"></div>
+		<div class="col-md-4"></div>
 		<div class="col-md-2 d-flex gap-2">
 			<a href="<?= base_url('price-history/export') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-success flex-fill"><i class="bi bi-file-earmark-excel"></i> Excel</a>
 			<a href="<?= base_url('price-history/export-pdf') . '?' . http_build_query($qs_base) ?>" class="btn btn-sm btn-outline-danger flex-fill"><i class="bi bi-file-earmark-pdf"></i> PDF</a>

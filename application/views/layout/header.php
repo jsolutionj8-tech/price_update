@@ -115,15 +115,17 @@
 		   mengecilkan ukuran font-nya (disamakan dgn Markup/Margin di sebelahnya). */
 		.rrp-figure { white-space: normal !important; overflow-wrap: break-word; line-height: 1.15; }
 
-		/* Input Harga Jual & Modal di Update Harga: matikan panah spinner naik/turun bawaan
-		   browser (mengganggu saat mengetik nominal besar). */
+		/* Input Harga Jual, Modal, & Harga Kompetitor di Update Harga: matikan panah spinner
+		   naik/turun bawaan browser (mengganggu saat mengetik nominal besar). */
 		.channel-price-input::-webkit-inner-spin-button,
 		.channel-price-input::-webkit-outer-spin-button,
+		.competitor-price-input::-webkit-inner-spin-button,
+		.competitor-price-input::-webkit-outer-spin-button,
 		input[name="modal"]::-webkit-inner-spin-button,
 		input[name="modal"]::-webkit-outer-spin-button {
 			-webkit-appearance: none; margin: 0;
 		}
-		.channel-price-input, input[name="modal"] { -moz-appearance: textfield; }
+		.channel-price-input, .competitor-price-input, input[name="modal"] { -moz-appearance: textfield; }
 
 		/* Badge status notifikasi ("Pending"/"Sent") khusus di halaman Riwayat Perubahan Harga:
 		   Pending latar oranye tulisan putih, Sent dibalik jadi outline (latar putih, tulisan &
