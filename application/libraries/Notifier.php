@@ -377,7 +377,7 @@ class Notifier
 		$body_rows = '';
 		$notes_lines = '';
 		foreach ($matrix['rows'] as $row) {
-			$product_cell = '<b>' . htmlspecialchars($row['product_name']) . '</b><br><span style="color:#5b6b7d;font-size:11px;">' . htmlspecialchars($row['product_code']) . '</span>';
+			$product_cell = '<b>' . htmlspecialchars($row['product_name']) . '</b> <span style="color:#5b6b7d;font-size:11px;">(' . htmlspecialchars($row['product_code']) . ')</span>';
 
 			$old_cells = '';
 			$new_cells = '';
@@ -386,10 +386,16 @@ class Notifier
 				$new_cells .= '<td><b>' . (array_key_exists($code, $row['new']) ? rupiah($row['new'][$code]) : '-') . '</b></td>';
 			}
 
+			// Kolom Produk sengaja TIDAK pakai rowspan — banyak email client (jg Dompdf di
+			// PDF lampiran) tetap menggambar garis pembatas antar-baris tembus ke tengah sel
+			// rowspan. Sebagai gantinya: baris Lama tampilkan info produk dgn border-bottom
+			// dihilangkan, baris Baru kosong dgn border-top dihilangkan, jadi tetap terlihat
+			// menyatu tanpa garis di tengah.
 			$body_rows .= '<tr style="background:#f4f6f9;">'
-				. '<td rowspan="2" style="vertical-align:top;">' . $product_cell . '</td>'
+				. '<td style="vertical-align:top;border-bottom:none;">' . $product_cell . '</td>'
 				. '<td>Lama</td>' . $old_cells . '<td></td></tr>';
 			$body_rows .= '<tr>'
+				. '<td style="border-top:none;background:#fff;"></td>'
 				. '<td>Baru</td>' . $new_cells
 				. '<td style="color:#1a7f37;font-weight:bold;">NEW</td></tr>';
 
@@ -450,10 +456,21 @@ class Notifier
 			.summary th, .summary td { border: 1px solid #ccc; padding: 6px 8px; text-align:left; }
 			.summary th { background:#eaf1f8; }
 			table.matrix { width: 100%; border-collapse: collapse; margin-bottom:16px; font-size:9px; }
-			table.matrix th, table.matrix td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
-			table.matrix th { background: #3D5C6C; color:#fff; }
-			.row-old { color:#94a3b8; text-decoration:line-through; background:#f4f6f9; }
-			.row-new b { color:#111; }
+			table.matrix th { border: 1px solid #ccc; padding: 4px 6px; text-align: left; background: #3D5C6C; color:#fff; }
+			/* Kolom Produk = 1 baris utuh (tidak dipecah Lama/Baru sama sekali), supaya nama
+			   & kode produk TIDAK PERNAH kena garis pembatas apa pun — Dompdf terbukti tetap
+			   menggambar garis tembus row-boundary walau border-bottom/top di-override per sel
+			   (baik pakai rowspan maupun sel kosong terpisah). Kolom lain (Status Harga & tiap
+			   kanal harga) yg memang butuh 2 baris (Lama/Baru) dirender pakai tabel bersarang
+			   independen di dalam masing2 sel — supaya baris pembatasnya cuma ada DI DALAM
+			   kolom itu sendiri, tidak menembus ke kolom Produk sama sekali. */
+			table.matrix td.prod-cell { border: 1px solid #ccc; padding: 4px 6px; text-align: left; vertical-align: middle; background:#fff; color:#1c2b36; }
+			table.matrix td.data-cell { border: 1px solid #ccc; padding: 0; }
+			.subtable { width:100%; border-collapse:collapse; }
+			.subtable td { padding: 4px 6px; text-align:left; }
+			.sub-old-cell { border-bottom: 1px solid #ccc; background:#f4f6f9; }
+			.sub-new-cell { background:#fff; }
+			.price-old { color:#94a3b8; text-decoration:line-through; }
 			.status-new { color:#1a7f37; font-weight:bold; }
 			.notes { font-size:10px; margin-bottom:14px; }
 			.tindaklanjut { background:#fff3cd; border-left:4px solid #E34F05; padding:8px 12px; font-size:10px; margin-bottom:10px; }
@@ -473,19 +490,23 @@ class Notifier
 
 		$notes_lines = '';
 		foreach ($matrix['rows'] as $row) {
-			$product_cell = '<b>' . htmlspecialchars($row['product_name']) . '</b><br><span style="color:#5b6b7d;">' . htmlspecialchars($row['product_code']) . '</span>';
+			$product_cell = '<b>' . htmlspecialchars($row['product_name']) . '</b> <span style="color:#5b6b7d;">(' . htmlspecialchars($row['product_code']) . ')</span>';
 
-			$html .= '<tr class="row-old"><td rowspan="2">' . $product_cell . '</td><td>Lama</td>';
-			foreach (array_keys($channels) as $code) {
-				$html .= '<td>' . (($row['old'][$code] ?? null) !== null ? rupiah($row['old'][$code]) : '-') . '</td>';
-			}
-			$html .= '<td></td></tr>';
+			$html .= '<tr>';
+			$html .= '<td class="prod-cell">' . $product_cell . '</td>';
+			$html .= '<td class="data-cell"><table class="subtable"><tr><td class="sub-old-cell">Lama</td></tr><tr><td class="sub-new-cell">Baru</td></tr></table></td>';
 
-			$html .= '<tr class="row-new"><td>Baru</td>';
 			foreach (array_keys($channels) as $code) {
-				$html .= '<td><b>' . (array_key_exists($code, $row['new']) ? rupiah($row['new'][$code]) : '-') . '</b></td>';
+				$old_val = (($row['old'][$code] ?? null) !== null) ? rupiah($row['old'][$code]) : '-';
+				$new_val = array_key_exists($code, $row['new']) ? rupiah($row['new'][$code]) : '-';
+				$html .= '<td class="data-cell"><table class="subtable">'
+					. '<tr><td class="sub-old-cell price-old">' . $old_val . '</td></tr>'
+					. '<tr><td class="sub-new-cell"><b>' . $new_val . '</b></td></tr>'
+					. '</table></td>';
 			}
-			$html .= '<td class="status-new">NEW</td></tr>';
+
+			$html .= '<td class="data-cell"><table class="subtable"><tr><td class="sub-old-cell">&nbsp;</td></tr><tr><td class="sub-new-cell status-new">NEW</td></tr></table></td>';
+			$html .= '</tr>';
 
 			if (!empty($row['notes'])) {
 				$notes_lines .= '&bull; <b>' . htmlspecialchars($row['product_name']) . ':</b> ' . htmlspecialchars($row['notes']) . '<br>';
