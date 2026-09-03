@@ -107,6 +107,7 @@ class Price_history extends MY_Controller
 		if ($result['success']) {
 			$msg = "Notifikasi dikirim ulang: {$result['batches']} produk ke {$result['recipients']} penerima ({$result['sent']} email berhasil";
 			$msg .= $result['failed'] > 0 ? ", {$result['failed']} gagal)." : ').';
+			if (!empty($result['pdf_warning'])) $msg .= ' ' . $result['pdf_warning'];
 			$this->session->set_flashdata('success', $msg);
 		} else {
 			$this->session->set_flashdata('error', $result['message']);

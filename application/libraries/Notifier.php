@@ -199,6 +199,11 @@ class Notifier
 
 		$total_sent = 0;
 		$total_failed = 0;
+		// Alasan lampiran PDF gagal dibuat/dipasang (kalau ada) — ditangkap sekali & dikirim
+		// balik lewat return value supaya kelihatan di flashdata UI (bukan cuma di server log,
+		// yang sering tidak aktif/tidak kebaca di VPS). Lihat Price_update::send_pending() &
+		// Price_history::resend_bulk() yg menampilkannya.
+		$pdf_warning = null;
 
 		foreach ($recipients_by_email as $email => $info) {
 			$subject = '[Update Harga] ' . count($info['items']) . ' Produk - ' . tgl_indo(date('Y-m-d'));
@@ -217,11 +222,18 @@ class Notifier
 
 			// Lampiran PDF berisi ringkasan yang sama dgn isi email (hanya kanal yg dilanggan
 			// penerima ini) — supaya penerima punya salinan yang bisa dicetak/diarsipkan.
-			// Dilewati diam-diam kalau Dompdf belum terpasang, biar pengiriman notifikasi
-			// tidak ikut gagal gara-gara lampiran.
-			if (class_exists('\Dompdf\Dompdf')) {
-				$pdfContent = $this->_build_group_pdf($info['items']);
-				$this->CI->email->attach($pdfContent, 'attachment', 'ringkasan-update-harga-' . date('Ymd') . '.pdf', 'application/pdf');
+			// Kalau gagal (library tak terpasang di server, mis. lupa composer install saat
+			// deploy ke VPS, atau folder cache font Dompdf tidak writable), JANGAN gagalkan
+			// seluruh pengiriman notifikasi — cukup catat alasannya utk ditampilkan di UI.
+			if (!class_exists('\Dompdf\Dompdf')) {
+				$pdf_warning = $pdf_warning ?: 'Lampiran PDF tidak terpasang: library Dompdf tidak ditemukan di server (jalankan "composer install" di server).';
+			} else {
+				try {
+					$pdfContent = $this->_build_group_pdf($info['items']);
+					$this->CI->email->attach($pdfContent, 'attachment', 'ringkasan-update-harga-' . date('Ymd') . '.pdf', 'application/pdf');
+				} catch (\Throwable $e) {
+					$pdf_warning = $pdf_warning ?: ('Lampiran PDF gagal dibuat: ' . $e->getMessage());
+				}
 			}
 
 			try {
@@ -253,11 +265,12 @@ class Notifier
 		}
 
 		return array(
-			'success'    => TRUE,
-			'batches'    => count($batches),
-			'recipients' => count($recipients_by_email),
-			'sent'       => $total_sent,
-			'failed'     => $total_failed,
+			'success'     => TRUE,
+			'batches'     => count($batches),
+			'recipients'  => count($recipients_by_email),
+			'sent'        => $total_sent,
+			'failed'      => $total_failed,
+			'pdf_warning' => $pdf_warning,
 		);
 	}
 
