@@ -124,6 +124,12 @@
 						<span class="nav-link-title">Hak Akses</span>
 					</a>
 				</li>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'settings' ? 'active' : '' ?>" href="<?= base_url('settings') ?>">
+						<span class="nav-link-icon"><i class="bi bi-gear"></i></span>
+						<span class="nav-link-title">Settings</span>
+					</a>
+				</li>
 				<?php endif; ?>
 
 				<li class="nav-item mt-2 border-top border-secondary-subtle pt-2">

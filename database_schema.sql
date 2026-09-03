@@ -376,6 +376,30 @@ CREATE TABLE `users` (
   CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `smtp_settings` */
+/* Menyimpan 1 baris konfigurasi SMTP pengirim (diisi lewat menu Settings, ADMIN-only) —
+   menggantikan kredensial hardcode di application/config/email.php. Notifier::__construct()
+   membaca dari sini dulu, fallback ke config/email.php kalau tabel ini masih kosong. */
+
+DROP TABLE IF EXISTS `smtp_settings`;
+
+CREATE TABLE `smtp_settings` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `smtp_host` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `smtp_port` int(10) unsigned NOT NULL DEFAULT 587,
+  `smtp_crypto` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'tls',
+  `smtp_user` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `smtp_pass` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `from_email` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `from_name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `updated_by` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_smtp_settings_user` (`updated_by`),
+  CONSTRAINT `fk_smtp_settings_user` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `vendors` */
 
 DROP TABLE IF EXISTS `vendors`;

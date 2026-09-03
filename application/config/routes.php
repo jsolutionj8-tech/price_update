@@ -165,6 +165,8 @@ $route['notification-groups/delete/(:num)'] = 'notification_groups/delete/$1';
 // Hak akses (menu per role)
 $route['access-control']               = 'access_control/index';
 $route['access-control/update']        = 'access_control/update';
+$route['settings']                     = 'settings/index';
+$route['settings/update']              = 'settings/update';
 
 // Import / export
 $route['reports/export']               = 'reports/export';

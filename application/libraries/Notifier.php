@@ -4,7 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * Notifier
  * Menyusun & mengirim email notifikasi otomatis setiap ada perubahan harga.
- * Menggunakan library Email bawaan CodeIgniter (protocol SMTP, lihat config/email.php).
+ * Menggunakan library Email bawaan CodeIgniter (protocol SMTP). Kredensial pengirim
+ * (host/port/enkripsi/username/password/from) diambil dari menu Settings (tabel
+ * smtp_settings, lihat Smtp_settings_model) — bukan lagi hardcode di config/email.php,
+ * yang sekarang cuma dipakai sebagai fallback kalau menu Settings belum pernah diisi.
  *
  * Dua mode pengiriman:
  *  - dispatch($batch_id): kirim notifikasi untuk SATU batch (dipakai oleh
@@ -25,6 +28,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Notifier
 {
 	protected $CI;
+	protected $smtpSettings;
 
 	public function __construct()
 	{
@@ -32,17 +36,27 @@ class Notifier
 		$this->CI->load->model('price_change_batch_model');
 		$this->CI->load->model('email_log_model');
 		$this->CI->load->model('notification_group_model');
+		$this->CI->load->model('smtp_settings_model');
+		$this->CI->load->model('price_model');
 		$this->CI->config->load('email');
+
+		$this->smtpSettings = $this->CI->smtp_settings_model->get();
+
 		$this->CI->load->library('email', array(
-			'protocol'    => $this->CI->config->item('protocol'),
-			'smtp_host'   => $this->CI->config->item('smtp_host'),
-			'smtp_port'   => $this->CI->config->item('smtp_port'),
-			'smtp_user'   => $this->CI->config->item('smtp_user'),
-			'smtp_pass'   => $this->CI->config->item('smtp_pass'),
-			'smtp_crypto' => $this->CI->config->item('smtp_crypto'),
-			'mailtype'    => $this->CI->config->item('mailtype'),
-			'charset'     => $this->CI->config->item('charset'),
-			'newline'     => $this->CI->config->item('newline'),
+			'protocol'     => 'smtp',
+			'smtp_host'    => $this->smtpSettings['smtp_host'],
+			'smtp_port'    => $this->smtpSettings['smtp_port'],
+			'smtp_user'    => $this->smtpSettings['smtp_user'],
+			'smtp_pass'    => $this->smtpSettings['smtp_pass'],
+			'smtp_crypto'  => $this->smtpSettings['smtp_crypto'],
+			// CI3 default smtp_timeout cuma 5 detik kalau tidak di-set eksplisit — sering
+			// kepotong duluan sebelum handshake TLS ke Gmail selesai, muncul sbg error
+			// SMTP 10060 (connection timeout) padahal koneksinya sendiri sehat. Dari
+			// config/email.php spy gampang disesuaikan tanpa perlu ubah kode ini lagi.
+			'smtp_timeout' => $this->CI->config->item('smtp_timeout') ?: 30,
+			'mailtype'     => $this->CI->config->item('mailtype'),
+			'charset'      => $this->CI->config->item('charset'),
+			'newline'      => $this->CI->config->item('newline'),
 		));
 	}
 
@@ -87,7 +101,7 @@ class Notifier
 			$log_id = $this->CI->email_log_model->create_queued($batch_id, $r['id'], $r['email'], $subject);
 
 			$this->CI->email->clear(TRUE);
-			$this->CI->email->from($this->CI->config->item('from_email'), $this->CI->config->item('from_name'));
+			$this->CI->email->from($this->smtpSettings['from_email'], $this->smtpSettings['from_name']);
 			$this->CI->email->to($r['email']);
 			$this->CI->email->subject($subject);
 			$this->CI->email->message($body);
@@ -196,7 +210,7 @@ class Notifier
 			}
 
 			$this->CI->email->clear(TRUE);
-			$this->CI->email->from($this->CI->config->item('from_email'), $this->CI->config->item('from_name'));
+			$this->CI->email->from($this->smtpSettings['from_email'], $this->smtpSettings['from_name']);
 			$this->CI->email->to($email);
 			$this->CI->email->subject($subject);
 			$this->CI->email->message($body);
@@ -248,44 +262,156 @@ class Notifier
 	}
 
 	/**
-	 * Render body email gabungan: satu blok ringkasan per produk/batch,
-	 * hanya menampilkan kanal yang relevan untuk penerima tsb.
+	 * Peta channel_code => channel_name terurut sesuai sort_order di Master Sales
+	 * Channel (lihat Price_model::get_channels(), dipakai juga di form Update Harga) —
+	 * jadi urutan kolom kanal di tabel email/PDF konsisten dengan urutan di form.
+	 */
+	protected function _channel_order()
+	{
+		$order = array();
+		foreach ($this->CI->price_model->get_channels() as $ch) {
+			$order[$ch['channel_code']] = $ch['channel_name'];
+		}
+		return $order;
+	}
+
+	/**
+	 * Susun data mentah $items (satu per produk/batch) jadi struktur matrix siap-render:
+	 * daftar kolom kanal yang benar2 dipakai (union semua produk, hanya yg dilanggan
+	 * penerima), dan satu baris per produk berisi harga lama/baru per kanal tsb. Dipakai
+	 * bersama oleh render_group_template() (HTML email) & _build_group_pdf() (lampiran)
+	 * supaya isinya selalu identik, cuma beda format output.
+	 */
+	protected function _build_price_matrix(array $items)
+	{
+		$channel_order = $this->_channel_order();
+		$used_codes = array();
+		$rows = array();
+
+		foreach ($items as $item) {
+			$batch = $item['batch'];
+			$new = json_decode($batch['new_values'], TRUE) ?: array();
+			$old = json_decode($batch['old_values'], TRUE) ?: array();
+
+			$old_prices = array();
+			$new_prices = array();
+			foreach ((array) ($new['channel_prices'] ?? array()) as $code => $price) {
+				if (!in_array($code, $item['visible_channels'], TRUE)) continue;
+				$used_codes[$code] = TRUE;
+				$new_prices[$code] = $price;
+				$old_prices[$code] = $old['channel_prices'][$code] ?? null;
+			}
+
+			$rows[] = array(
+				'batch_id'       => $batch['id'],
+				'product_code'   => $batch['product_code'],
+				'product_name'   => $batch['product_name'],
+				'effective_date' => $batch['effective_date'],
+				'changed_by'     => $batch['changed_by_name'],
+				'notes'          => $batch['notes'] ?? '',
+				'old'            => $old_prices,
+				'new'            => $new_prices,
+			);
+		}
+
+		// Urutkan kolom sesuai sort_order Master Sales Channel; kanal yg sudah tidak
+		// ada di master (mis. dihapus) tetap ditampilkan pakai code-nya sendiri di akhir.
+		$channels = array();
+		foreach ($channel_order as $code => $name) {
+			if (isset($used_codes[$code])) $channels[$code] = $name;
+		}
+		foreach ($used_codes as $code => $_) {
+			if (!isset($channels[$code])) $channels[$code] = $code;
+		}
+
+		return array('channels' => $channels, 'rows' => $rows);
+	}
+
+	/**
+	 * Ringkasan header (jumlah produk / tanggal efektif / diperbarui oleh) utk satu
+	 * penerima. Kalau baris-barisnya punya tanggal/pengubah yg berbeda-beda (jarang,
+	 * tapi mungkin kalau batch dari sesi update berbeda ikut digabung), tampilkan
+	 * "Beberapa tanggal"/nama gabungan alih-alih memaksa satu nilai yg salah.
+	 */
+	protected function _group_summary(array $rows)
+	{
+		$dates = array_unique(array_column($rows, 'effective_date'));
+		$users = array_unique(array_column($rows, 'changed_by'));
+
+		return array(
+			'count'          => count($rows),
+			'effective_date' => count($dates) === 1 ? tgl_indo($dates[0]) : 'Beberapa tanggal',
+			'changed_by'     => count($users) === 1 ? $users[0] : implode(', ', $users),
+		);
+	}
+
+	/**
+	 * Render body email gabungan sesuai format "Pemberitahuan Internal - Perubahan
+	 * Harga Produk": header navy, ringkasan (jumlah produk/tanggal/pengubah), tabel
+	 * matrix produk x kanal (baris Lama & Baru per produk), catatan, & kotak Tindak
+	 * Lanjut. Hanya menampilkan kanal yang dilanggan penerima ini.
 	 */
 	protected function render_group_template(array $items)
 	{
-		$blocks = '';
-		foreach ($items as $item) {
-			$batch = $item['batch'];
-			$new = json_decode($batch['new_values'], TRUE);
-			$old = json_decode($batch['old_values'], TRUE);
+		$matrix = $this->_build_price_matrix($items);
+		$channels = $matrix['channels'];
+		$summary = $this->_group_summary($matrix['rows']);
 
-			$rows = '';
-			if (!empty($new['channel_prices'])) {
-				foreach ($new['channel_prices'] as $channel => $new_price) {
-					if (!in_array($channel, $item['visible_channels'], TRUE)) continue;
-					$old_price = $old['channel_prices'][$channel] ?? '-';
-					$rows .= '<tr><td>' . htmlspecialchars($channel) . '</td><td>' . rupiah($old_price) . '</td><td><b>' . rupiah($new_price) . '</b></td></tr>';
-				}
+		$header_cols = '<th align="left">Produk</th><th align="left">Status Harga</th>';
+		foreach ($channels as $name) $header_cols .= '<th align="left">' . htmlspecialchars($name) . '</th>';
+		$header_cols .= '<th align="left">Status</th>';
+
+		$body_rows = '';
+		$notes_lines = '';
+		foreach ($matrix['rows'] as $row) {
+			$product_cell = '<b>' . htmlspecialchars($row['product_name']) . '</b><br><span style="color:#5b6b7d;font-size:11px;">' . htmlspecialchars($row['product_code']) . '</span>';
+
+			$old_cells = '';
+			$new_cells = '';
+			foreach (array_keys($channels) as $code) {
+				$old_cells .= '<td style="color:#94a3b8;text-decoration:line-through;">' . (($row['old'][$code] ?? null) !== null ? rupiah($row['old'][$code]) : '-') . '</td>';
+				$new_cells .= '<td><b>' . (array_key_exists($code, $row['new']) ? rupiah($row['new'][$code]) : '-') . '</b></td>';
 			}
 
-			$blocks .= '<div style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">'
-				. '<div style="background:#3D5C6C;color:#fff;padding:8px 12px;font-family:Arial,sans-serif;font-size:14px;font-weight:bold;">'
-				. htmlspecialchars($batch['product_code']) . ' - ' . htmlspecialchars($batch['product_name'])
-				. '</div>'
-				. '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:13px;width:100%;">'
-				. '<tr style="background:#f4f6f9;"><th align="left">Kanal</th><th align="left">Harga Lama</th><th align="left">Harga Baru</th></tr>'
-				. $rows
-				. '</table>'
-				. '<div style="padding:6px 12px;font-family:Arial,sans-serif;font-size:12px;color:#5b6b7d;">Efektif ' . tgl_indo($batch['effective_date'])
-				. ' &middot; Diubah oleh ' . htmlspecialchars($batch['changed_by_name'])
-				. ' &middot; <a href="' . base_url('price-history/detail/' . $batch['id']) . '">Lihat detail</a></div>'
-				. '</div>';
+			$body_rows .= '<tr style="background:#f4f6f9;">'
+				. '<td rowspan="2" style="vertical-align:top;">' . $product_cell . '</td>'
+				. '<td>Lama</td>' . $old_cells . '<td></td></tr>';
+			$body_rows .= '<tr>'
+				. '<td>Baru</td>' . $new_cells
+				. '<td style="color:#1a7f37;font-weight:bold;">NEW</td></tr>';
+
+			if (!empty($row['notes'])) {
+				$notes_lines .= '<div>&bull; <b>' . htmlspecialchars($row['product_name']) . ':</b> ' . htmlspecialchars($row['notes']) . '</div>';
+			}
 		}
 
-		return '<div style="font-family:Arial,sans-serif;">'
-			. '<p>Berikut ringkasan <b>' . count($items) . ' perubahan harga produk</b> yang baru saja diperbarui:</p>'
-			. $blocks
-			. '<p style="font-size:12px;color:#5b6b7d;">Email ini dikirim otomatis oleh Sistem Update Harga.</p>'
+		$notes_block = $notes_lines !== ''
+			? '<div style="font-family:Arial,sans-serif;font-size:12px;color:#334155;margin:14px 0;"><b>Catatan:</b>' . $notes_lines . '</div>'
+			: '';
+
+		return '<div style="font-family:Arial,sans-serif;max-width:820px;">'
+			. '<div style="background:#3D5C6C;color:#fff;padding:18px 22px;">'
+			. '<div style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;opacity:.85;">Pemberitahuan Internal</div>'
+			. '<div style="font-size:22px;font-weight:bold;margin-top:4px;">Perubahan Harga Produk</div>'
+			. '</div>'
+			. '<div style="padding:18px 22px;border:1px solid #e2e8f0;border-top:none;">'
+			. '<p style="margin:0 0 4px;">Berikut adalah ringkasan harga produk yang telah diperbarui.</p>'
+			. '<p style="margin:0 0 16px;">Mohon memastikan harga pada seluruh kanal penjualan sudah sesuai dengan informasi di bawah ini.</p>'
+			. '<table cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;font-size:13px;margin-bottom:16px;">'
+			. '<tr style="background:#eaf1f8;"><th align="left">Jumlah Produk</th><th align="left">Tanggal Efektif</th><th align="left">Diperbarui Oleh</th></tr>'
+			. '<tr><td><b>' . $summary['count'] . ' SKU</b></td><td>' . htmlspecialchars($summary['effective_date']) . '</td><td>' . htmlspecialchars($summary['changed_by']) . '</td></tr>'
+			. '</table>'
+			. '<p style="margin:0 0 12px;">Mohon memastikan harga pada POS, website, marketplace, price tag, dan materi promosi telah diperbarui sesuai daftar berikut.</p>'
+			. '<div style="overflow-x:auto;"><table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse;font-size:12px;width:100%;">'
+			. '<tr style="background:#3D5C6C;color:#fff;">' . $header_cols . '</tr>'
+			. $body_rows
+			. '</table></div>'
+			. $notes_block
+			. '<div style="background:#fff3cd;border-left:4px solid #E34F05;padding:10px 14px;margin-top:16px;font-size:12px;">'
+			. '<b style="color:#E34F05;">TINDAK LANJUT:</b> Tim terkait wajib melakukan pengecekan dan konfirmasi setelah seluruh harga berhasil diperbarui.'
+			. '</div>'
+			. '<p style="font-size:12px;color:#5b6b7d;margin-top:16px;">Ringkasan ini turut dilampirkan dalam bentuk PDF pada email ini. Email dikirim otomatis oleh Sistem Update Harga.</p>'
+			. '</div>'
 			. '</div>';
 	}
 
@@ -298,40 +424,72 @@ class Notifier
 	 */
 	protected function _build_group_pdf(array $items)
 	{
+		$matrix = $this->_build_price_matrix($items);
+		$channels = $matrix['channels'];
+		$summary = $this->_group_summary($matrix['rows']);
+
 		$html = '<html><head><meta charset="utf-8"><style>
-			body { font-family: sans-serif; font-size: 11px; color:#1c2b36; }
-			h3 { margin: 0 0 14px; color:#3D5C6C; }
-			.product-title { background:#3D5C6C; color:#fff; padding:6px 10px; font-weight:bold; font-size:12px; }
-			table { width: 100%; border-collapse: collapse; margin-bottom:18px; }
-			th, td { border: 1px solid #ccc; padding: 5px 8px; text-align: left; }
-			th { background: #f4f6f9; }
-			td.num { text-align: right; }
-			.meta { font-size:10px; color:#5b6b7d; margin:-14px 0 18px; }
+			body { font-family: sans-serif; font-size: 10px; color:#1c2b36; }
+			.header { background:#3D5C6C; color:#fff; padding:14px 18px; margin-bottom:16px; }
+			.header .label { font-size:10px; letter-spacing:.06em; text-transform:uppercase; opacity:.85; }
+			.header .title { font-size:18px; font-weight:bold; margin-top:3px; }
+			.summary { width:100%; border-collapse:collapse; margin-bottom:14px; font-size:10px; }
+			.summary th, .summary td { border: 1px solid #ccc; padding: 6px 8px; text-align:left; }
+			.summary th { background:#eaf1f8; }
+			table.matrix { width: 100%; border-collapse: collapse; margin-bottom:16px; font-size:9px; }
+			table.matrix th, table.matrix td { border: 1px solid #ccc; padding: 4px 6px; text-align: left; }
+			table.matrix th { background: #3D5C6C; color:#fff; }
+			.row-old { color:#94a3b8; text-decoration:line-through; background:#f4f6f9; }
+			.row-new b { color:#111; }
+			.status-new { color:#1a7f37; font-weight:bold; }
+			.notes { font-size:10px; margin-bottom:14px; }
+			.tindaklanjut { background:#fff3cd; border-left:4px solid #E34F05; padding:8px 12px; font-size:10px; margin-bottom:10px; }
+			.tindaklanjut b { color:#E34F05; }
+			.footer { font-size:9px; color:#5b6b7d; text-align:center; margin-top:10px; }
 		</style></head><body>';
-		$html .= '<h3>Ringkasan ' . count($items) . ' Perubahan Harga Produk</h3>';
 
-		foreach ($items as $item) {
-			$batch = $item['batch'];
-			$new = json_decode($batch['new_values'], TRUE);
-			$old = json_decode($batch['old_values'], TRUE);
+		$html .= '<div class="header"><div class="label">Pemberitahuan Internal</div><div class="title">Perubahan Harga Produk</div></div>';
+		$html .= '<p>Berikut adalah ringkasan harga produk yang telah diperbarui. Mohon memastikan harga pada seluruh kanal penjualan sudah sesuai dengan informasi di bawah ini.</p>';
+		$html .= '<table class="summary"><tr><th>Jumlah Produk</th><th>Tanggal Efektif</th><th>Diperbarui Oleh</th></tr>'
+			. '<tr><td><b>' . $summary['count'] . ' SKU</b></td><td>' . htmlspecialchars($summary['effective_date']) . '</td><td>' . htmlspecialchars($summary['changed_by']) . '</td></tr></table>';
+		$html .= '<p>Mohon memastikan harga pada POS, website, marketplace, price tag, dan materi promosi telah diperbarui sesuai daftar berikut.</p>';
 
-			$html .= '<div class="product-title">' . htmlspecialchars($batch['product_code']) . ' - ' . htmlspecialchars($batch['product_name']) . '</div>';
-			$html .= '<div class="meta">Efektif ' . tgl_indo($batch['effective_date']) . ' &middot; Diubah oleh ' . htmlspecialchars($batch['changed_by_name']) . '</div>';
-			$html .= '<table><thead><tr><th>Kanal</th><th>Harga Lama</th><th>Harga Baru</th></tr></thead><tbody>';
-			if (!empty($new['channel_prices'])) {
-				foreach ($new['channel_prices'] as $channel => $new_price) {
-					if (!in_array($channel, $item['visible_channels'], TRUE)) continue;
-					$old_price = $old['channel_prices'][$channel] ?? '-';
-					$html .= '<tr><td>' . htmlspecialchars($channel) . '</td><td class="num">' . rupiah($old_price) . '</td><td class="num"><b>' . rupiah($new_price) . '</b></td></tr>';
-				}
+		$html .= '<table class="matrix"><thead><tr><th>Produk</th><th>Status Harga</th>';
+		foreach ($channels as $name) $html .= '<th>' . htmlspecialchars($name) . '</th>';
+		$html .= '<th>Status</th></tr></thead><tbody>';
+
+		$notes_lines = '';
+		foreach ($matrix['rows'] as $row) {
+			$product_cell = '<b>' . htmlspecialchars($row['product_name']) . '</b><br><span style="color:#5b6b7d;">' . htmlspecialchars($row['product_code']) . '</span>';
+
+			$html .= '<tr class="row-old"><td rowspan="2">' . $product_cell . '</td><td>Lama</td>';
+			foreach (array_keys($channels) as $code) {
+				$html .= '<td>' . (($row['old'][$code] ?? null) !== null ? rupiah($row['old'][$code]) : '-') . '</td>';
 			}
-			$html .= '</tbody></table>';
+			$html .= '<td></td></tr>';
+
+			$html .= '<tr class="row-new"><td>Baru</td>';
+			foreach (array_keys($channels) as $code) {
+				$html .= '<td><b>' . (array_key_exists($code, $row['new']) ? rupiah($row['new'][$code]) : '-') . '</b></td>';
+			}
+			$html .= '<td class="status-new">NEW</td></tr>';
+
+			if (!empty($row['notes'])) {
+				$notes_lines .= '&bull; <b>' . htmlspecialchars($row['product_name']) . ':</b> ' . htmlspecialchars($row['notes']) . '<br>';
+			}
+		}
+		$html .= '</tbody></table>';
+
+		if ($notes_lines !== '') {
+			$html .= '<div class="notes"><b>Catatan:</b><br>' . $notes_lines . '</div>';
 		}
 
+		$html .= '<div class="tindaklanjut"><b>TINDAK LANJUT:</b> Tim terkait wajib melakukan pengecekan dan konfirmasi setelah seluruh harga berhasil diperbarui.</div>';
+		$html .= '<div class="footer">Dokumen ini dibuat sebagai lampiran pemberitahuan perubahan harga internal ATAMBAH &mdash; dicetak ' . htmlspecialchars(date('d/m/Y H:i')) . '</div>';
 		$html .= '</body></html>';
 
 		$dompdf = new \Dompdf\Dompdf(array('isRemoteEnabled' => FALSE));
-		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->setPaper('A4', 'landscape');
 		$dompdf->loadHtml($html);
 		$dompdf->render();
 		return $dompdf->output();
