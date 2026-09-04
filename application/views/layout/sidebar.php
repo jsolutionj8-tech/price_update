@@ -7,7 +7,7 @@
 	$can = function ($key) use ($role, $accessible_menus) {
 		return $role === 'ADMIN' || in_array($key, $accessible_menus, TRUE);
 	};
-	$show_master_data = $can('products') || $can('categories') || $can('vendors') || $can('competitors') || $can('costs') || $can('marketplaces');
+	$show_master_data = $can('products') || $can('brands') || $can('categories') || $can('vendors') || $can('competitors') || $can('costs') || $can('marketplaces');
 	$show_transaksi   = $can('price-update') || $can('price-history');
 	$show_admin       = $role === 'ADMIN' || $can('users') || $can('notification-groups') || $can('reports');
 ?>
@@ -26,6 +26,14 @@
 					<a class="nav-link <?= $seg === 'products' ? 'active' : '' ?>" href="<?= base_url('products') ?>">
 						<span class="nav-link-icon"><i class="bi bi-box-seam"></i></span>
 						<span class="nav-link-title">Produk</span>
+					</a>
+				</li>
+				<?php endif; ?>
+				<?php if ($can('brands')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'brands' ? 'active' : '' ?>" href="<?= base_url('brands') ?>">
+						<span class="nav-link-icon"><i class="bi bi-award"></i></span>
+						<span class="nav-link-title">Brand</span>
 					</a>
 				</li>
 				<?php endif; ?>

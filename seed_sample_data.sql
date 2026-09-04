@@ -13,6 +13,7 @@ INSERT INTO roles (role_code, role_name, description) VALUES
 -- Master menu (dipakai halaman Administrasi -> Hak Akses, lihat application/models/Menu_access_model.php)
 INSERT INTO menus (menu_key, menu_label, menu_group, menu_icon, sort_order) VALUES
 ('products',            'Produk',              'Master Data',   'bi-box-seam',              10),
+('brands',              'Brand',               'Master Data',   'bi-award',                 15),
 ('categories',          'Kategori Barang',     'Master Data',   'bi-tags',                  20),
 ('vendors',             'Vendor',              'Master Data',   'bi-truck',                 30),
 ('competitors',         'Kompetitor',          'Master Data',   'bi-shop-window',           40),

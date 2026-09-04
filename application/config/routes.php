@@ -74,6 +74,15 @@ $route['products/update/(:num)']       = 'products/update/$1';
 $route['products/delete/(:num)']       = 'products/delete/$1';
 $route['products/search']              = 'products/search';
 
+// Brand (master data)
+$route['brands']                       = 'brands/index';
+$route['brands/create']                = 'brands/create';
+$route['brands/store']                 = 'brands/store';
+$route['brands/edit/(:num)']           = 'brands/edit/$1';
+$route['brands/update/(:num)']         = 'brands/update/$1';
+$route['brands/delete/(:num)']         = 'brands/delete/$1';
+$route['brands/activate/(:num)']       = 'brands/activate/$1';
+
 // Kategori barang (master data)
 $route['categories']                   = 'categories/index';
 $route['categories/create']            = 'categories/create';
