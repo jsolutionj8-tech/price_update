@@ -107,10 +107,43 @@ function getFormDataRupiahSafe(form) {
 	return fd;
 }
 
+// Autosave draft ke localStorage supaya input yang belum ditekan "Simpan Perubahan Harga"
+// tidak hilang saat user pindah ke menu lain lalu kembali ke halaman Update Harga produk ini.
+// Di-scope per produk+vendor (form punya hidden input product_id & vendor_id) dan hanya
+// tersimpan di browser/device ini — dihapus otomatis begitu form disubmit (lihat wireForm).
+const DRAFT_PREFIX = 'priceUpdateDraft_';
+function draftKey(form) {
+	const productId = form.querySelector('[name=product_id]').value;
+	const vendorId = form.querySelector('[name=vendor_id]').value;
+	return DRAFT_PREFIX + productId + '_' + vendorId;
+}
+function saveDraft(form) {
+	const data = {};
+	form.querySelectorAll('input[name], textarea[name]').forEach(el => {
+		if (el.name === 'product_id' || el.name === 'vendor_id') return;
+		data[el.name] = el.value;
+	});
+	try {
+		localStorage.setItem(draftKey(form), JSON.stringify(data));
+	} catch (e) { /* storage penuh/nonaktif (mis. mode privat) — autosave bukan fitur kritikal */ }
+}
+function loadDraft(form) {
+	try {
+		const raw = localStorage.getItem(draftKey(form));
+		return raw ? JSON.parse(raw) : null;
+	} catch (e) {
+		return null;
+	}
+}
+function clearDraft(form) {
+	try { localStorage.removeItem(draftKey(form)); } catch (e) { /* noop */ }
+}
+
 function wireForm(form) {
 	Array.from(form.querySelectorAll('.rupiah-input')).forEach(wireRupiahInput);
 	form.addEventListener('submit', function () {
 		form.querySelectorAll('.rupiah-input').forEach(el => { el.value = rupiahDigits(el.value); });
+		clearDraft(form);
 	});
 
 	const modal = form.querySelector('[name=modal]');
@@ -120,6 +153,31 @@ function wireForm(form) {
 	const outMarkup = form.querySelector('.out-markup');
 	const outMargin = form.querySelector('.out-margin');
 	const channelInputs = Array.from(form.querySelectorAll('.channel-price-input')).filter(el => el.name !== 'price_OFFLINE');
+
+	// Pulihkan draft (kalau ada) sebelum recalc() pertama di bawah supaya semua figur
+	// (Profit/Markup/Margin/RRP) langsung dihitung dari nilai yang dipulihkan.
+	const draft = loadDraft(form);
+	if (draft) {
+		Object.keys(draft).forEach(name => {
+			const el = form.querySelector('[name="' + name.replace(/"/g, '\\"') + '"]');
+			if (el) el.value = draft[name];
+		});
+		// Tidak ada tombol "buang/reset" di sini — input hanya boleh berubah balik ke data server
+		// setelah user benar-benar menekan "Simpan Perubahan Harga" (lihat clearDraft() di listener
+		// 'submit' pada wireForm). Notice ini murni informasi, tombol close cuma menyembunyikan
+		// notice-nya, TIDAK menyentuh draft ataupun nilai field.
+		const notice = document.createElement('div');
+		notice.className = 'alert alert-warning d-flex justify-content-between align-items-center mb-3';
+		notice.innerHTML = '<span><i class="bi bi-info-circle me-1"></i>Input yang belum disimpan untuk vendor ini sudah dipulihkan otomatis.</span>' +
+			'<button type="button" class="btn-close ms-2" aria-label="Tutup"></button>';
+		form.prepend(notice);
+		notice.querySelector('.btn-close').addEventListener('click', () => notice.remove());
+	}
+	let draftSaveTimer = null;
+	form.addEventListener('input', function () {
+		clearTimeout(draftSaveTimer);
+		draftSaveTimer = setTimeout(function () { saveDraft(form); }, 400);
+	});
 
 	// Tampilkan persentase (Markup/Margin) dengan teks merah kalau nilainya minus (harga jual di bawah Modal).
 	// positiveClass (opsional) dipakai saat nilainya positif, mis. Markup biru brand saat untung.
@@ -318,6 +376,8 @@ if (cancelVendorBtn) {
 				cancelVendorBtn.disabled = false;
 				return;
 			}
+			const paneForm = activePane.querySelector('.price-form');
+			if (paneForm) clearDraft(paneForm);
 			window.location.reload();
 		})
 		.catch(function () {
