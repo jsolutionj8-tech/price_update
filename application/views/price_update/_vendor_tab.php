@@ -22,7 +22,7 @@
 				<input type="number" step="0.01" name="margin_pct" class="form-control input-calc" placeholder="0" value="<?= $vc['target_hpp_pct'] > 0 ? (float) $vc['target_hpp_pct'] : '' ?>" required>
 			</div>
 		</div>
-		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Profit, Markup % &amp; Margin % di bawah tiap kolom Harga Kanal dihitung otomatis dari <b>Laba Bersih</b> (Harga Jual &minus; Total Biaya kanal &minus; Modal), mis. Modal 800.000 &amp; Harga Jual 1.000.000 (tanpa Biaya kanal) &rarr; Profit 200.000: Markup % = Laba Bersih ÷ (Modal + Total Biaya) × 100, Margin % = Laba Bersih ÷ Harga Jual × 100 — Biaya bertipe Persentase di Master Biaya dihitung dari Harga Jual, bukan Modal, sesuai cara marketplace memotong komisi. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest (Modal ÷ (1 &minus; Margin%)).</small>
+		<small class="text-muted d-block mt-2"><i class="bi bi-info-circle me-1"></i>Profit, Markup % &amp; Margin % di bawah tiap kolom Harga Kanal dihitung otomatis dari <b>Profit</b> (Harga Jual &minus; Modal), mis. Modal 800.000 &amp; Harga Jual 1.000.000 &rarr; Profit 200.000: Markup % = Profit ÷ Modal × 100, Margin % = Profit ÷ Harga Jual × 100. Kanal <b>Offline</b> jadi acuan utama perhitungan Markup % secara keseluruhan (sesuai format spreadsheet acuan); jika Offline belum diisi, dihitung sementara dari SRP Suggest (Modal ÷ (1 &minus; Margin%)).</small>
 	</div>
 
 	<div class="row g-3 mt-3">
@@ -61,17 +61,17 @@
 								</div>
 								<div class="col-4">
 									<div class="bg-white rounded-3 py-2 h-100 d-flex flex-column">
-										<div class="small text-muted">Markup</div>
+										<div class="small text-muted">Margin</div>
 										<div class="flex-fill d-flex align-items-center justify-content-center">
-											<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
+											<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
 										</div>
 									</div>
 								</div>
 								<div class="col-4">
 									<div class="bg-white rounded-3 py-2 h-100 d-flex flex-column">
-										<div class="small text-muted">Margin</div>
+										<div class="small text-muted">Markup</div>
 										<div class="flex-fill d-flex align-items-center justify-content-center">
-											<div class="fw-bold text-nowrap <?= $is_offline ? 'out-margin' : 'out-margin-channel' ?>">—</div>
+											<div class="fw-bold text-nowrap <?= $is_offline ? 'out-markup' : 'out-markup-channel' ?>">—</div>
 										</div>
 									</div>
 								</div>

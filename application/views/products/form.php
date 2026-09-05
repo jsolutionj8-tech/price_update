@@ -3,14 +3,10 @@
 
 <div class="card card-stat p-4" style="max-width:640px;">
 	<form method="post" action="<?= isset($product) ? base_url('products/update/' . $product['id']) : base_url('products/store') ?>">
-		<?php if (!isset($product)): ?>
 		<div class="mb-3">
 			<label class="form-label">Kode Produk</label>
-			<input type="text" name="product_code" class="form-control" required>
+			<input type="text" name="product_code" class="form-control" required value="<?= htmlspecialchars($product['product_code'] ?? '') ?>">
 		</div>
-		<?php else: ?>
-			<div class="mb-3"><label class="form-label">Kode Produk</label><input type="text" class="form-control" value="<?= htmlspecialchars($product['product_code']) ?>" disabled></div>
-		<?php endif; ?>
 		<div class="mb-3">
 			<label class="form-label">Nama Produk</label>
 			<input type="text" name="product_name" class="form-control" required value="<?= htmlspecialchars($product['product_name'] ?? '') ?>">

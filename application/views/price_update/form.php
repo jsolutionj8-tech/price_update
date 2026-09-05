@@ -154,20 +154,19 @@ function wireForm(form) {
 		}
 	}
 
-	// RRP (Recommended Selling Price) per kanal = "Suggested Selling Price" — Harga Jual Minimum
-	// (Modal/(1-Margin%) + Biaya Tetap kanal) / (1 - Biaya Persentase kanal), dibulatkan NAIK ke
-	// kelipatan Rp5.000 terdekat spy jadi harga jual yg "rapi". Biaya per kanal diambil dari
-	// Master Biaya (Sales Channel) via data-biaya/data-biaya-pct di tiap input Harga Jual. Mis.
-	// Modal 800.000 & Margin 10%, kanal Biaya Persentase 2,8% & Biaya Tetap 9.220 -> Harga Jual
-	// Minimum 923.981 -> dibulatkan naik -> RRP 925.000.
+	// RRP (Recommended Selling Price) per kanal = (Modal/(1-Margin%)) / (1 - Biaya Persentase
+	// kanal) + Biaya Tetap kanal, dibulatkan NAIK ke kelipatan Rp500 terdekat spy jadi harga
+	// jual yg "rapi". Biaya per kanal diambil dari Master Biaya (Sales Channel) via
+	// data-biaya/data-biaya-pct di tiap input Harga Jual. Mis. Modal 11.666, Margin 20%, kanal
+	// Biaya Persentase 2,8% & Biaya Tetap 3.220 -> 18.222,57 -> dibulatkan naik -> RRP 18.500.
 	function calcRrp(input, modalVal, marginVal) {
 		const biayaNominal = parseFloat(input.dataset.biaya) || 0;
 		const biayaPct = parseFloat(input.dataset.biayaPct) || 0;
 		const biayaPctFactor = 1 - (biayaPct / 100);
 		const canRrp = modalVal > 0 && marginVal > 0 && marginVal < 100 && biayaPctFactor > 0;
 		if (!canRrp) return null;
-		const hargaJualMinimum = (modalVal / (1 - marginVal / 100) + biayaNominal) / biayaPctFactor;
-		return Math.ceil(hargaJualMinimum / 5000) * 5000;
+		const hargaJualMinimum = (modalVal / (1 - marginVal / 100)) / biayaPctFactor + biayaNominal;
+		return Math.ceil(hargaJualMinimum / 500) * 500;
 	}
 
 	function updateChannelOutputs() {
@@ -192,22 +191,16 @@ function wireForm(form) {
 			const srpEl = wrap.querySelector('.out-srp-channel');
 			const markupEl = wrap.querySelector('.out-markup-channel');
 			const marginEl = wrap.querySelector('.out-margin-channel');
-			const biayaNominal = parseFloat(input.dataset.biaya) || 0;
-			const biayaPct = parseFloat(input.dataset.biayaPct) || 0; // dalam %, mis. 7.5 untuk 7,5%
 			const priceVal = rupiahNumber(input.value);
 			const canPct = modalVal > 0 && priceVal > 0;
-			// Total Biaya kanal dari Harga Jual aktual = biaya nominal (Rp) + (biaya persen % x Harga Jual).
-			// Laba Bersih (Profit) = Harga Jual - Total Biaya - Modal, mis. Modal 800.000 & Harga Jual
-			// 1.000.000 (tanpa Biaya kanal) -> Profit 200.000.
-			const totalBiaya = biayaNominal + (priceVal * biayaPct / 100);
-			const labaBersih = priceVal - totalBiaya - modalVal;
+			// Profit = Harga Jual - Modal, mis. Modal 800.000 & Harga Jual 1.000.000 -> Profit 200.000.
+			const labaBersih = priceVal - modalVal;
 			if (srpEl) {
 				srpEl.textContent = canPct ? 'Rp ' + Math.round(labaBersih).toLocaleString('id-ID') : '—';
 				setValueColor(srpEl, labaBersih, canPct, 'text-markup-positive');
 			}
-			// Markup % = Laba Bersih / (Modal + Total Biaya) * 100
-			const totalModal = modalVal + totalBiaya;
-			setPctText(markupEl, canPct && totalModal > 0 ? (labaBersih / totalModal) * 100 : 0, canPct && totalModal > 0, 'text-markup-positive');
+			// Markup % = Laba Bersih / Modal * 100
+			setPctText(markupEl, canPct && modalVal > 0 ? (labaBersih / modalVal) * 100 : 0, canPct && modalVal > 0, 'text-markup-positive');
 			// Margin % = Laba Bersih / Harga Jual * 100
 			setPctText(marginEl, canPct ? (labaBersih / priceVal) * 100 : 0, canPct, 'text-markup-positive');
 		});

@@ -87,6 +87,7 @@ class Products extends MY_Controller
 	{
 		$this->_validate();
 		$this->product_model->update($id, array(
+			'product_code' => $this->input->post('product_code', TRUE),
 			'product_name' => $this->input->post('product_name', TRUE),
 			'brand_id'     => $this->input->post('brand_id', TRUE),
 			'category_id'  => $this->input->post('category_id', TRUE) ?: NULL,
@@ -123,6 +124,7 @@ class Products extends MY_Controller
 	protected function _validate()
 	{
 		$this->load->library('form_validation');
+		$this->form_validation->set_rules('product_code', 'Kode Produk', 'required');
 		$this->form_validation->set_rules('product_name', 'Nama Produk', 'required');
 		$this->form_validation->set_rules('brand_id', 'Brand', 'required');
 		if ($this->form_validation->run() === FALSE) {
