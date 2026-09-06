@@ -221,6 +221,8 @@ class Shopify extends Admin_Controller
 		$ch = curl_init('https://' . $settings['shop_domain'] . '/admin/api/2024-01/shop.json');
 		curl_setopt_array($ch, array(
 			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_FOLLOWLOCATION => true, // shop_domain custom (mis. domain sendiri) biasanya redirect ke *.myshopify.com
+			CURLOPT_MAXREDIRS      => 3,
 			CURLOPT_TIMEOUT        => 15,
 			CURLOPT_HTTPHEADER     => array('X-Shopify-Access-Token: ' . $settings['access_token']),
 		));
