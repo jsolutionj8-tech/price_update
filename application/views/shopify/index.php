@@ -5,9 +5,14 @@
 			<i class="bi bi-check-circle me-1"></i>Terhubung ke <b><?= htmlspecialchars($settings['shop_domain']) ?></b>
 			<div class="small text-muted mt-1">Scope: <?= htmlspecialchars($settings['scope']) ?> &nbsp;|&nbsp; Sejak: <?= !empty($settings['connected_at']) ? date('d M Y H:i', strtotime($settings['connected_at'])) : '-' ?></div>
 		</div>
-		<form method="post" action="<?= base_url('shopify/disconnect') ?>" onsubmit="return confirm('Putuskan koneksi ke Shopify? Anda perlu menghubungkan ulang lewat OAuth untuk memakainya lagi.')">
-			<button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-plug me-1"></i>Putuskan Koneksi</button>
-		</form>
+		<div class="d-flex gap-2">
+			<form method="post" action="<?= base_url('shopify/test-connection') ?>">
+				<button type="submit" class="btn btn-outline-primary btn-sm"><i class="bi bi-broadcast me-1"></i>Test Koneksi</button>
+			</form>
+			<form method="post" action="<?= base_url('shopify/disconnect') ?>" onsubmit="return confirm('Putuskan koneksi ke Shopify? Anda perlu menghubungkan ulang untuk memakainya lagi.')">
+				<button type="submit" class="btn btn-outline-danger btn-sm"><i class="bi bi-plug me-1"></i>Putuskan Koneksi</button>
+			</form>
+		</div>
 	<?php else: ?>
 		<div class="alert alert-warning"><i class="bi bi-info-circle me-1"></i>Belum terhubung ke Shopify.</div>
 	<?php endif; ?>

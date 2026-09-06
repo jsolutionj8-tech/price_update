@@ -184,6 +184,7 @@ $route['shopify/save-manual-token']    = 'shopify/save_manual_token';
 $route['shopify/connect']              = 'shopify/connect';
 $route['shopify/callback']             = 'shopify/callback';
 $route['shopify/disconnect']           = 'shopify/disconnect';
+$route['shopify/test-connection']      = 'shopify/test_connection';
 
 // Import / export
 $route['reports/export']               = 'reports/export';

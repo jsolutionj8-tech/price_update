@@ -205,6 +205,46 @@ class Shopify extends Admin_Controller
 		redirect('shopify');
 	}
 
+	/**
+	 * Pastikan access_token yang tersimpan benar-benar valid & bisa dipakai — bukan cuma
+	 * "tersimpan di DB" tapi belum tentu jalan (mis. salah salin, scope kurang, dsb). Panggil
+	 * endpoint Admin API paling ringan (shop.json) pakai access_token, laporkan hasilnya apa adanya.
+	 */
+	public function test_connection()
+	{
+		$settings = $this->shopify_settings_model->get();
+		if (empty($settings['access_token'])) {
+			$this->session->set_flashdata('error', 'Belum ada Access Token tersimpan.');
+			redirect('shopify');
+		}
+
+		$ch = curl_init('https://' . $settings['shop_domain'] . '/admin/api/2024-01/shop.json');
+		curl_setopt_array($ch, array(
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT        => 15,
+			CURLOPT_HTTPHEADER     => array('X-Shopify-Access-Token: ' . $settings['access_token']),
+		));
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		$curl_error = curl_error($ch);
+		curl_close($ch);
+
+		$result = $response ? json_decode($response, true) : null;
+
+		if ($curl_error) {
+			$this->session->set_flashdata('error', 'Test koneksi gagal: tidak bisa menghubungi ' . $settings['shop_domain'] . ' (' . $curl_error . ').');
+		} elseif ($http_code === 200 && !empty($result['shop']['name'])) {
+			$this->session->set_flashdata('success', 'Token VALID & berfungsi — berhasil mengambil data toko "' . $result['shop']['name'] . '" dari Shopify API.');
+		} elseif ($http_code === 401) {
+			$this->session->set_flashdata('error', 'Token TIDAK valid (HTTP 401 Unauthorized) — Access Token salah/sudah dicabut. Buat ulang Custom App/token-nya.');
+		} else {
+			log_message('error', 'Shopify test_connection gagal — HTTP ' . $http_code . ': ' . $response);
+			$this->session->set_flashdata('error', 'Test koneksi gagal (HTTP ' . $http_code . '). Detail sudah dicatat di log server.');
+		}
+
+		redirect('shopify');
+	}
+
 	private function _normalize_domain($domain)
 	{
 		$domain = trim($domain);
