@@ -73,6 +73,15 @@ class Product_model extends CI_Model
 		return $this->db->where('id', $id)->update($this->table, array('status' => 'inactive'));
 	}
 
+	/**
+	 * Cache variant_id Shopify hasil pencarian by SKU, spy sync harga berikutnya utk produk
+	 * yang sama tidak perlu cari lagi lewat GraphQL (lihat Shopify_client::find_variant_id_by_sku()).
+	 */
+	public function update_shopify_variant_id($id, $variant_id)
+	{
+		return $this->db->where('id', $id)->update($this->table, array('shopify_variant_id' => $variant_id));
+	}
+
 	public function get_all_brands()
 	{
 		return $this->db->where('is_active', 1)->order_by('brand_name')->get('brands')->result_array();

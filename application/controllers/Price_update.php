@@ -268,6 +268,7 @@ class Price_update extends MY_Controller
 		$channels = $this->price_model->get_channels();
 		$new_prices = array();
 		$channels_changed = array();
+		$shopify_sync = null;
 
 		foreach ($channels as $ch) {
 			$posted = $this->input->post('price_' . $ch['channel_code']);
@@ -276,11 +277,20 @@ class Price_update extends MY_Controller
 			$posted = (float) $posted;
 			$new_prices[$ch['channel_code']] = $posted;
 
-			if (!isset($old_prices[$ch['channel_code']]) || (float) $old_prices[$ch['channel_code']] !== $posted) {
+			$price_changed = !isset($old_prices[$ch['channel_code']]) || (float) $old_prices[$ch['channel_code']] !== $posted;
+			if ($price_changed) {
 				$channels_changed[] = $ch['channel_code'];
 			}
 
 			$this->price_model->upsert_price($product_id, $vendor_id, $ch['id'], $posted, $effective_date, $user_id);
+
+			// Kanal "SHOPIFY" (dibuat lewat menu Sales Channel) ikut didorong ke toko Shopify
+			// yang sudah terhubung (lihat menu Shopify) — hanya kalau harganya memang berubah.
+			// Kegagalan sync TIDAK membatalkan penyimpanan harga di sistem ini (lihat flashdata
+			// di bawah), krn Shopify bisa saja sedang bermasalah/produk belum ada di sana.
+			if ($ch['channel_code'] === 'SHOPIFY' && $price_changed) {
+				$shopify_sync = $this->_sync_shopify_price($product_id, $posted);
+			}
 		}
 
 		// --- simpan harga kompetitor (opsional, diinput langsung dari form Update Harga) ---
@@ -319,9 +329,50 @@ class Price_update extends MY_Controller
 		// SATU email gabungan untuk SEMUA batch berstatus 'pending' di database (lintas
 		// user/sesi), dipicu lewat tombol "Kirim Notifikasi Sekarang" pada banner global.
 		$pending_count = $this->price_change_batch_model->count_pending();
-		$this->session->set_flashdata('success', 'Harga berhasil disimpan. Total ' . $pending_count . ' perubahan menunggu dikirim notifikasi — lanjutkan update produk lain, lalu klik "Kirim Notifikasi Sekarang" di atas jika sudah selesai.');
+		$message = 'Harga berhasil disimpan. Total ' . $pending_count . ' perubahan menunggu dikirim notifikasi — lanjutkan update produk lain, lalu klik "Kirim Notifikasi Sekarang" di atas jika sudah selesai.';
+		if ($shopify_sync !== null) {
+			$message .= $shopify_sync['success']
+				? ' Harga Shopify berhasil disinkronkan.'
+				: ' PERINGATAN: sinkronisasi ke Shopify GAGAL (' . $shopify_sync['error'] . ') — harga di sistem ini tetap tersimpan normal.';
+		}
+		$this->session->set_flashdata('success', $message);
 
 		redirect('price-history/detail/' . $batch_id);
+	}
+
+	/**
+	 * Dorong harga kanal SHOPIFY ke Shopify via Admin API. variant_id dicari sekali by SKU
+	 * (product_code) lalu di-cache ke products.shopify_variant_id spy sync berikutnya lebih
+	 * cepat (tidak perlu GraphQL lookup lagi tiap kali harga produk yg sama diubah).
+	 * @return array|null null kalau belum terhubung ke Shopify sama sekali (bukan error).
+	 */
+	private function _sync_shopify_price($product_id, $price)
+	{
+		$this->load->library('shopify_client');
+		if (!$this->shopify_client->is_connected()) return null;
+
+		$product = $this->product_model->find($product_id);
+		if (empty($product)) return array('success' => false, 'error' => 'Produk tidak ditemukan.');
+
+		$variant_id = $product['shopify_variant_id'];
+		if (empty($variant_id)) {
+			$variant_id = $this->shopify_client->find_variant_id_by_sku($product['product_code']);
+			if (!empty($variant_id)) {
+				$this->product_model->update_shopify_variant_id($product_id, $variant_id);
+			}
+		}
+
+		if (empty($variant_id)) {
+			$error = 'Produk dengan SKU "' . $product['product_code'] . '" tidak ditemukan di Shopify.';
+			log_message('error', 'Shopify sync: ' . $error);
+			return array('success' => false, 'error' => $error);
+		}
+
+		$result = $this->shopify_client->update_variant_price($variant_id, $price);
+		if (!$result['success']) {
+			log_message('error', 'Shopify sync gagal utk produk ' . $product['product_code'] . ' (variant ' . $variant_id . '): ' . $result['error']);
+		}
+		return $result;
 	}
 
 	/**

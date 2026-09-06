@@ -313,6 +313,7 @@ CREATE TABLE `products` (
   `brand_id` int(10) unsigned NOT NULL,
   `category_id` int(10) unsigned DEFAULT NULL,
   `unit` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT 'pcs',
+  `shopify_variant_id` bigint(20) unsigned DEFAULT NULL COMMENT 'Cache hasil pencarian by SKU (product_code) via Shopify API, diisi otomatis saat sync harga pertama kali berhasil',
   `status` enum('active','inactive') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active',
   `created_by` int(10) unsigned DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
