@@ -90,7 +90,7 @@ class Shopify extends Admin_Controller
 
 		$this->shopify_settings_model->save(array(
 			'shop_domain'  => $this->_normalize_domain($this->input->post('shop_domain', TRUE)),
-			'access_token' => $this->input->post('access_token', TRUE),
+			'access_token' => trim($this->input->post('access_token', TRUE)),
 			'connected_at' => date('Y-m-d H:i:s'),
 			'updated_by'   => $this->auth_lib->user_id(),
 		));
