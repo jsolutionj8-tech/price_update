@@ -177,6 +177,13 @@ $route['access-control/update']        = 'access_control/update';
 $route['settings']                     = 'settings/index';
 $route['settings/update']              = 'settings/update';
 
+// Koneksi Shopify (OAuth)
+$route['shopify']                      = 'shopify/index';
+$route['shopify/save-credentials']     = 'shopify/save_credentials';
+$route['shopify/connect']              = 'shopify/connect';
+$route['shopify/callback']             = 'shopify/callback';
+$route['shopify/disconnect']           = 'shopify/disconnect';
+
 // Import / export
 $route['reports/export']               = 'reports/export';
 $route['reports/import']               = 'reports/import';

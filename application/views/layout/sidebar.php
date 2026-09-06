@@ -138,6 +138,12 @@
 						<span class="nav-link-title">Settings</span>
 					</a>
 				</li>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'shopify' ? 'active' : '' ?>" href="<?= base_url('shopify') ?>">
+						<span class="nav-link-icon"><i class="bi bi-shop"></i></span>
+						<span class="nav-link-title">Shopify</span>
+					</a>
+				</li>
 				<?php endif; ?>
 
 				<li class="nav-item mt-2 border-top border-secondary-subtle pt-2">

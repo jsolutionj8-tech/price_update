@@ -1,0 +1,196 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+/**
+ * Shopify
+ * Halaman "Shopify": simpan kredensial OAuth (shop domain, client_id, client_secret) &
+ * jalankan alur OAuth Authorization Code untuk mendapatkan access_token. Sengaja
+ * Admin_Controller (bukan lewat Menu_access_model) krn halaman ini menyimpan client_secret
+ * & access_token — sama alasannya dgn Settings (SMTP) & Access_control.
+ *
+ * connect()/callback() dijalankan di dalam sesi admin yang sudah login (redirect ke Shopify
+ * lalu kembali ke browser admin yang sama), jadi tetap aman di-gate lewat Admin_Controller
+ * meski endpoint-nya diakses lewat redirect, bukan klik menu biasa.
+ */
+class Shopify extends Admin_Controller
+{
+	const OAUTH_STATE_KEY = 'shopify_oauth_state';
+
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model('shopify_settings_model');
+	}
+
+	public function index()
+	{
+		$data = array(
+			'title'    => 'Shopify',
+			'settings' => $this->shopify_settings_model->get(),
+		);
+		$this->render_view('shopify/index', $data);
+	}
+
+	public function save_credentials()
+	{
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('shop_domain', 'Shop Domain', 'required');
+		$this->form_validation->set_rules('client_id', 'Client ID', 'required');
+
+		if ($this->form_validation->run() === FALSE) {
+			$this->session->set_flashdata('error', validation_errors());
+			redirect('shopify');
+		}
+
+		$current = $this->shopify_settings_model->get();
+
+		$data = array(
+			'shop_domain' => $this->_normalize_domain($this->input->post('shop_domain', TRUE)),
+			'client_id'   => $this->input->post('client_id', TRUE),
+			'updated_by'  => $this->auth_lib->user_id(),
+		);
+
+		// Client Secret sengaja tidak ditampilkan ulang di form (lihat views/shopify/index.php)
+		// — field dikosongkan berarti "jangan ubah", hanya ditimpa kalau diisi ulang.
+		$new_secret = $this->input->post('client_secret');
+		if ($new_secret !== '' && $new_secret !== NULL) {
+			$data['client_secret'] = $new_secret;
+		} elseif (empty($current['id'])) {
+			$this->session->set_flashdata('error', 'Client Secret wajib diisi.');
+			redirect('shopify');
+		} else {
+			$data['client_secret'] = $current['client_secret'];
+		}
+
+		// Ganti shop/client_id/secret berarti koneksi lama (kalau ada) sudah tidak relevan lagi.
+		$data['access_token'] = NULL;
+		$data['connected_at'] = NULL;
+
+		$this->shopify_settings_model->save($data);
+		$this->session->set_flashdata('success', 'Kredensial Shopify berhasil disimpan. Klik "Hubungkan ke Shopify" untuk melanjutkan.');
+		redirect('shopify');
+	}
+
+	/**
+	 * Mulai alur OAuth: redirect browser admin ke halaman izin (consent) Shopify.
+	 * `state` acak disimpan di session lalu diverifikasi lagi di callback() utk mencegah
+	 * CSRF pada proses OAuth (permintaan authorize/callback palsu dari pihak lain).
+	 */
+	public function connect()
+	{
+		$settings = $this->shopify_settings_model->get();
+		if (empty($settings['shop_domain']) || empty($settings['client_id']) || empty($settings['client_secret'])) {
+			$this->session->set_flashdata('error', 'Isi dulu Shop Domain, Client ID & Client Secret sebelum menghubungkan.');
+			redirect('shopify');
+		}
+
+		$state = bin2hex(random_bytes(16));
+		$this->session->set_userdata(self::OAUTH_STATE_KEY, $state);
+
+		$authorize_url = 'https://' . $settings['shop_domain'] . '/admin/oauth/authorize'
+			. '?client_id=' . rawurlencode($settings['client_id'])
+			. '&scope=' . rawurlencode($settings['scope'])
+			. '&redirect_uri=' . rawurlencode(base_url('shopify/callback'))
+			. '&state=' . rawurlencode($state);
+
+		redirect($authorize_url);
+	}
+
+	/**
+	 * Shopify redirect ke sini setelah admin toko klik "Install/Allow". Verifikasi state & hmac
+	 * dulu (wajib — tanpa ini siapa pun bisa memalsukan callback ini), baru tukar `code` dgn
+	 * access_token lewat server-to-server call (client_secret tidak pernah dikirim ke browser).
+	 */
+	public function callback()
+	{
+		$state = $this->input->get('state');
+		$session_state = $this->session->userdata(self::OAUTH_STATE_KEY);
+		$this->session->unset_userdata(self::OAUTH_STATE_KEY); // one-time use, langsung dibuang
+
+		if (empty($state) || empty($session_state) || !hash_equals($session_state, $state)) {
+			$this->session->set_flashdata('error', 'Koneksi Shopify dibatalkan: state tidak valid (permintaan kadaluarsa atau tidak sah).');
+			redirect('shopify');
+		}
+
+		$settings = $this->shopify_settings_model->get();
+		$shop = $this->input->get('shop');
+		if (empty($settings) || empty($shop) || !hash_equals($settings['shop_domain'], $shop)) {
+			$this->session->set_flashdata('error', 'Koneksi Shopify dibatalkan: shop domain tidak cocok dengan yang tersimpan.');
+			redirect('shopify');
+		}
+
+		if (!$this->_verify_hmac($settings['client_secret'])) {
+			$this->session->set_flashdata('error', 'Koneksi Shopify dibatalkan: verifikasi keamanan (hmac) gagal.');
+			redirect('shopify');
+		}
+
+		$code = $this->input->get('code');
+		if (empty($code)) {
+			$this->session->set_flashdata('error', 'Koneksi Shopify gagal: kode otorisasi tidak diterima.');
+			redirect('shopify');
+		}
+
+		$ch = curl_init('https://' . $shop . '/admin/oauth/access_token');
+		curl_setopt_array($ch, array(
+			CURLOPT_POST           => true,
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_TIMEOUT        => 15,
+			CURLOPT_HTTPHEADER     => array('Content-Type: application/json'),
+			CURLOPT_POSTFIELDS     => json_encode(array(
+				'client_id'     => $settings['client_id'],
+				'client_secret' => $settings['client_secret'],
+				'code'          => $code,
+			)),
+		));
+		$response = curl_exec($ch);
+		$curl_error = curl_error($ch);
+		curl_close($ch);
+
+		$result = $response ? json_decode($response, true) : null;
+
+		if ($curl_error || empty($result['access_token'])) {
+			log_message('error', 'Shopify OAuth token exchange gagal: ' . ($curl_error ?: $response));
+			$this->session->set_flashdata('error', 'Koneksi Shopify gagal saat menukar kode otorisasi. Coba lagi.');
+			redirect('shopify');
+		}
+
+		$this->shopify_settings_model->save_token($result['scope'] ?? $settings['scope'], $result['access_token'], $this->auth_lib->user_id());
+		$this->session->set_flashdata('success', 'Berhasil terhubung ke Shopify (' . $shop . ').');
+		redirect('shopify');
+	}
+
+	public function disconnect()
+	{
+		$this->shopify_settings_model->clear_token($this->auth_lib->user_id());
+		$this->session->set_flashdata('success', 'Koneksi ke Shopify sudah diputuskan.');
+		redirect('shopify');
+	}
+
+	private function _normalize_domain($domain)
+	{
+		$domain = trim($domain);
+		$domain = preg_replace('#^https?://#i', '', $domain);
+		return rtrim($domain, '/');
+	}
+
+	/**
+	 * Verifikasi hmac query string sesuai dokumentasi OAuth Shopify: seluruh parameter GET
+	 * (kecuali hmac & signature) diurutkan alfabetis lalu di-HMAC-SHA256 pakai Client Secret.
+	 */
+	private function _verify_hmac($client_secret)
+	{
+		$params = $this->input->get();
+		$hmac = isset($params['hmac']) ? $params['hmac'] : '';
+		unset($params['hmac'], $params['signature']);
+		if (empty($hmac)) return FALSE;
+
+		ksort($params);
+		$pairs = array();
+		foreach ($params as $key => $value) {
+			$pairs[] = $key . '=' . $value;
+		}
+		$computed = hash_hmac('sha256', implode('&', $pairs), $client_secret);
+
+		return hash_equals($computed, $hmac);
+	}
+}

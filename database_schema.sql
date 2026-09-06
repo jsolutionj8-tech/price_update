@@ -400,6 +400,28 @@ CREATE TABLE `smtp_settings` (
   CONSTRAINT `fk_smtp_settings_user` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `shopify_settings` */
+/* Menyimpan 1 baris kredensial & token OAuth Shopify (diisi lewat menu Shopify, ADMIN-only).
+   client_secret & access_token adalah rahasia — jangan pernah ditampilkan ulang di form/log. */
+
+DROP TABLE IF EXISTS `shopify_settings`;
+
+CREATE TABLE `shopify_settings` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `shop_domain` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_secret` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `scope` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'read_products,write_products',
+  `access_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `connected_at` datetime DEFAULT NULL,
+  `updated_by` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_shopify_settings_user` (`updated_by`),
+  CONSTRAINT `fk_shopify_settings_user` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `vendors` */
 
 DROP TABLE IF EXISTS `vendors`;
