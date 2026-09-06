@@ -209,7 +209,16 @@ class Shopify extends Admin_Controller
 		if ($curl_error) {
 			$this->session->set_flashdata('error', 'Test koneksi gagal: tidak bisa menghubungi ' . $settings['shop_domain'] . ' (' . $curl_error . ').');
 		} elseif ($http_code === 200 && !empty($result['shop']['name'])) {
-			$this->session->set_flashdata('success', 'Token VALID & berfungsi — berhasil mengambil data toko "' . $result['shop']['name'] . '" dari Shopify API.');
+			// shop.json cuma membuktikan token valid, BUKAN scope apa saja yang aktif — cek scope
+			// SEBENARNYA lewat access_scopes.json (bisa beda dari kolom `scope` tersimpan kalau
+			// scope app diubah di Dev Dashboard SETELAH token ini terbit; upstream tidak retroaktif
+			// menaikkan scope token lama, hanya reconnect/token baru yang membawa scope terbaru).
+			$active_scope = $this->_fetch_active_scopes($settings);
+			if ($active_scope !== null && $active_scope !== $settings['scope']) {
+				$this->shopify_settings_model->save(array('scope' => $active_scope));
+			}
+			$scope_text = $active_scope ?? $settings['scope'] . ' (tidak bisa verifikasi scope aktif)';
+			$this->session->set_flashdata('success', 'Token VALID & berfungsi — berhasil mengambil data toko "' . $result['shop']['name'] . '" dari Shopify API. Scope aktif: ' . $scope_text . '.');
 		} elseif ($http_code === 401) {
 			$this->session->set_flashdata('error', 'Token TIDAK valid (HTTP 401 Unauthorized) — Access Token salah/sudah dicabut. Buat ulang Custom App/token-nya.');
 		} else {
@@ -218,6 +227,33 @@ class Shopify extends Admin_Controller
 		}
 
 		redirect('shopify');
+	}
+
+	/**
+	 * Ambil daftar scope yang BENAR-BENAR aktif untuk access_token tersimpan, langsung dari
+	 * Shopify (bukan dari kolom `scope` kita, yang cuma snapshot hasil callback() terakhir).
+	 * Return null kalau gagal dipanggil (bukan berarti scope kosong).
+	 */
+	private function _fetch_active_scopes($settings)
+	{
+		$ch = curl_init('https://' . $settings['shop_domain'] . '/admin/oauth/access_scopes.json');
+		curl_setopt_array($ch, array(
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_MAXREDIRS      => 3,
+			CURLOPT_TIMEOUT        => 15,
+			CURLOPT_HTTPHEADER     => array('X-Shopify-Access-Token: ' . $settings['access_token']),
+		));
+		$response = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+
+		if ($http_code !== 200) return null;
+
+		$result = json_decode($response, true);
+		if (empty($result['access_scopes'])) return null;
+
+		return implode(',', array_column($result['access_scopes'], 'handle'));
 	}
 
 	private function _normalize_domain($domain)
