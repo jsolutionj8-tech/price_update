@@ -284,11 +284,11 @@ class Price_update extends MY_Controller
 
 			$this->price_model->upsert_price($product_id, $vendor_id, $ch['id'], $posted, $effective_date, $user_id);
 
-			// Kanal "SHOPIFY" (dibuat lewat menu Sales Channel) ikut didorong ke toko Shopify
+			// Kanal "B2B" (Sales Channel yg dipetakan ke toko Shopify) ikut didorong ke Shopify
 			// yang sudah terhubung (lihat menu Shopify) — hanya kalau harganya memang berubah.
 			// Kegagalan sync TIDAK membatalkan penyimpanan harga di sistem ini (lihat flashdata
 			// di bawah), krn Shopify bisa saja sedang bermasalah/produk belum ada di sana.
-			if ($ch['channel_code'] === 'SHOPIFY' && $price_changed) {
+			if ($ch['channel_code'] === 'B2B' && $price_changed) {
 				$shopify_sync = $this->_sync_shopify_price($product_id, $posted);
 			}
 		}
@@ -341,7 +341,7 @@ class Price_update extends MY_Controller
 	}
 
 	/**
-	 * Dorong harga kanal SHOPIFY ke Shopify via Admin API. variant_id dicari sekali by SKU
+	 * Dorong harga kanal B2B ke Shopify via Admin API. variant_id dicari sekali by SKU
 	 * (product_code) lalu di-cache ke products.shopify_variant_id spy sync berikutnya lebih
 	 * cepat (tidak perlu GraphQL lookup lagi tiap kali harga produk yg sama diubah).
 	 * @return array|null null kalau belum terhubung ke Shopify sama sekali (bukan error).
