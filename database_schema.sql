@@ -401,16 +401,18 @@ CREATE TABLE `smtp_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /*Table structure for table `shopify_settings` */
-/* Menyimpan 1 baris kredensial & token OAuth Shopify (diisi lewat menu Shopify, ADMIN-only).
-   client_secret & access_token adalah rahasia — jangan pernah ditampilkan ulang di form/log. */
+/* Menyimpan 1 baris kredensial & token Shopify (diisi lewat menu Shopify, ADMIN-only).
+   client_secret & access_token adalah rahasia — jangan pernah ditampilkan ulang di form/log.
+   client_id/client_secret nullable krn Custom App (Admin API access_token manual) tidak butuh
+   itu — cuma dipakai kalau memakai alur OAuth (Shopify::connect()/callback()). */
 
 DROP TABLE IF EXISTS `shopify_settings`;
 
 CREATE TABLE `shopify_settings` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `shop_domain` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `client_id` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `client_secret` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_id` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `client_secret` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `scope` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'read_products,write_products',
   `access_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `connected_at` datetime DEFAULT NULL,

@@ -72,6 +72,33 @@ class Shopify extends Admin_Controller
 	}
 
 	/**
+	 * Jalur alternatif tanpa OAuth: Custom App yang dibuat langsung dari admin toko Shopify
+	 * (Settings -> Apps and sales channels -> Develop apps) memberi Admin API access_token
+	 * secara langsung (sekali tampil), tanpa client_id/client_secret/redirect_uri sama sekali.
+	 * Dipakai kalau alur OAuth (connect()/callback()) bermasalah di sisi konfigurasi Shopify.
+	 */
+	public function save_manual_token()
+	{
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('shop_domain', 'Shop Domain', 'required');
+		$this->form_validation->set_rules('access_token', 'Access Token', 'required');
+
+		if ($this->form_validation->run() === FALSE) {
+			$this->session->set_flashdata('error', validation_errors());
+			redirect('shopify');
+		}
+
+		$this->shopify_settings_model->save(array(
+			'shop_domain'  => $this->_normalize_domain($this->input->post('shop_domain', TRUE)),
+			'access_token' => $this->input->post('access_token', TRUE),
+			'connected_at' => date('Y-m-d H:i:s'),
+			'updated_by'   => $this->auth_lib->user_id(),
+		));
+		$this->session->set_flashdata('success', 'Access Token Shopify berhasil disimpan.');
+		redirect('shopify');
+	}
+
+	/**
 	 * Mulai alur OAuth: redirect browser admin ke halaman izin (consent) Shopify.
 	 * `state` acak disimpan di session lalu diverifikasi lagi di callback() utk mencegah
 	 * CSRF pada proses OAuth (permintaan authorize/callback palsu dari pihak lain).

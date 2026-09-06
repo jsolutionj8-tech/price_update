@@ -13,8 +13,32 @@
 	<?php endif; ?>
 </div>
 
+<?php if (empty($settings['access_token'])): ?>
+<div class="card card-stat p-4 mb-3" style="max-width:560px;">
+	<h6 class="fw-bold mb-3">Custom App (Access Token Manual) &mdash; Direkomendasikan</h6>
+	<p class="text-muted small">
+		Lebih simpel & tidak perlu OAuth/redirect sama sekali. Buka admin toko Shopify Anda &rarr;
+		<b>Settings &rarr; Apps and sales channels &rarr; Develop apps</b> &rarr; buat app baru &rarr;
+		di <b>API access</b> centang scope <code>read_products</code> &amp; <code>write_products</code> &rarr;
+		<b>Install app</b> &rarr; <b>Reveal token once</b>, lalu salin token-nya ke sini (token hanya
+		tampil sekali di Shopify, simpan baik-baik).
+	</p>
+	<form method="post" action="<?= base_url('shopify/save-manual-token') ?>">
+		<div class="mb-3">
+			<label class="form-label">Shop Domain</label>
+			<input type="text" name="shop_domain" class="form-control" required value="<?= htmlspecialchars($settings['shop_domain'] ?? '') ?>" placeholder="nama-toko.myshopify.com">
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Admin API Access Token</label>
+			<input type="password" name="access_token" class="form-control" autocomplete="new-password" placeholder="shpat_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+		</div>
+		<button class="btn btn-primary">Simpan Access Token</button>
+	</form>
+</div>
+<?php endif; ?>
+
 <div class="card card-stat p-4" style="max-width:560px;">
-	<h6 class="fw-bold mb-3">Kredensial App Shopify</h6>
+	<h6 class="fw-bold mb-3">Alternatif: OAuth App Shopify</h6>
 	<p class="text-muted small">Ambil dari Shopify Partner/Dev Dashboard &rarr; App settings. Client Secret tidak pernah ditampilkan ulang di sini setelah disimpan.</p>
 	<form method="post" action="<?= base_url('shopify/save-credentials') ?>">
 		<div class="mb-3">
