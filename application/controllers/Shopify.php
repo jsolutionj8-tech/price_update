@@ -87,11 +87,17 @@ class Shopify extends Admin_Controller
 		$state = bin2hex(random_bytes(16));
 		$this->session->set_userdata(self::OAUTH_STATE_KEY, $state);
 
+		$redirect_uri = base_url('shopify/callback');
 		$authorize_url = 'https://' . $settings['shop_domain'] . '/admin/oauth/authorize'
 			. '?client_id=' . rawurlencode($settings['client_id'])
 			. '&scope=' . rawurlencode($settings['scope'])
-			. '&redirect_uri=' . rawurlencode(base_url('shopify/callback'))
+			. '&redirect_uri=' . rawurlencode($redirect_uri)
 			. '&state=' . rawurlencode($state);
+
+		// Log persis redirect_uri yang dikirim — dipakai utk diagnosa error Shopify "redirect_uri
+		// and application url must have matching hosts" (host redirect_uri ini HARUS sama dgn
+		// host "App URL" yg terdaftar di Partner/Dev Dashboard, bukan cuma di Allowed Redirection URL).
+		log_message('error', 'Shopify OAuth connect() — base_url(): ' . base_url() . ' | redirect_uri dikirim: ' . $redirect_uri . ' | authorize_url: ' . $authorize_url);
 
 		redirect($authorize_url);
 	}
@@ -108,6 +114,12 @@ class Shopify extends Admin_Controller
 		$this->session->unset_userdata(self::OAUTH_STATE_KEY); // one-time use, langsung dibuang
 
 		if (empty($state) || empty($session_state) || !hash_equals($session_state, $state)) {
+			// Log alasan spesifik (bukan cuma pesan generik ke user) supaya gampang didiagnosis
+			// lewat application/logs/ kalau ini kejadian lagi — session cookie hilang antar
+			// request (beda host/domain, cookie diblokir, dsb) vs state memang sudah dipakai/kadaluarsa.
+			log_message('error', 'Shopify OAuth state mismatch — state dari Shopify: ' . var_export($state, TRUE)
+				. ', state di session: ' . var_export($session_state, TRUE)
+				. ', session_id: ' . session_id());
 			$this->session->set_flashdata('error', 'Koneksi Shopify dibatalkan: state tidak valid (permintaan kadaluarsa atau tidak sah).');
 			redirect('shopify');
 		}
