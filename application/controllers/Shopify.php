@@ -15,6 +15,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Shopify extends Admin_Controller
 {
 	const OAUTH_STATE_KEY = 'shopify_oauth_state';
+	// Diminta secara tetap di connect() — TIDAK diambil dari kolom `scope` tersimpan, krn nilai
+	// itu cuma snapshot hasil connect terakhir dan bisa basi (mis. connect pertama sebelum app
+	// Shopify-nya sendiri dikonfigurasi lengkap). Ini scope yang benar-benar dibutuhkan fitur
+	// sync harga (baca produk by SKU + tulis harga variant).
+	const REQUIRED_SCOPE = 'read_products,write_products';
 
 	public function __construct()
 	{
@@ -90,7 +95,7 @@ class Shopify extends Admin_Controller
 		$redirect_uri = base_url('shopify/callback');
 		$authorize_url = 'https://' . $settings['shop_domain'] . '/admin/oauth/authorize'
 			. '?client_id=' . rawurlencode($settings['client_id'])
-			. '&scope=' . rawurlencode($settings['scope'])
+			. '&scope=' . rawurlencode(self::REQUIRED_SCOPE)
 			. '&redirect_uri=' . rawurlencode($redirect_uri)
 			. '&state=' . rawurlencode($state);
 
@@ -166,8 +171,15 @@ class Shopify extends Admin_Controller
 			redirect('shopify');
 		}
 
-		$this->shopify_settings_model->save_token($result['scope'] ?? $settings['scope'], $result['access_token'], $this->auth_lib->user_id());
-		$this->session->set_flashdata('success', 'Berhasil terhubung ke Shopify (' . $shop . ').');
+		// Jangan percaya `scope` dari respons token exchange begitu saja — verifikasi ulang scope
+		// yang BENAR-BENAR aktif lewat access_scopes.json (sama seperti test_connection()), krn
+		// respons token exchange kadang tidak konsisten dgn scope yg sungguh dikabulkan Shopify.
+		$new_settings = array('shop_domain' => $shop, 'access_token' => $result['access_token']);
+		$verified_scope = $this->_fetch_active_scopes($new_settings);
+		$scope_to_save = $verified_scope ?: ($result['scope'] ?? $settings['scope']);
+
+		$this->shopify_settings_model->save_token($scope_to_save, $result['access_token'], $this->auth_lib->user_id());
+		$this->session->set_flashdata('success', 'Berhasil terhubung ke Shopify (' . $shop . '). Scope aktif: ' . $scope_to_save . '.');
 		redirect('shopify');
 	}
 
