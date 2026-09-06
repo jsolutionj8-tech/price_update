@@ -286,9 +286,13 @@ class Price_update extends MY_Controller
 
 			// Kanal "B2B" (Sales Channel yg dipetakan ke toko Shopify) ikut didorong ke Shopify
 			// yang sudah terhubung (lihat menu Shopify) — hanya kalau harganya memang berubah.
+			// Dicocokkan lewat channel_NAME (bukan channel_code) krn code dibuat otomatis sekali
+			// saat channel pertama kali dibuat & TIDAK ikut berubah kalau nama channel diganti
+			// belakangan (mis. channel lama "Online" di-rename jadi "B2B" tapi code-nya tetap
+			// ONLINE) — cocokkan by nama spy tidak salah kanal seperti itu lagi.
 			// Kegagalan sync TIDAK membatalkan penyimpanan harga di sistem ini (lihat flashdata
 			// di bawah), krn Shopify bisa saja sedang bermasalah/produk belum ada di sana.
-			if ($ch['channel_code'] === 'B2B' && $price_changed) {
+			if (strcasecmp($ch['channel_name'], 'B2B') === 0 && $price_changed) {
 				$shopify_sync = $this->_sync_shopify_price($product_id, $posted);
 			}
 		}
