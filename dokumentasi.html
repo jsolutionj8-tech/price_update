@@ -195,7 +195,7 @@
 
 <header class="hero">
 	<h1>📊 Sistem Update Harga Produk &amp; Notifikasi Email Otomatis</h1>
-	<p>Dokumentasi teknis &amp; panduan penggunaan — PHP CodeIgniter 3 + MySQL/MariaDB. Mencakup modul Master Kategori Barang, Master Vendor, Master Kompetitor, dan Sales Channel, serta tampilan aplikasi yang responsif untuk desktop maupun handphone.</p>
+	<p>Dokumentasi teknis &amp; panduan penggunaan — PHP CodeIgniter 3 + MySQL/MariaDB. Mencakup modul Master Kategori Barang, Master Vendor, Master Kompetitor, Sales Channel, dan Events (RSVP), serta tampilan aplikasi yang responsif untuk desktop maupun handphone.</p>
 	<div class="badges">
 		<span>CodeIgniter 3</span>
 		<span>PHP 8.x</span>
@@ -203,7 +203,7 @@
 		<span>Tabler UI (Bootstrap 5)</span>
 		<span>Responsive Desktop &amp; Mobile</span>
 	</div>
-	<div class="meta">Dokumen ini dibuka langsung di browser — tidak memerlukan server tambahan. Diperbarui: 26 Agustus 2026.</div>
+	<div class="meta">Dokumen ini dibuka langsung di browser — tidak memerlukan server tambahan. Diperbarui: 08 September 2026.</div>
 </header>
 
 <div class="layout">
@@ -224,6 +224,7 @@
 		<a href="#modul-marketplace" class="sub">6.6 Sales Channel <span class="badge-new">BARU</span></a>
 		<a href="#modul-update-harga" class="sub">6.7 Update Harga</a>
 		<a href="#modul-hak-akses" class="sub">6.12 Hak Akses <span class="badge-new">BARU</span></a>
+		<a href="#modul-events" class="sub">6.13 Events (RSVP) <span class="badge-new">BARU</span></a>
 		<a href="#responsif">7. Tampilan Desktop &amp; Mobile</a>
 		<a href="#notifikasi">8. Notifikasi Email &amp; Cron</a>
 		<a href="#troubleshooting">9. Troubleshooting</a>
@@ -248,6 +249,7 @@
 				<div class="card"><h4>🕒 Riwayat Perubahan</h4><p>Snapshot lengkap nilai lama vs baru setiap kali harga diubah, beserta status pengiriman notifikasi.</p></div>
 				<div class="card"><h4>📧 Notifikasi Email</h4><p>Email otomatis ke grup penerima yang berlangganan kanal tertentu setiap ada perubahan harga.</p></div>
 				<div class="card"><h4>👥 User &amp; Role</h4><p>Manajemen akun dan hak akses berbasis role: Administrator, Editor, Viewer.</p></div>
+				<div class="card"><h4>🎟️ Events (RSVP) <span class="badge-new">BARU</span></h4><p>Kelola acara/undangan (mis. private dinner tasting), form RSVP publik untuk tamu, e-tiket berbarcode, dan email konfirmasi otomatis.</p></div>
 			</div>
 		</section>
 
@@ -311,6 +313,10 @@ SOURCE seed_sample_data.sql;</code></pre>
 				<tr><td><code>notification_groups</code>, <code>notification_group_members</code>, <code>notification_group_channels</code></td><td>Grup penerima notifikasi dan langganan per marketplace</td></tr>
 				<tr><td><code>email_templates</code>, <code>email_logs</code></td><td>Template email dan riwayat pengiriman (status terkirim/gagal)</td></tr>
 				<tr><td><code>audit_logs</code></td><td>Jejak audit perubahan data penting</td></tr>
+				<tr><td><code>events</code> <span class="badge-new">BARU</span></td><td>Master acara/undangan (nama, tagline, venue, deposit per tamu, info rekening, dsb) — dikelola lewat menu <strong>Events</strong>, diakses publik lewat <code>slug</code> unik</td></tr>
+				<tr><td><code>event_schedules</code> <span class="badge-new">BARU</span></td><td>Pilihan tanggal/jam per event (tampil sbg kartu pilihan di form RSVP), dengan kuota opsional per jadwal</td></tr>
+				<tr><td><code>event_rsvps</code> <span class="badge-new">BARU</span></td><td>Satu baris per submission form RSVP tamu: data pemesan, jumlah tamu, status member, status pembayaran deposit (<code>pending</code>/<code>paid</code>/<code>cancelled</code>), kode tiket &amp; kode gift unik</td></tr>
+				<tr><td><code>event_rsvp_guests</code> <span class="badge-new">BARU</span></td><td>Nama tiap tamu dalam satu RSVP (jumlah baris = jumlah tamu yang diisi pemesan)</td></tr>
 			</table>
 			</div>
 			<div class="callout info">Sales Channel dengan kode <code>OFFLINE</code> memiliki peran khusus: harga di kanal ini dipakai sebagai acuan utama perhitungan <strong>Markup %</strong> dan <strong>Margin %</strong> pada modul Update Harga. Pastikan selalu ada satu sales channel aktif dengan kode tersebut — sistem kini menolak permintaan hapus kanal berkode <code>OFFLINE</code> secara otomatis (lihat §6.6).</div>
@@ -458,6 +464,31 @@ SOURCE seed_sample_data.sql;</code></pre>
 				<li>Percobaan membuka URL menu yang tidak diizinkan langsung (tanpa lewat sidebar) akan menampilkan halaman <strong>403 Akses Ditolak</strong>, bukan cuma disembunyikan dari tampilan — jadi benar-benar diblokir, bukan sekadar disamarkan.</li>
 			</ul>
 			<div class="callout warn">⚠️ Role ADMIN <strong>tidak muncul</strong> di matriks ini dan selalu punya akses penuh ke seluruh menu, termasuk halaman Hak Akses itu sendiri — supaya ADMIN tidak bisa mengunci dirinya sendiri lewat kesalahan konfigurasi.</div>
+
+			<h3 id="modul-events">6.13 Events (RSVP) <span class="badge-new">BARU</span></h3>
+			<p>Menu <strong>Event RSVP → Events</strong> (role ADMIN &amp; EDITOR). Modul mandiri untuk mengelola acara/undangan (mis. private dinner tasting, product launch) lengkap dengan <strong>form RSVP publik</strong> untuk tamu, <strong>e-tiket berbarcode</strong>, dan <strong>email konfirmasi otomatis</strong> — terpisah dari alur Produk/Harga, tapi berbagi database &amp; kredensial SMTP (menu Settings) yang sama.</p>
+
+			<h4 style="margin:1rem 0 .4rem;color:var(--navy-dark);font-size:.98rem;">Sisi Admin — Kelola Event</h4>
+			<ul>
+				<li><strong>Tambah Event</strong>: isi Nama Event, Tagline (deskripsi singkat), Venue, <strong>Deposit per Tamu (Rp)</strong>, info rekening bank (untuk pembayaran manual), nomor RSVP Assistance, dan teks/link Membership (opsional).</li>
+				<li><strong>Tambah Jadwal</strong>: di halaman Edit Event, tambahkan satu atau lebih pilihan tanggal + jam (mis. Sabtu 19 Sep &amp; Minggu 20 Sep) — masing-masing boleh diberi <strong>kuota</strong> maksimum tamu (kosongkan untuk tanpa batas). Jadwal inilah yang tampil sebagai kartu pilihan di langkah pertama form RSVP.</li>
+				<li><strong>Link Undangan</strong>: setiap event punya satu URL publik (<code>/rsvp/&lt;slug-event&gt;</code>) yang bisa disalin lewat tombol clipboard di daftar Events, lalu disebar manual ke calon tamu (WhatsApp/email) — satu link berlaku untuk semua tamu, tidak perlu link berbeda per orang.</li>
+				<li><strong>Verifikasi Pembayaran</strong>: tombol <strong>RSVP</strong> pada tiap event membuka daftar RSVP yang masuk (kode tiket, pemesan, jadwal, nama tamu, status member, nominal deposit). Karena <strong>tidak ada integrasi payment gateway</strong>, admin mengecek mutasi rekening secara manual lalu menekan <strong>Lunas</strong> (status <code>pending</code> → <code>paid</code>) atau <strong>Batalkan</strong> bila perlu.</li>
+			</ul>
+
+			<h4 style="margin:1.2rem 0 .4rem;color:var(--navy-dark);font-size:.98rem;">Sisi Tamu — Form RSVP Publik (Tanpa Login)</h4>
+			<p>Halaman <code>/rsvp/&lt;slug&gt;</code> memakai tampilan tersendiri (krem/emas/hitam, bukan tema Tabler admin) yang dirancang khusus untuk brand acara — dikembangkan &amp; diuji memakai contoh nyata acara <strong>"A Dialogue of Taste" oleh YAWARA × Atambah.com</strong>. Alurnya 4 langkah, seluruh data baru benar-benar tersimpan ke database setelah langkah terakhir (bukan per-langkah, supaya tidak ada RSVP "setengah jadi"):</p>
+			<ol class="steps">
+				<li><strong>Reservasi</strong> — tamu memilih salah satu kartu jadwal, lalu isi <strong>Total guest</strong>; nominal <strong>Deposit reservasi</strong> (Deposit per Tamu × jumlah tamu) terhitung otomatis &amp; live.</li>
+				<li><strong>Data Tamu</strong> — nama pemesan, nomor HP, email (tujuan email konfirmasi), nama setiap tamu (jumlah field mengikuti Total guest langkah 1), dan pertanyaan alergi makanan (kalau "Ya", wajib sebutkan detailnya).</li>
+				<li><strong>Membership</strong> — status member Atambah.com (Yes/No, menampilkan info special gift &amp; link daftar member kalau "No"), plus centang persetujuan menerima info promosi.</li>
+				<li><strong>Pembayaran</strong> — ringkasan total deposit, nomor rekening/VA bank (dengan tombol Copy), dan centang persetujuan bahwa reservasi baru dikonfirmasi setelah pembayaran diverifikasi admin. Klik <strong>Konfirmasi RSVP</strong> untuk submit.</li>
+			</ol>
+			<p class="lead">Setelah submit berhasil, tamu diarahkan ke halaman <strong>E-Tiket</strong> berisi ringkasan reservasi, barcode <strong>Guest Identification</strong> (kode tiket, format <code>ADT-xxxxxx</code>) untuk check-in di lokasi, dan barcode <strong>Member Benefit/Gift</strong> (kode <code>GIFT-xxxxxx</code>) untuk klaim hadiah — halaman ini bisa dibuka ulang kapan saja lewat link permanennya (juga disertakan di email konfirmasi), dan punya tombol <strong>Simpan/Print E-Ticket</strong>.</p>
+
+			<div class="callout good">✅ <strong>Barcode asli, bisa discan sungguhan</strong> — digenerate di server (format Code128, library <code>picqer/php-barcode-generator</code>) sebagai gambar PNG sesungguhnya, bukan sekadar tampilan visual. Endpoint yang sama dipakai baik di halaman e-tiket maupun disematkan langsung ke email konfirmasi.</div>
+			<div class="callout good">✅ <strong>Email konfirmasi otomatis</strong> — terkirim ke email pemesan begitu RSVP tersimpan, memakai kredensial SMTP yang sama dengan notifikasi perubahan harga (menu <strong>Settings</strong>). Isinya ringkasan reservasi, nominal &amp; info transfer deposit, serta gambar barcode kode tiket.</div>
+			<div class="callout warn">⚠️ Kuota jadwal (kalau diisi) dicek ulang di server saat submit — kalau tamu mendaftar lebih dari sisa kuota, RSVP ditolak dengan pesan sisa kuota yang tersedia. Kode tiket &amp; kode gift dijamin unik (dicek ke database saat dibuat), jadi aman dipakai sebagai identitas check-in.</div>
 		</section>
 
 		<section id="responsif">
@@ -524,6 +555,12 @@ SOURCE seed_sample_data.sql;</code></pre>
 			<div class="table-wrap">
 			<table>
 				<tr><th>Tanggal</th><th>Perubahan</th></tr>
+				<tr>
+					<td>08 Sep 2026</td>
+					<td>
+						Menambahkan modul <strong>Events (RSVP) <span class="badge-new">BARU</span></strong> — lihat §6.13. Empat tabel baru (<code>events</code>, <code>event_schedules</code>, <code>event_rsvps</code>, <code>event_rsvp_guests</code>) dan menu admin baru <strong>Events</strong> (kelola acara, jadwal, verifikasi pembayaran deposit manual — tidak ada integrasi payment gateway) di grup sidebar baru <strong>"Event RSVP"</strong>. Ditambahkan halaman publik (tanpa login) <code>/rsvp/&lt;slug&gt;</code> bergaya wizard 4 langkah dengan tema visual tersendiri (bukan Tabler admin), dikembangkan &amp; diuji memakai contoh nyata acara "A Dialogue of Taste" oleh YAWARA × Atambah.com. Barcode tiket/gift digenerate asli di server (Code128, PNG, library <code>picqer/php-barcode-generator</code> — dipin ke versi <code>2.3.3</code> demi kompatibilitas PHP 7.4 di server produksi, versi terbaru library ini mensyaratkan PHP 8.2+). Email konfirmasi RSVP memakai ulang kredensial SMTP dari menu Settings.
+					</td>
+				</tr>
 				<tr>
 					<td>28 Agu 2026 (lanjutan 2)</td>
 					<td>
