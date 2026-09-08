@@ -33,10 +33,11 @@
 		   latar, bukan warna tulisan — defaultnya abu-abu (kurang kontras di atas oranye). Dipaksa putih. */
 		.badge.bg-success, .badge.bg-warning { color: #fff; }
 
-		/* Badge "Non-active"/"Inactive" (status_badge(), dipakai di semua menu Master Data) dibalik jadi
-		   outline (latar putih, tulisan & frame oranye) supaya kontras dgn "Active" yg latar oranye penuh
-		   — border disamakan tebalnya di keduanya supaya ukuran kotaknya sejajar. */
-		.badge.bg-success, .badge.bg-secondary { border: 2px solid #E34F05; display: inline-block; width: 6.5rem; text-align: center; }
+		/* Badge "Non-active"/"Inactive"/"Cancelled" (status_badge(), dipakai di semua menu Master Data &
+		   RSVP) dibalik jadi outline (latar putih, tulisan & frame oranye) supaya kontras dgn "Active"/
+		   "Pending"/"Paid" yg latar oranye penuh — border & lebar disamakan di semua status supaya
+		   sejajar ukurannya dlm satu kolom (mis. kolom Status di menu Events -> RSVP). */
+		.badge.bg-success, .badge.bg-warning, .badge.bg-secondary { border: 2px solid #E34F05; display: inline-block; width: 6.5rem; text-align: center; }
 		.badge.bg-secondary { background-color: #fff !important; color: #E34F05 !important; }
 
 		/* Select2 (dropdown pencarian vendor/brand/kategori) pakai tema Bootstrap sendiri yang warna birunya
