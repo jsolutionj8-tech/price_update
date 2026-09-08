@@ -17,6 +17,8 @@ if (!function_exists('status_badge')) {
 			'failed'     => 'danger',
 			'active'     => 'success',
 			'inactive'   => 'secondary',
+			'paid'       => 'success',
+			'cancelled'  => 'danger',
 		);
 		$color = isset($map[$status]) ? $map[$status] : 'secondary';
 		return '<span class="badge bg-' . $color . '">' . ucfirst($status) . '</span>';

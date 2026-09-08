@@ -425,6 +425,105 @@ CREATE TABLE `shopify_settings` (
   CONSTRAINT `fk_shopify_settings_user` FOREIGN KEY (`updated_by`) REFERENCES `users` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+/*Table structure for table `events` */
+/* Master event RSVP (mis. acara tasting/undangan) — dikelola ADMIN/EDITOR lewat menu Events.
+   Halaman isi RSVP-nya sendiri PUBLIK (tanpa login), diakses via slug ini. */
+
+DROP TABLE IF EXISTS `events`;
+
+CREATE TABLE `events` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `slug` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `event_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `tagline` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `venue_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `venue_address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deposit_per_guest` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `membership_gift_text` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `membership_register_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_account_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `bank_account_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `rsvp_assistance_phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_by` int(10) unsigned DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT NULL ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
+  KEY `fk_events_creator` (`created_by`),
+  CONSTRAINT `fk_events_creator` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/*Table structure for table `event_schedules` */
+/* Pilihan tanggal/jam per event (tampil sbg kartu pilihan di step 1 form RSVP). */
+
+DROP TABLE IF EXISTS `event_schedules`;
+
+CREATE TABLE `event_schedules` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `event_id` int(10) unsigned NOT NULL,
+  `event_date` date NOT NULL,
+  `event_time` time NOT NULL,
+  `quota` int(10) unsigned DEFAULT NULL COMMENT 'NULL = tanpa batas kuota',
+  `sort_order` smallint(6) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  KEY `fk_event_schedules_event` (`event_id`),
+  CONSTRAINT `fk_event_schedules_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/*Table structure for table `event_rsvps` */
+/* Satu baris per submission form RSVP publik. Pembayaran deposit manual (transfer/kartu),
+   diverifikasi manual oleh admin lewat menu Events (lihat verified_by/verified_at). */
+
+DROP TABLE IF EXISTS `event_rsvps`;
+
+CREATE TABLE `event_rsvps` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `event_id` int(10) unsigned NOT NULL,
+  `schedule_id` int(10) unsigned NOT NULL,
+  `orderer_name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `guest_count` smallint(6) unsigned NOT NULL DEFAULT 1,
+  `is_member` enum('yes','no') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'no',
+  `marketing_consent` tinyint(1) NOT NULL DEFAULT 0,
+  `has_allergy` tinyint(1) NOT NULL DEFAULT 0,
+  `allergy_note` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `deposit_amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+  `payment_method` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_status` enum('pending','paid','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `ticket_code` varchar(30) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `gift_code` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `verified_by` int(10) unsigned DEFAULT NULL,
+  `verified_at` datetime DEFAULT NULL,
+  `created_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ticket_code` (`ticket_code`),
+  KEY `fk_event_rsvps_event` (`event_id`),
+  KEY `fk_event_rsvps_schedule` (`schedule_id`),
+  KEY `fk_event_rsvps_verifier` (`verified_by`),
+  CONSTRAINT `fk_event_rsvps_event` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_event_rsvps_schedule` FOREIGN KEY (`schedule_id`) REFERENCES `event_schedules` (`id`),
+  CONSTRAINT `fk_event_rsvps_verifier` FOREIGN KEY (`verified_by`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+/*Table structure for table `event_rsvp_guests` */
+/* Nama tiap tamu dalam satu RSVP (jumlah baris = guest_count di event_rsvps). */
+
+DROP TABLE IF EXISTS `event_rsvp_guests`;
+
+CREATE TABLE `event_rsvp_guests` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `rsvp_id` int(10) unsigned NOT NULL,
+  `guest_name` varchar(150) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `sort_order` smallint(6) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `fk_event_rsvp_guests_rsvp` (`rsvp_id`),
+  CONSTRAINT `fk_event_rsvp_guests_rsvp` FOREIGN KEY (`rsvp_id`) REFERENCES `event_rsvps` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*Table structure for table `vendors` */
 
 DROP TABLE IF EXISTS `vendors`;

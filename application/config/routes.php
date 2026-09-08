@@ -190,5 +190,24 @@ $route['reports/export']               = 'reports/export';
 $route['reports/import']               = 'reports/import';
 $route['reports/do_import']            = 'reports/do_import';
 
+// Events (admin, perlu login)
+$route['events']                       = 'events/index';
+$route['events/create']                = 'events/create';
+$route['events/store']                 = 'events/store';
+$route['events/edit/(:num)']           = 'events/edit/$1';
+$route['events/update/(:num)']         = 'events/update/$1';
+$route['events/delete/(:num)']         = 'events/delete/$1';
+$route['events/schedule-store/(:num)'] = 'events/schedule_store/$1';
+$route['events/schedule-delete/(:num)'] = 'events/schedule_delete/$1';
+$route['events/rsvps/(:num)']          = 'events/rsvps/$1';
+$route['events/mark-paid/(:num)']      = 'events/mark_paid/$1';
+$route['events/cancel-rsvp/(:num)']    = 'events/cancel_rsvp/$1';
+
+// Event RSVP publik (TANPA login — diakses tamu lewat link undangan)
+$route['rsvp/(:any)']                  = 'event_rsvp/index/$1';
+$route['rsvp/(:any)/submit']           = 'event_rsvp/submit/$1';
+$route['rsvp-ticket/(:any)']           = 'event_rsvp/ticket/$1';
+$route['rsvp-barcode/(:any)']          = 'event_rsvp/barcode/$1';
+
 // CLI (dipanggil via cron, lihat dokumentasi)
 $route['cli/send_email_queue']         = 'cli/send_email_queue';

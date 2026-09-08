@@ -22,6 +22,7 @@ INSERT INTO menus (menu_key, menu_label, menu_group, menu_icon, sort_order) VALU
 ('price-update',        'Update Harga',        'Draft Pricing', 'bi-currency-exchange',     60),
 ('competitor-price',    'Harga Kompetitor',    'Draft Pricing', 'bi-graph-up-arrow',        70),
 ('price-history',       'Riwayat Perubahan',   'Draft Pricing', 'bi-clock-history',         80),
+('events',              'Events',              'Event RSVP',    'bi-calendar-event',        85),
 ('users',               'Manajemen User',      'Administrasi',  'bi-people',                90),
 ('notification-groups', 'Grup Notifikasi',     'Administrasi',  'bi-bell',                  100),
 ('reports',             'Import / Export',     'Administrasi',  'bi-file-earmark-arrow-up', 110);
@@ -39,6 +40,14 @@ SELECT r.id, m.id,
 FROM roles r
 CROSS JOIN menus m
 WHERE r.role_code IN ('EDITOR', 'VIEWER');
+
+-- Kalau menjalankan blok di atas pada database yang SUDAH ADA datanya (bukan instalasi baru),
+-- INSERT menus akan gagal krn menu_key lain sudah ada (UNIQUE). Untuk menambahkan HANYA menu
+-- "events" ke database yang sudah berjalan, jalankan cukup 2 statement ini saja:
+--   INSERT INTO menus (menu_key, menu_label, menu_group, menu_icon, sort_order)
+--     VALUES ('events', 'Events', 'Event RSVP', 'bi-calendar-event', 85);
+--   INSERT INTO role_menu_access (role_id, menu_id, can_access)
+--     SELECT r.id, m.id, 1 FROM roles r, menus m WHERE r.role_code = 'EDITOR' AND m.menu_key = 'events';
 
 -- Master Marketplace / kanal penjualan. Kode OFFLINE WAJIB ada karena dipakai
 -- sebagai acuan perhitungan Markup%/Margin% (lihat Price_update controller & Price_calculator).

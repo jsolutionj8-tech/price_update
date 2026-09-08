@@ -9,6 +9,7 @@
 	};
 	$show_master_data = $can('products') || $can('brands') || $can('categories') || $can('vendors') || $can('competitors') || $can('costs') || $can('marketplaces');
 	$show_transaksi   = $can('price-update') || $can('price-history');
+	$show_events      = $can('events');
 	$show_admin       = $role === 'ADMIN' || $can('users') || $can('notification-groups') || $can('reports');
 ?>
 <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark">
@@ -94,6 +95,18 @@
 					<a class="nav-link <?= $seg === 'price-history' ? 'active' : '' ?>" href="<?= base_url('price-history') ?>">
 						<span class="nav-link-icon"><i class="bi bi-clock-history"></i></span>
 						<span class="nav-link-title">Riwayat Perubahan</span>
+					</a>
+				</li>
+				<?php endif; ?>
+
+				<?php if ($show_events): ?>
+				<li class="nav-item"><span class="nav-section-title">Event RSVP</span></li>
+				<?php endif; ?>
+				<?php if ($can('events')): ?>
+				<li class="nav-item">
+					<a class="nav-link <?= $seg === 'events' ? 'active' : '' ?>" href="<?= base_url('events') ?>">
+						<span class="nav-link-icon"><i class="bi bi-calendar-event"></i></span>
+						<span class="nav-link-title">Events</span>
 					</a>
 				</li>
 				<?php endif; ?>
