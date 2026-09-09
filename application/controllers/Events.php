@@ -51,6 +51,7 @@ class Events extends MY_Controller
 			'bank_account_name'        => $this->input->post('bank_account_name', TRUE),
 			'rsvp_assistance_phone'    => $this->input->post('rsvp_assistance_phone', TRUE),
 			'dresscode'                => $this->input->post('dresscode', TRUE),
+			'price_text'               => $this->input->post('price_text', TRUE),
 			'flyer_background'         => $this->_handle_flyer_upload(),
 			'is_active'                => 1,
 			'created_by'               => $this->auth_lib->user_id(),
@@ -92,6 +93,7 @@ class Events extends MY_Controller
 			'bank_account_name'        => $this->input->post('bank_account_name', TRUE),
 			'rsvp_assistance_phone'    => $this->input->post('rsvp_assistance_phone', TRUE),
 			'dresscode'                => $this->input->post('dresscode', TRUE),
+			'price_text'               => $this->input->post('price_text', TRUE),
 			'flyer_background'         => $this->_handle_flyer_upload($current['flyer_background']),
 			'is_active'                => $this->input->post('is_active') ? 1 : 0,
 		));

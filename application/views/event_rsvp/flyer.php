@@ -78,7 +78,7 @@
 <body>
 <div class="shell">
 	<div class="flyer-photo"<?= !empty($event['flyer_background']) ? ' style="background-image:url(\'' . base_url('assets/images/events/' . $event['flyer_background']) . '\')"' : '' ?>>
-		<div class="eyebrow">Anda Diundang</div>
+		<div class="eyebrow">You're Invited</div>
 		<h1 class="title"><?= htmlspecialchars($event['event_name']) ?></h1>
 		<?php if (!empty($event['tagline'])): ?>
 			<div class="rule"></div>
@@ -96,6 +96,12 @@
 				<div class="lbl">Time</div>
 				<div class="val"><?= htmlspecialchars($time_text ?: '-') ?></div>
 			</div>
+			<?php if (!empty($event['price_text'])): ?>
+			<div>
+				<div class="lbl">Price</div>
+				<div class="val"><?= htmlspecialchars($event['price_text']) ?></div>
+			</div>
+			<?php endif; ?>
 			<?php if (!empty($event['venue_name'])): ?>
 			<div>
 				<div class="lbl">Venue</div>
@@ -111,7 +117,7 @@
 			<?php endif; ?>
 		</div>
 
-		<a href="<?= base_url('rsvp/' . $event['slug'] . '/daftar') ?>" class="cta-btn">RSVP Sekarang &rarr;</a>
+		<a href="<?= base_url('rsvp/' . $event['slug'] . '/daftar') ?>" class="cta-btn">RSVP Now &rarr;</a>
 
 		<?php if (!empty($event['rsvp_assistance_phone'])): ?>
 			<p class="rsvp-line">RSVP Assistance &middot; <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $event['rsvp_assistance_phone']) ?>"><?= htmlspecialchars($event['rsvp_assistance_phone']) ?></a></p>

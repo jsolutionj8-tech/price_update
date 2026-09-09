@@ -446,6 +446,7 @@ CREATE TABLE `events` (
   `bank_account_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `rsvp_assistance_phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `dresscode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `price_text` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Teks bebas mis. "IDR 1.800.000++ per orang" — bukan angka murni krn sering ada embel2 (++, mulai dari, dst.)',
   `flyer_background` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Nama file gambar latar flyer, disimpan di assets/images/events/',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_by` int(10) unsigned DEFAULT NULL,

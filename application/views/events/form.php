@@ -22,11 +22,15 @@
 		<hr>
 		<h6 class="fw-bold mb-3">Flyer (Halaman Undangan)</h6>
 		<div class="row g-3">
-			<div class="col-md-6">
+			<div class="col-md-4">
 				<label class="form-label">Dresscode</label>
 				<input type="text" name="dresscode" class="form-control" value="<?= htmlspecialchars($event['dresscode'] ?? '') ?>" placeholder="Smart Casual">
 			</div>
-			<div class="col-md-6">
+			<div class="col-md-4">
+				<label class="form-label">Price (teks bebas)</label>
+				<input type="text" name="price_text" class="form-control" value="<?= htmlspecialchars($event['price_text'] ?? '') ?>" placeholder="IDR 1.800.000++ / orang">
+			</div>
+			<div class="col-md-4">
 				<label class="form-label">Background Flyer</label>
 				<input type="file" name="flyer_background" class="form-control" accept="image/png,image/jpeg,image/webp">
 				<?php if (!empty($event['flyer_background'])): ?>
