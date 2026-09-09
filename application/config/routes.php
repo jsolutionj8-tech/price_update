@@ -205,6 +205,7 @@ $route['events/cancel-rsvp/(:num)']    = 'events/cancel_rsvp/$1';
 
 // Event RSVP publik (TANPA login — diakses tamu lewat link undangan)
 $route['rsvp/(:any)']                  = 'event_rsvp/index/$1';
+$route['rsvp/(:any)/daftar']           = 'event_rsvp/form/$1';
 $route['rsvp/(:any)/submit']           = 'event_rsvp/submit/$1';
 $route['rsvp-ticket/(:any)']           = 'event_rsvp/ticket/$1';
 $route['rsvp-barcode/(:any)']          = 'event_rsvp/barcode/$1';

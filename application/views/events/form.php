@@ -1,6 +1,6 @@
 <div class="card card-stat p-4 mb-3" style="max-width:720px;">
 	<h6 class="fw-bold mb-3"><?= isset($event) ? 'Edit Event' : 'Tambah Event' ?></h6>
-	<form method="post" action="<?= isset($event) ? base_url('events/update/' . $event['id']) : base_url('events/store') ?>">
+	<form method="post" action="<?= isset($event) ? base_url('events/update/' . $event['id']) : base_url('events/store') ?>" enctype="multipart/form-data">
 		<div class="mb-3">
 			<label class="form-label">Nama Event</label>
 			<input type="text" name="event_name" class="form-control" required value="<?= htmlspecialchars($event['event_name'] ?? '') ?>" placeholder="A Dialogue of Taste">
@@ -19,6 +19,25 @@
 				<input type="text" name="venue_address" class="form-control" value="<?= htmlspecialchars($event['venue_address'] ?? '') ?>">
 			</div>
 		</div>
+		<hr>
+		<h6 class="fw-bold mb-3">Flyer (Halaman Undangan)</h6>
+		<div class="row g-3">
+			<div class="col-md-6">
+				<label class="form-label">Dresscode</label>
+				<input type="text" name="dresscode" class="form-control" value="<?= htmlspecialchars($event['dresscode'] ?? '') ?>" placeholder="Smart Casual">
+			</div>
+			<div class="col-md-6">
+				<label class="form-label">Background Flyer</label>
+				<input type="file" name="flyer_background" class="form-control" accept="image/png,image/jpeg,image/webp">
+				<?php if (!empty($event['flyer_background'])): ?>
+					<div class="mt-2 d-flex align-items-center gap-2">
+						<img src="<?= base_url('assets/images/events/' . $event['flyer_background']) ?>" alt="Background flyer saat ini" style="height:60px;border-radius:6px;object-fit:cover;">
+						<span class="small text-muted">Background saat ini — upload file baru untuk mengganti.</span>
+					</div>
+				<?php endif; ?>
+			</div>
+		</div>
+		<p class="text-muted small mb-0">Tanggal &amp; jam pada flyer diambil otomatis dari Jadwal Reservasi di bawah — tidak perlu diisi manual.</p>
 		<hr>
 		<div class="row g-3">
 			<div class="col-md-6">

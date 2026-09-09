@@ -19,11 +19,38 @@ class Event_rsvp extends CI_Controller
 	}
 
 	/**
-	 * Halaman wizard 5 langkah. Semua langkah dirender dalam satu halaman (ditoggle lewat
-	 * JS di sisi klien) — data baru benar2 dikirim ke server sekali, lewat submit() di
-	 * langkah terakhir, supaya tidak ada RSVP "setengah jadi" tersimpan di database.
+	 * Halaman flyer/undangan — tampil PERTAMA saat link dibuka, sebelum form pendaftaran.
+	 * Tanggal & jam diringkas otomatis dari Jadwal Reservasi (event_schedules), bukan field
+	 * terpisah, supaya tidak ada data yang bisa tidak sinkron antara flyer & pilihan jadwal.
 	 */
 	public function index($slug)
+	{
+		$event = $this->event_model->find_by_slug($slug);
+		if (!$event) show_404();
+
+		$schedules = $this->event_schedule_model->get_for_event($event['id'], TRUE);
+
+		$dates = array();
+		$times = array();
+		foreach ($schedules as $s) {
+			$dates[tgl_indo($s['event_date'])] = TRUE;
+			$times[substr($s['event_time'], 0, 5)] = TRUE;
+		}
+
+		$this->load->view('event_rsvp/flyer', array(
+			'event'      => $event,
+			'date_text'  => implode(' & ', array_keys($dates)),
+			'time_text'  => implode(' / ', array_keys($times)) . ' WIB',
+		));
+	}
+
+	/**
+	 * Halaman wizard 4 langkah (klik "RSVP Sekarang" dari flyer). Semua langkah dirender
+	 * dalam satu halaman (ditoggle lewat JS di sisi klien) — data baru benar2 dikirim ke
+	 * server sekali, lewat submit() di langkah terakhir, supaya tidak ada RSVP "setengah
+	 * jadi" tersimpan di database.
+	 */
+	public function form($slug)
 	{
 		$event = $this->event_model->find_by_slug($slug);
 		if (!$event) show_404();

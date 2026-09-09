@@ -445,6 +445,8 @@ CREATE TABLE `events` (
   `bank_account_number` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `bank_account_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `rsvp_assistance_phone` varchar(30) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `dresscode` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `flyer_background` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Nama file gambar latar flyer, disimpan di assets/images/events/',
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
   `created_by` int(10) unsigned DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),

@@ -50,6 +50,8 @@ class Events extends MY_Controller
 			'bank_account_number'      => $this->input->post('bank_account_number', TRUE),
 			'bank_account_name'        => $this->input->post('bank_account_name', TRUE),
 			'rsvp_assistance_phone'    => $this->input->post('rsvp_assistance_phone', TRUE),
+			'dresscode'                => $this->input->post('dresscode', TRUE),
+			'flyer_background'         => $this->_handle_flyer_upload(),
 			'is_active'                => 1,
 			'created_by'               => $this->auth_lib->user_id(),
 		));
@@ -72,6 +74,9 @@ class Events extends MY_Controller
 
 	public function update($id)
 	{
+		$current = $this->event_model->find($id);
+		if (!$current) show_404();
+
 		$this->_validate();
 
 		$this->event_model->update($id, array(
@@ -86,6 +91,8 @@ class Events extends MY_Controller
 			'bank_account_number'      => $this->input->post('bank_account_number', TRUE),
 			'bank_account_name'        => $this->input->post('bank_account_name', TRUE),
 			'rsvp_assistance_phone'    => $this->input->post('rsvp_assistance_phone', TRUE),
+			'dresscode'                => $this->input->post('dresscode', TRUE),
+			'flyer_background'         => $this->_handle_flyer_upload($current['flyer_background']),
 			'is_active'                => $this->input->post('is_active') ? 1 : 0,
 		));
 
@@ -193,6 +200,40 @@ class Events extends MY_Controller
 			$this->session->set_flashdata('error', validation_errors());
 			redirect($_SERVER['HTTP_REFERER'] ?? 'events');
 		}
+	}
+
+	/**
+	 * Upload background flyer (opsional) — dipakai sbg latar halaman flyer publik (Event_rsvp::index()).
+	 * Kalau tidak ada file baru dipilih, background lama tetap dipakai (tidak dihapus/direset).
+	 * @param string|null $current nama file lama (utk dihapus kalau diganti dgn file baru)
+	 * @return string|null nama file tersimpan, atau $current kalau tidak ada upload baru
+	 */
+	private function _handle_flyer_upload($current = null)
+	{
+		if (empty($_FILES['flyer_background']['name'])) {
+			return $current;
+		}
+
+		$upload_path = FCPATH . 'assets/images/events/';
+		$this->load->library('upload', array(
+			'upload_path'   => $upload_path,
+			'allowed_types' => 'jpg|jpeg|png|webp',
+			'max_size'      => 5120,
+			'encrypt_name'  => TRUE,
+		));
+
+		if (!$this->upload->do_upload('flyer_background')) {
+			$this->session->set_flashdata('error', 'Gagal upload background flyer: ' . strip_tags($this->upload->display_errors('', '')));
+			redirect($_SERVER['HTTP_REFERER'] ?? 'events');
+		}
+
+		$new_filename = $this->upload->data('file_name');
+
+		if (!empty($current) && $current !== $new_filename) {
+			@unlink($upload_path . $current);
+		}
+
+		return $new_filename;
 	}
 
 	private function _generate_slug($name)
