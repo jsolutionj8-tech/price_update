@@ -97,6 +97,13 @@
 	.schedule-card .day-name { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 	.schedule-card .day-date { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
+	/* 1 jadwal: tetap kartu penuh spt biasa. 2 jadwal (atau lebih): dibagi kiri-kanan dlm
+	   grid 2 kolom, kartu jadi ringkas (angka tanggal di atas, bukan di samping) spy muat. */
+	#scheduleList.schedule-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+	#scheduleList.schedule-grid .schedule-card { flex-direction: column; align-items: flex-start; margin-bottom: 0; padding: 14px; gap: 4px; }
+	#scheduleList.schedule-grid .day-num { font-size: 26px; }
+	#scheduleList.schedule-grid .day-date { font-size: 12px; }
+
 	label.field-label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
 	label.field-label .req { color: var(--danger); }
 	.field-control {
@@ -199,7 +206,7 @@
 			<h1 class="step-title">Pilih jadwal reservasi</h1>
 			<p class="step-desc"><?= htmlspecialchars($event['tagline'] ?? '') ?></p>
 
-			<div id="scheduleList">
+			<div id="scheduleList" class="<?= count($schedules) > 1 ? 'schedule-grid' : '' ?>">
 				<?php foreach ($schedules as $s): $ts = strtotime($s['event_date']); ?>
 					<div class="schedule-card" data-schedule-id="<?= $s['id'] ?>" data-quota="<?= $s['quota'] !== null ? (int) $s['quota'] : '' ?>">
 						<div class="day-num"><?= date('d', $ts) ?></div>

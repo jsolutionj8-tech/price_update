@@ -65,6 +65,13 @@
 	.info-grid .val { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 600; line-height: 1.25; }
 	.info-grid .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
+	/* Tanggal: 1 jadwal tampil sbg 1 kolom biasa; 2 jadwal (atau lebih) dibagi rata
+	   kiri-kanan dlm baris yg sama, bukan digabung jadi satu teks panjang "A & B". */
+	.date-cols { display: flex; gap: 10px; }
+	.date-cols .date-col { flex: 1; font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1.25; }
+	.date-cols.single .date-col { font-size: 19px; }
+	.date-cols.multi .date-col { font-size: 16px; }
+
 	.cta-btn {
 		display: block; width: 100%; text-align: center; text-decoration: none;
 		background: var(--gold); color: var(--ink); font-weight: 700; font-size: 15px;
@@ -90,7 +97,15 @@
 		<div class="info-grid">
 			<div>
 				<div class="lbl">Date</div>
-				<div class="val"><?= htmlspecialchars($date_text ?: '-') ?></div>
+				<?php if (empty($dates)): ?>
+					<div class="val">-</div>
+				<?php else: ?>
+					<div class="date-cols <?= count($dates) > 1 ? 'multi' : 'single' ?>">
+						<?php foreach ($dates as $d): ?>
+							<div class="date-col"><?= htmlspecialchars($d) ?></div>
+						<?php endforeach; ?>
+					</div>
+				<?php endif; ?>
 			</div>
 			<div>
 				<div class="lbl">Time</div>

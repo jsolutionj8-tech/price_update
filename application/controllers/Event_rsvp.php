@@ -39,7 +39,7 @@ class Event_rsvp extends CI_Controller
 
 		$this->load->view('event_rsvp/flyer', array(
 			'event'      => $event,
-			'date_text'  => implode(' & ', array_keys($dates)),
+			'dates'      => array_keys($dates),
 			'time_text'  => implode(' / ', array_keys($times)) . ' WIB',
 		));
 	}
