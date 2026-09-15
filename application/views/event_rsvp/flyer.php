@@ -31,7 +31,7 @@
 	.flyer-img { display: block; width: 100%; height: auto; }
 	.flyer-overlay {
 		position: absolute; left: 0; right: 0; bottom: 0;
-		padding: 34px 24px 20px;
+		padding: 34px 24px 6px;
 		background: linear-gradient(180deg, rgba(14,12,9,0) 0%, rgba(14,12,9,.65) 35%, rgba(14,12,9,.97) 60%, var(--ink) 100%);
 	}
 	.flyer-photo.no-img .flyer-overlay { position: static; padding: 0; background: none; }
@@ -66,14 +66,13 @@
 	.cta-wrap {
 		position: sticky; bottom: 0;
 		background: var(--ink);
-		border-top: 1px solid rgba(255,255,255,.08);
-		padding: 14px 24px calc(16px + env(safe-area-inset-bottom));
-		margin-top: 10px;
+		padding: 6px 24px calc(18px + env(safe-area-inset-bottom));
 	}
 	.cta-btn {
 		display: block; width: 100%; text-align: center; text-decoration: none;
 		background: var(--gold); color: var(--ink); font-weight: 700; font-size: 15px;
 		letter-spacing: .03em; padding: 16px; border-radius: 12px;
+		box-shadow: 0 0 18px rgba(201,161,90,.6), 0 0 36px rgba(201,161,90,.35), 0 4px 14px rgba(0,0,0,.35);
 	}
 
 	.rsvp-line { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 12.5px; color: var(--muted); margin: 12px 0 0; }

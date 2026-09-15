@@ -89,15 +89,13 @@
 		border: 1.5px solid var(--border);
 		border-radius: var(--radius);
 		padding: 16px 18px;
-		display: flex;
-		align-items: center;
-		gap: 16px;
 		margin-bottom: 12px;
 		cursor: pointer;
 		background: var(--surface);
 		transition: border-color .15s, background .15s;
 	}
 	.schedule-card.selected { border-color: var(--gold); border-width: 2px; background: rgba(201,161,90,.1); }
+	.schedule-card-top { display: flex; align-items: center; gap: 16px; }
 	.schedule-card .day-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; color: #fff; }
 	.schedule-card .day-info { flex: 1; }
 	.schedule-card .day-name { color: #fff; font-size: 15px; font-weight: 700; }
@@ -114,8 +112,10 @@
 
 	.guest-row {
 		display: flex; align-items: center; justify-content: space-between;
-		border: 1.5px solid var(--border); border-radius: var(--radius);
-		padding: 14px 18px; margin-top: 4px;
+		cursor: default;
+	}
+	.schedule-card .guest-row {
+		margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
 	}
 	.guest-row-label { font-size: 15px; font-weight: 700; color: #fff; }
 	.guest-row-sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
@@ -240,12 +240,14 @@
 			<div id="scheduleList">
 				<?php foreach ($schedules as $s): $ts = strtotime($s['event_date']); ?>
 					<div class="schedule-card" data-schedule-id="<?= $s['id'] ?>" data-quota="<?= $s['quota'] !== null ? (int) $s['quota'] : '' ?>" data-date-label="<?= htmlspecialchars(date('l', $ts) . ', ' . tgl_indo($s['event_date'])) ?>">
-						<div class="day-num"><?= date('d', $ts) ?></div>
-						<div class="day-info">
-							<div class="day-name"><?= date('l', $ts) ?></div>
-							<div class="day-date"><?= tgl_indo($s['event_date']) ?> &middot; <?= substr($s['event_time'], 0, 5) ?> WIB</div>
+						<div class="schedule-card-top">
+							<div class="day-num"><?= date('d', $ts) ?></div>
+							<div class="day-info">
+								<div class="day-name"><?= date('l', $ts) ?></div>
+								<div class="day-date"><?= tgl_indo($s['event_date']) ?> &middot; <?= substr($s['event_time'], 0, 5) ?> WIB</div>
+							</div>
+							<div class="radio-dot" aria-hidden="true"></div>
 						</div>
-						<div class="radio-dot" aria-hidden="true"></div>
 					</div>
 				<?php endforeach; ?>
 				<?php if (empty($schedules)): ?>
@@ -253,7 +255,7 @@
 				<?php endif; ?>
 			</div>
 
-			<div class="guest-row">
+			<div class="guest-row" id="guestRow" style="display:none;">
 				<div>
 					<div class="guest-row-label">Guests</div>
 					<div class="guest-row-sub">IDR <?= number_format($event['deposit_per_guest'], 0, ',', '.') ?> each</div>
@@ -435,6 +437,7 @@
 	}
 
 	// --- STEP 1: schedule & guest count ---
+	const guestRow = document.getElementById('guestRow');
 	document.querySelectorAll('.schedule-card').forEach(function (card) {
 		card.addEventListener('click', function () {
 			document.querySelectorAll('.schedule-card').forEach(function (c) { c.classList.remove('selected'); });
@@ -442,6 +445,8 @@
 			selectedScheduleId = card.dataset.scheduleId;
 			selectedQuota = card.dataset.quota !== '' ? parseInt(card.dataset.quota, 10) : null;
 			selectedDateLabel = card.dataset.dateLabel || null;
+			card.appendChild(guestRow);
+			guestRow.style.display = 'flex';
 			updateDepositLine();
 		});
 	});
@@ -477,10 +482,12 @@
 		updateDeposit();
 		updateDepositLine();
 	}
-	document.getElementById('guestMinus').addEventListener('click', function () {
+	document.getElementById('guestMinus').addEventListener('click', function (e) {
+		e.stopPropagation();
 		setGuestCount((parseInt(guestCountInput.value, 10) || 1) - 1);
 	});
-	document.getElementById('guestPlus').addEventListener('click', function () {
+	document.getElementById('guestPlus').addEventListener('click', function (e) {
+		e.stopPropagation();
 		setGuestCount((parseInt(guestCountInput.value, 10) || 1) + 1);
 	});
 	updateDeposit();
