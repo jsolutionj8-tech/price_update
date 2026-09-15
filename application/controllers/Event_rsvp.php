@@ -33,13 +33,19 @@ class Event_rsvp extends CI_Controller
 		// Format tanggal ringkas ala flyer: "19 & 20 September 2026" (gabung tgl kalau masih
 		// dalam bulan+tahun yg sama, umum utk event 2 malam) + baris nama hari terpisah di
 		// bawahnya, mis. "Saturday & Sunday". Kalau beda bulan/tahun, fallback ke tanggal
-		// lengkap masing2 spy tidak menyesatkan.
+		// lengkap masing2 spy tidak menyesatkan. Diurutkan berdasar tanggal asli (bukan
+		// "Urutan"/sort_order admin) supaya ringkasan selalu tampil kronologis.
+		$schedules_by_date = $schedules;
+		usort($schedules_by_date, function ($a, $b) {
+			return strtotime($a['event_date']) <=> strtotime($b['event_date']);
+		});
+
 		$days = array();
 		$day_names = array();
 		$months = array();
 		$full_dates = array();
 		$times = array();
-		foreach ($schedules as $s) {
+		foreach ($schedules_by_date as $s) {
 			$ts = strtotime($s['event_date']);
 			$day_num = date('j', $ts);
 			if (!in_array($day_num, $days, TRUE)) $days[] = $day_num;
@@ -47,6 +53,7 @@ class Event_rsvp extends CI_Controller
 			if (!in_array($day_name, $day_names, TRUE)) $day_names[] = $day_name;
 			$months[date('F Y', $ts)] = TRUE;
 			$full_dates[date('j F Y', $ts)] = TRUE;
+
 			$times[substr($s['event_time'], 0, 5)] = TRUE;
 		}
 

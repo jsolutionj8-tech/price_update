@@ -24,20 +24,20 @@
 	.sub { color: var(--muted); font-size: 14px; margin-bottom: 26px; }
 
 	.ticket-card { background: var(--ink); color: #fff; border-radius: 16px; padding: 22px 22px 26px; margin-bottom: 18px; }
-	.ticket-card .top-row { display: flex; justify-content: space-between; align-items: flex-start; }
 	.ticket-card .ev-name { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
-	.ticket-card .pax { font-size: 11px; background: rgba(255,255,255,.12); border-radius: 999px; padding: 3px 10px; }
-	.ticket-card .guest-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 700; margin-top: 4px; }
+	.ticket-card .guest-name { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 20px; font-weight: 700; margin-top: 4px; }
+	.ticket-card .guest-name .pax { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 500; color: rgba(255,255,255,.6); }
 	.ticket-card hr { border: none; border-top: 1px solid rgba(255,255,255,.15); margin: 16px 0; }
 	.ticket-card .lbl { font-size: 10px; color: rgba(255,255,255,.55); text-transform: uppercase; letter-spacing: .08em; }
 	.ticket-card .val { font-size: 14px; margin-top: 2px; }
-	.ticket-card .row2 { display: flex; gap: 24px; }
+	.ticket-card .guest-list .val { line-height: 1.7; }
 
 	.barcode-card { background: #fff; border: 1px solid var(--gold-soft); border-radius: 14px; padding: 18px; text-align: center; margin-bottom: 16px; }
 	.barcode-card .title { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 	.barcode-card img { max-width: 100%; height: 64px; }
 	.barcode-card .code { font-family: monospace; font-size: 14px; margin-top: 8px; letter-spacing: .05em; }
 	.barcode-card.gift .title { color: var(--gold); }
+	.barcode-card.gift .gift-cta { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 12px; }
 
 	.btn-print {
 		display: block; width: 100%; text-align: center; border: 1.5px solid var(--ink); border-radius: 12px;
@@ -52,51 +52,40 @@
 	<div class="center">
 		<div class="check-circle">&#10003;</div>
 		<span class="eyebrow">E-Ticket</span>
-		<h1>We look forward to<br>welcoming you.</h1>
-		<p class="sub">Simpan halaman ini dan tunjukkan barcode saat tiba di lokasi.</p>
+		<h1>Your reservation is confirmed</h1>
+		<p class="sub">Show this e-ticket upon arrival.</p>
 	</div>
 
 	<div class="ticket-card">
-		<div class="top-row">
-			<span class="ev-name"><?= htmlspecialchars(strtoupper($display_name)) ?></span>
-			<span class="pax"><?= (int) $rsvp['guest_count'] ?> PAX</span>
-		</div>
-		<div class="guest-name"><?= htmlspecialchars($rsvp['orderer_name']) ?></div>
+		<div class="ev-name"><?= htmlspecialchars(strtoupper($display_name)) ?></div>
+		<div class="guest-name"><?= htmlspecialchars($rsvp['orderer_name']) ?> <span class="pax">| <?= (int) $rsvp['guest_count'] ?> Guests</span></div>
 		<hr>
-		<div class="row2">
-			<div>
-				<div class="lbl">Date</div>
-				<div class="val"><?= tgl_indo($schedule['event_date']) ?></div>
-			</div>
-			<div>
-				<div class="lbl">Time</div>
-				<div class="val"><?= substr($schedule['event_time'], 0, 5) ?> WIB</div>
-			</div>
-		</div>
+		<div class="lbl">Date &amp; Time</div>
+		<div class="val"><?= date('l', strtotime($schedule['event_date'])) ?>, <?= tgl_indo($schedule['event_date']) ?> &middot; <?= date('g:i A', strtotime($schedule['event_time'])) ?></div>
 		<?php if (!empty($event['venue_name'])): ?>
 		<hr>
 		<div class="lbl">Venue</div>
-		<div class="val"><?= htmlspecialchars($event['venue_name']) ?></div>
+		<div class="val"><?= htmlspecialchars($event['venue_name']) ?><?= !empty($event['venue_address']) ? ', ' . htmlspecialchars($event['venue_address']) : '' ?></div>
 		<?php endif; ?>
 		<?php if (count($guests) > 1): ?>
 		<hr>
-		<div class="lbl">Tamu</div>
-		<div class="val"><?= htmlspecialchars(implode(', ', array_column($guests, 'guest_name'))) ?></div>
+		<div class="lbl">Guests</div>
+		<div class="guest-list"><?php foreach ($guests as $g): ?><div class="val"><?= htmlspecialchars($g['guest_name']) ?></div><?php endforeach; ?></div>
 		<?php endif; ?>
 	</div>
 
 	<div class="barcode-card">
-		<div class="title">Guest Identification</div>
+		<div class="title">Check-in Barcode</div>
 		<img src="<?= base_url('rsvp-barcode/' . $rsvp['ticket_code']) ?>" alt="Barcode tiket">
 		<div class="code"><?= htmlspecialchars($rsvp['ticket_code']) ?></div>
 	</div>
 
 	<?php if (!empty($rsvp['gift_code'])): ?>
 	<div class="barcode-card gift">
-		<div class="title">Member Benefit &mdash; Register to Unlock Gift</div>
+		<div class="title">Member Benefit</div>
+		<div class="gift-cta">Scan to Unlock Your Gift</div>
 		<img src="<?= base_url('rsvp-barcode/' . $rsvp['gift_code']) ?>" alt="Barcode gift" style="opacity:.85;">
 		<div class="code"><?= htmlspecialchars($rsvp['gift_code']) ?></div>
-		<div style="font-size:11px;color:var(--muted);margin-top:4px;">Tunjukkan kepada petugas gift counter.</div>
 	</div>
 	<?php endif; ?>
 

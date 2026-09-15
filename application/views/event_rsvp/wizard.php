@@ -97,17 +97,39 @@
 		background: var(--surface);
 		transition: border-color .15s, background .15s;
 	}
-	.schedule-card.selected { border-color: var(--gold); background: rgba(201,161,90,.1); }
+	.schedule-card.selected { border-color: var(--gold); border-width: 2px; background: rgba(201,161,90,.1); }
 	.schedule-card .day-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; color: #fff; }
-	.schedule-card .day-name { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+	.schedule-card .day-info { flex: 1; }
+	.schedule-card .day-name { color: #fff; font-size: 15px; font-weight: 700; }
 	.schedule-card .day-date { color: var(--muted); font-size: 13px; margin-top: 2px; }
+	.schedule-card .radio-dot {
+		width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+		border: 1.5px solid var(--border); position: relative;
+	}
+	.schedule-card.selected .radio-dot { background: var(--gold); border-color: var(--gold); }
+	.schedule-card.selected .radio-dot::after {
+		content: '\2713'; position: absolute; inset: 0; display: flex; align-items: center;
+		justify-content: center; font-size: 11px; font-weight: 700; color: var(--ink);
+	}
 
-	/* Single schedule: normal full-width card. Two or more schedules: split evenly side by
-	   side in a 2-column grid, with a more compact card layout (date on top) so it still fits. */
-	#scheduleList.schedule-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-	#scheduleList.schedule-grid .schedule-card { flex-direction: column; align-items: flex-start; margin-bottom: 0; padding: 14px; gap: 4px; }
-	#scheduleList.schedule-grid .day-num { font-size: 26px; }
-	#scheduleList.schedule-grid .day-date { font-size: 12px; }
+	.guest-row {
+		display: flex; align-items: center; justify-content: space-between;
+		border: 1.5px solid var(--border); border-radius: var(--radius);
+		padding: 14px 18px; margin-top: 4px;
+	}
+	.guest-row-label { font-size: 15px; font-weight: 700; color: #fff; }
+	.guest-row-sub { color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+	.stepper { display: flex; align-items: center; gap: 14px; }
+	.stepper-btn {
+		width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--border);
+		background: transparent; color: #fff; font-size: 16px; font-weight: 700; line-height: 1;
+		cursor: pointer; display: flex; align-items: center; justify-content: center;
+	}
+	.stepper-btn:disabled { opacity: .35; cursor: not-allowed; }
+	.stepper-value { min-width: 18px; text-align: center; font-size: 16px; font-weight: 700; color: #fff; }
+
+	.booking-hint { font-size: 12.5px; color: var(--muted); margin: 10px 2px 0; }
+	.booking-hint a { color: var(--gold); font-weight: 600; }
 
 	label.field-label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; color: #fff; }
 	label.field-label .req { color: var(--danger); }
@@ -134,6 +156,11 @@
 	.deposit-box .lbl { color: #6B5636; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
 	.deposit-box .val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; margin: 2px 0; }
 	.deposit-box .hint { color: #6B5636; font-size: 12px; }
+	.deposit-box .deposit-line { color: #4A3B22; font-size: 13px; margin-top: 6px; }
+	.deposit-box .deposit-rule { border: none; border-top: 1px solid rgba(107,86,54,.25); margin: 14px 0; }
+	.deposit-total-row { display: flex; align-items: baseline; justify-content: space-between; }
+	.deposit-total-row .deposit-total-label { color: #6B5636; font-size: 13px; font-weight: 600; }
+	.deposit-total-row .deposit-total-value { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 22px; font-weight: 800; color: #201B14; }
 
 	.toggle-group { display: flex; gap: 10px; }
 	.toggle-btn {
@@ -210,14 +237,15 @@
 			<h1 class="step-title">Choose Your Reservation</h1>
 			<p class="step-desc"><?= htmlspecialchars($event['tagline'] ?? '') ?></p>
 
-			<div id="scheduleList" class="<?= count($schedules) > 1 ? 'schedule-grid' : '' ?>">
+			<div id="scheduleList">
 				<?php foreach ($schedules as $s): $ts = strtotime($s['event_date']); ?>
-					<div class="schedule-card" data-schedule-id="<?= $s['id'] ?>" data-quota="<?= $s['quota'] !== null ? (int) $s['quota'] : '' ?>">
+					<div class="schedule-card" data-schedule-id="<?= $s['id'] ?>" data-quota="<?= $s['quota'] !== null ? (int) $s['quota'] : '' ?>" data-date-label="<?= htmlspecialchars(date('l', $ts) . ', ' . tgl_indo($s['event_date'])) ?>">
 						<div class="day-num"><?= date('d', $ts) ?></div>
-						<div>
-							<div class="day-name"><?= strtoupper(date('l', $ts)) ?></div>
+						<div class="day-info">
+							<div class="day-name"><?= date('l', $ts) ?></div>
 							<div class="day-date"><?= tgl_indo($s['event_date']) ?> &middot; <?= substr($s['event_time'], 0, 5) ?> WIB</div>
 						</div>
+						<div class="radio-dot" aria-hidden="true"></div>
 					</div>
 				<?php endforeach; ?>
 				<?php if (empty($schedules)): ?>
@@ -225,13 +253,32 @@
 				<?php endif; ?>
 			</div>
 
-			<label class="field-label">Total guests <span class="req">*</span></label>
-			<input type="number" id="guestCount" class="field-control" min="1" value="1">
+			<div class="guest-row">
+				<div>
+					<div class="guest-row-label">Guests</div>
+					<div class="guest-row-sub">IDR <?= number_format($event['deposit_per_guest'], 0, ',', '.') ?> each</div>
+				</div>
+				<div class="stepper">
+					<button type="button" class="stepper-btn" id="guestMinus" aria-label="Decrease guests">&minus;</button>
+					<span class="stepper-value" id="guestCountDisplay">1</span>
+					<button type="button" class="stepper-btn" id="guestPlus" aria-label="Increase guests">+</button>
+				</div>
+				<input type="hidden" id="guestCount" value="1">
+			</div>
+
+			<?php if (!empty($event['rsvp_assistance_phone'])): ?>
+				<p class="booking-hint">Booking for more than 8? <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $event['rsvp_assistance_phone']) ?>">Message us</a> and we'll arrange the table.</p>
+			<?php endif; ?>
 
 			<div class="deposit-box">
 				<div class="lbl">Reservation Deposit</div>
-				<div class="val">IDR <span id="depositValue">0</span></div>
-				<div class="hint">IDR <?= number_format($event['deposit_per_guest'], 0, ',', '.') ?> &times; number of guests</div>
+				<div class="deposit-line" id="depositLine">Select a date to see your deposit total.</div>
+				<hr class="deposit-rule">
+				<div class="deposit-total-row">
+					<span class="deposit-total-label">Due today</span>
+					<span class="deposit-total-value">IDR <span id="depositValue">0</span></span>
+				</div>
+				<div class="hint">Confirms your seat and counts towards your bill on the night.</div>
 			</div>
 		</section>
 
@@ -346,6 +393,7 @@
 	let currentStep = 1;
 	let selectedScheduleId = null;
 	let selectedQuota = null;
+	let selectedDateLabel = null;
 	let allergyFlag = 0;
 	let memberFlag = null;
 
@@ -378,7 +426,10 @@
 			s.classList.toggle('active', parseInt(s.dataset.step, 10) === n);
 		});
 		document.getElementById('btnBack').style.display = n === 1 ? 'none' : 'block';
-		document.getElementById('btnNext').textContent = n === TOTAL_STEPS ? 'Confirm RSVP →' : 'Continue →';
+		let nextLabel = 'Continue →';
+		if (n === TOTAL_STEPS) nextLabel = 'Confirm RSVP →';
+		else if (n === 1) nextLabel = 'Continue to your details';
+		document.getElementById('btnNext').textContent = nextLabel;
 		clearError();
 		window.scrollTo({ top: 0, behavior: 'instant' });
 	}
@@ -390,6 +441,8 @@
 			card.classList.add('selected');
 			selectedScheduleId = card.dataset.scheduleId;
 			selectedQuota = card.dataset.quota !== '' ? parseInt(card.dataset.quota, 10) : null;
+			selectedDateLabel = card.dataset.dateLabel || null;
+			updateDepositLine();
 		});
 	});
 	if (document.querySelectorAll('.schedule-card').length === 1) {
@@ -397,6 +450,7 @@
 	}
 
 	const guestCountInput = document.getElementById('guestCount');
+	const guestCountDisplay = document.getElementById('guestCountDisplay');
 	function updateDeposit() {
 		const count = Math.max(1, parseInt(guestCountInput.value, 10) || 1);
 		const total = count * depositPerGuest;
@@ -404,8 +458,34 @@
 		document.getElementById('depositValue').textContent = formatted;
 		document.getElementById('depositValue2').textContent = formatted;
 	}
-	guestCountInput.addEventListener('input', updateDeposit);
+	function updateDepositLine() {
+		const el = document.getElementById('depositLine');
+		if (!el) return;
+		const count = Math.max(1, parseInt(guestCountInput.value, 10) || 1);
+		if (!selectedDateLabel) {
+			el.textContent = 'Select a date to see your deposit total.';
+			return;
+		}
+		const perGuest = depositPerGuest.toLocaleString('id-ID');
+		el.textContent = 'IDR ' + perGuest + ' × ' + count + ' guest' + (count > 1 ? 's' : '') + ', ' + selectedDateLabel;
+	}
+	function setGuestCount(n) {
+		n = Math.max(1, n);
+		guestCountInput.value = n;
+		guestCountDisplay.textContent = n;
+		document.getElementById('guestMinus').disabled = n <= 1;
+		updateDeposit();
+		updateDepositLine();
+	}
+	document.getElementById('guestMinus').addEventListener('click', function () {
+		setGuestCount((parseInt(guestCountInput.value, 10) || 1) - 1);
+	});
+	document.getElementById('guestPlus').addEventListener('click', function () {
+		setGuestCount((parseInt(guestCountInput.value, 10) || 1) + 1);
+	});
 	updateDeposit();
+	updateDepositLine();
+	document.getElementById('guestMinus').disabled = true;
 
 	// --- STEP 2: dynamic guest names + allergy ---
 	function renderGuestNameInputs() {
