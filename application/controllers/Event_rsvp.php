@@ -30,16 +30,34 @@ class Event_rsvp extends CI_Controller
 
 		$schedules = $this->event_schedule_model->get_for_event($event['id'], TRUE);
 
-		$dates = array();
+		// Format tanggal ringkas ala flyer: "19 & 20 September 2026" (gabung tgl kalau masih
+		// dalam bulan+tahun yg sama, umum utk event 2 malam) + baris nama hari terpisah di
+		// bawahnya, mis. "Saturday & Sunday". Kalau beda bulan/tahun, fallback ke tanggal
+		// lengkap masing2 spy tidak menyesatkan.
+		$days = array();
+		$day_names = array();
+		$months = array();
+		$full_dates = array();
 		$times = array();
 		foreach ($schedules as $s) {
-			$dates[tgl_indo($s['event_date'])] = TRUE;
+			$ts = strtotime($s['event_date']);
+			$day_num = date('j', $ts);
+			if (!in_array($day_num, $days, TRUE)) $days[] = $day_num;
+			$day_name = date('l', $ts);
+			if (!in_array($day_name, $day_names, TRUE)) $day_names[] = $day_name;
+			$months[date('F Y', $ts)] = TRUE;
+			$full_dates[date('j F Y', $ts)] = TRUE;
 			$times[substr($s['event_time'], 0, 5)] = TRUE;
 		}
 
+		$date_text = count($months) === 1
+			? implode(' & ', $days) . ' ' . array_key_first($months)
+			: implode(' & ', array_keys($full_dates));
+
 		$this->load->view('event_rsvp/flyer', array(
 			'event'      => $event,
-			'dates'      => array_keys($dates),
+			'date_text'  => $date_text,
+			'day_text'   => implode(' & ', $day_names),
 			'time_text'  => implode(' / ', array_keys($times)) . ' WIB',
 		));
 	}

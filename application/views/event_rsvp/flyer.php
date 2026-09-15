@@ -65,21 +65,14 @@
 	.info-grid .val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.3; }
 	.info-grid .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
-	/* Tanggal: 1 jadwal tampil sbg 1 kolom biasa; 2 jadwal (atau lebih) dibagi rata
-	   kiri-kanan dlm baris yg sama, bukan digabung jadi satu teks panjang "A & B". */
-	.date-cols { display: flex; gap: 10px; }
-	.date-cols .date-col { flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; line-height: 1.3; }
-	.date-cols.single .date-col { font-size: 17px; }
-	.date-cols.multi .date-col { font-size: 15px; }
-
 	.cta-btn {
 		display: block; width: 100%; text-align: center; text-decoration: none;
 		background: var(--gold); color: var(--ink); font-weight: 700; font-size: 15px;
 		letter-spacing: .03em; padding: 16px; border-radius: 12px; margin-top: 6px;
 	}
 
-	.rsvp-line { text-align: center; font-size: 12px; color: var(--muted); margin-top: 16px; }
-	.rsvp-line a { color: var(--gold-soft); text-decoration: none; font-weight: 600; }
+	.rsvp-line { text-align: center; font-size: 12px; color: var(--gold); margin-top: 16px; }
+	.rsvp-line a { color: var(--gold); text-decoration: none; font-weight: 600; }
 </style>
 </head>
 <body>
@@ -101,15 +94,8 @@
 		<div class="info-grid">
 			<div>
 				<div class="lbl">Date</div>
-				<?php if (empty($dates)): ?>
-					<div class="val">-</div>
-				<?php else: ?>
-					<div class="date-cols <?= count($dates) > 1 ? 'multi' : 'single' ?>">
-						<?php foreach ($dates as $d): ?>
-							<div class="date-col"><?= htmlspecialchars($d) ?></div>
-						<?php endforeach; ?>
-					</div>
-				<?php endif; ?>
+				<div class="val"><?= htmlspecialchars($date_text ?: '-') ?></div>
+				<?php if (!empty($day_text)): ?><div class="sub"><?= htmlspecialchars($day_text) ?></div><?php endif; ?>
 			</div>
 			<div>
 				<div class="lbl">Time</div>
