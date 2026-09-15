@@ -51,7 +51,7 @@
 		<div class="row g-3">
 			<div class="col-md-6">
 				<label class="form-label">Deposit per Tamu (Rp)</label>
-				<input type="number" name="deposit_per_guest" class="form-control" required min="0" step="1000" value="<?= htmlspecialchars($event['deposit_per_guest'] ?? '') ?>">
+				<input type="text" inputmode="numeric" name="deposit_per_guest" class="form-control rupiah-input" required placeholder="0" value="<?= isset($event['deposit_per_guest']) ? number_format((int) round($event['deposit_per_guest']), 0, ',', '.') : '' ?>">
 			</div>
 			<div class="col-md-6">
 				<label class="form-label">RSVP Assistance (No. HP)</label>
@@ -92,6 +92,29 @@
 		<a href="<?= base_url('events') ?>" class="btn btn-outline-secondary mt-3">Batal</a>
 	</form>
 </div>
+
+<script>
+// Format ribuan (titik) utk input Deposit per Tamu saat diketik — nilai yg benar2 dikirim
+// ke server tetap angka mentah tanpa titik (dibersihkan di listener 'submit' sebelum submit).
+(function () {
+	function rupiahDigits(str) { return String(str || '').replace(/\D/g, ''); }
+	function formatRupiahDigits(digits) { return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+	document.querySelectorAll('.rupiah-input').forEach(function (el) {
+		el.addEventListener('input', function () {
+			const digitsBeforeCursor = rupiahDigits(el.value.slice(0, el.selectionStart));
+			el.value = formatRupiahDigits(rupiahDigits(el.value));
+			const newPos = formatRupiahDigits(digitsBeforeCursor).length;
+			el.setSelectionRange(newPos, newPos);
+		});
+		if (el.form) {
+			el.form.addEventListener('submit', function () {
+				el.value = rupiahDigits(el.value);
+			});
+		}
+	});
+})();
+</script>
 
 <?php if (isset($event)): ?>
 <div class="card card-stat p-4" style="max-width:720px;">
