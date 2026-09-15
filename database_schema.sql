@@ -435,6 +435,7 @@ CREATE TABLE `events` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `slug` varchar(120) COLLATE utf8mb4_unicode_ci NOT NULL,
   `event_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `invite_text` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT 'Teks kecil di atas judul flyer, mis. "You''re Invited" — kosong = pakai default di tampilan',
   `tagline` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `venue_name` varchar(150) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `venue_address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

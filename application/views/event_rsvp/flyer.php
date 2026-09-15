@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= htmlspecialchars($event['event_name']) ?></title>
+<title><?= htmlspecialchars($event['event_name'] ?: 'RSVP') ?></title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
 <style>
 	:root {
 		--ink: #0E0C09;
@@ -18,14 +18,14 @@
 		margin: 0;
 		background: var(--ink);
 		color: #fff;
-		font-family: 'Inter', sans-serif;
+		font-family: 'Plus Jakarta Sans', sans-serif;
 		-webkit-font-smoothing: antialiased;
 	}
 	.shell { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--ink); }
 
 	.flyer-photo {
 		position: relative;
-		min-height: 62vh;
+		min-height: 48vh;
 		background-color: #1a1712;
 		background-size: cover;
 		background-position: center;
@@ -43,18 +43,18 @@
 
 	.eyebrow { color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; margin-bottom: 10px; }
 	h1.title {
-		font-family: 'Cormorant Garamond', serif;
-		font-size: clamp(34px, 9vw, 46px);
-		font-weight: 700;
-		line-height: 1.08;
+		font-family: 'Plus Jakarta Sans', sans-serif;
+		font-size: clamp(30px, 8vw, 42px);
+		font-weight: 800;
+		line-height: 1.12;
 		margin: 0 0 10px;
 		text-transform: uppercase;
-		letter-spacing: .02em;
+		letter-spacing: .01em;
 	}
 	.rule { width: 46px; height: 1px; background: var(--gold); margin: 14px 0; }
 	.desc { font-size: 14px; line-height: 1.6; color: #EFE9DD; max-width: 340px; }
 
-	.info-panel { padding: 26px 24px 34px; }
+	.info-panel { padding: 10px 24px 34px; }
 	.info-grid {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
@@ -62,15 +62,15 @@
 		margin-bottom: 26px;
 	}
 	.info-grid .lbl { color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
-	.info-grid .val { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 600; line-height: 1.25; }
+	.info-grid .val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.3; }
 	.info-grid .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
 
 	/* Tanggal: 1 jadwal tampil sbg 1 kolom biasa; 2 jadwal (atau lebih) dibagi rata
 	   kiri-kanan dlm baris yg sama, bukan digabung jadi satu teks panjang "A & B". */
 	.date-cols { display: flex; gap: 10px; }
-	.date-cols .date-col { flex: 1; font-family: 'Cormorant Garamond', serif; font-weight: 600; line-height: 1.25; }
-	.date-cols.single .date-col { font-size: 19px; }
-	.date-cols.multi .date-col { font-size: 16px; }
+	.date-cols .date-col { flex: 1; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; line-height: 1.3; }
+	.date-cols.single .date-col { font-size: 17px; }
+	.date-cols.multi .date-col { font-size: 15px; }
 
 	.cta-btn {
 		display: block; width: 100%; text-align: center; text-decoration: none;
@@ -85,8 +85,12 @@
 <body>
 <div class="shell">
 	<div class="flyer-photo"<?= !empty($event['flyer_background']) ? ' style="background-image:url(\'' . base_url('assets/images/events/' . $event['flyer_background']) . '\')"' : '' ?>>
-		<div class="eyebrow">You're Invited</div>
-		<h1 class="title"><?= htmlspecialchars($event['event_name']) ?></h1>
+		<?php if (!empty($event['invite_text'])): ?>
+			<div class="eyebrow"><?= htmlspecialchars($event['invite_text']) ?></div>
+		<?php endif; ?>
+		<?php if (!empty($event['event_name'])): ?>
+			<h1 class="title"><?= htmlspecialchars($event['event_name']) ?></h1>
+		<?php endif; ?>
 		<?php if (!empty($event['tagline'])): ?>
 			<div class="rule"></div>
 			<p class="desc"><?= nl2br(htmlspecialchars($event['tagline'])) ?></p>

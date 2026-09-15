@@ -1,6 +1,6 @@
 <div class="card card-stat p-3 mb-3">
 	<div class="d-flex justify-content-between align-items-center">
-		<h6 class="fw-bold mb-0">RSVP — <?= htmlspecialchars($event['event_name']) ?></h6>
+		<h6 class="fw-bold mb-0">RSVP — <?= $event['event_name'] !== '' ? htmlspecialchars($event['event_name']) : '(Tanpa nama)' ?></h6>
 		<a href="<?= base_url('events') ?>" class="btn btn-outline-secondary btn-sm">Kembali</a>
 	</div>
 </div>

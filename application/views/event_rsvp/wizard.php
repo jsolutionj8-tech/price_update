@@ -1,11 +1,12 @@
+<?php $display_name = $event['event_name'] !== '' ? $event['event_name'] : 'Atambah'; ?>
 <!doctype html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= htmlspecialchars($event['event_name']) ?> — RSVP</title>
+<title><?= htmlspecialchars($display_name) ?> — RSVP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
 <style>
 	:root {
 		--cream: #F7F2E9;
@@ -22,7 +23,7 @@
 		margin: 0;
 		background: var(--cream);
 		color: var(--ink);
-		font-family: 'Inter', sans-serif;
+		font-family: 'Plus Jakarta Sans', sans-serif;
 		-webkit-font-smoothing: antialiased;
 	}
 	.rsvp-shell {
@@ -38,11 +39,12 @@
 		text-align: center;
 	}
 	.rsvp-topbar .brand {
-		font-family: 'Cormorant Garamond', serif;
-		font-size: 20px;
-		letter-spacing: .04em;
+		font-family: 'Plus Jakarta Sans', sans-serif;
+		font-size: 18px;
+		font-weight: 700;
+		letter-spacing: .06em;
+		text-transform: uppercase;
 	}
-	.rsvp-topbar .brand .x { color: var(--gold); margin: 0 4px; }
 	hr.rule { border: none; border-top: 1px solid var(--cream-deep); margin: 16px 24px 0; }
 
 	.step-indicator {
@@ -69,14 +71,15 @@
 	.rsvp-step { display: none; }
 	.rsvp-step.active { display: block; }
 
+	.step-head { display: flex; align-items: baseline; justify-content: space-between; }
 	.step-eyebrow { color: var(--gold); font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
-	.step-count { color: var(--muted); font-size: 12px; float: right; }
+	.step-count { color: var(--muted); font-size: 12px; }
 	h1.step-title {
-		font-family: 'Cormorant Garamond', serif;
-		font-size: 30px;
-		font-weight: 600;
+		font-family: 'Plus Jakarta Sans', sans-serif;
+		font-size: 28px;
+		font-weight: 800;
 		margin: 6px 0 8px;
-		line-height: 1.15;
+		line-height: 1.2;
 	}
 	.step-desc { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 18px; }
 
@@ -93,12 +96,12 @@
 		transition: border-color .15s, background .15s;
 	}
 	.schedule-card.selected { border-color: var(--gold); background: #FFFDF8; }
-	.schedule-card .day-num { font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; line-height: 1; }
+	.schedule-card .day-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; }
 	.schedule-card .day-name { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 	.schedule-card .day-date { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
-	/* 1 jadwal: tetap kartu penuh spt biasa. 2 jadwal (atau lebih): dibagi kiri-kanan dlm
-	   grid 2 kolom, kartu jadi ringkas (angka tanggal di atas, bukan di samping) spy muat. */
+	/* Single schedule: normal full-width card. Two or more schedules: split evenly side by
+	   side in a 2-column grid, with a more compact card layout (date on top) so it still fits. */
 	#scheduleList.schedule-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 	#scheduleList.schedule-grid .schedule-card { flex-direction: column; align-items: flex-start; margin-bottom: 0; padding: 14px; gap: 4px; }
 	#scheduleList.schedule-grid .day-num { font-size: 26px; }
@@ -119,17 +122,14 @@
 	.field-control:focus { outline: none; border-color: var(--gold); }
 	textarea.field-control { resize: vertical; min-height: 80px; }
 
-	.guest-count-box { display: flex; align-items: center; gap: 12px; }
-	.guest-count-box .field-control { text-align: center; }
-
 	.deposit-box {
 		background: var(--gold-soft);
 		border-radius: var(--radius);
 		padding: 16px 18px;
 		margin-top: 18px;
 	}
-	.deposit-box .lbl { color: #6B5636; font-size: 12px; }
-	.deposit-box .val { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; margin: 2px 0; }
+	.deposit-box .lbl { color: #6B5636; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+	.deposit-box .val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 26px; font-weight: 800; margin: 2px 0; }
 	.deposit-box .hint { color: #6B5636; font-size: 12px; }
 
 	.toggle-group { display: flex; gap: 10px; }
@@ -158,7 +158,7 @@
 		display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px;
 	}
 	.member-callout .star { color: var(--gold); font-size: 20px; }
-	.member-callout .t1 { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; }
+	.member-callout .t1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; }
 	.member-callout .t2 { font-size: 12px; opacity: .75; margin-top: 4px; }
 
 	.register-box { border: 1px solid var(--gold-soft); background: #FFFDF8; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-top: 14px; }
@@ -169,7 +169,8 @@
 
 	.pay-option { border: 1.5px solid #D8CDB8; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; background: #fff; }
 	.pay-option .eyebrow { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: .08em; }
-	.pay-option .name { font-weight: 600; margin: 2px 0 8px; }
+	.pay-option .name { font-weight: 600; margin: 2px 0 2px; }
+	.pay-option .account-name { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
 	.va-box { display: flex; align-items: center; justify-content: space-between; border: 1px dashed #D8CDB8; border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 15px; }
 	.va-box button { border: none; background: var(--ink); color: #fff; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
 
@@ -191,7 +192,7 @@
 <body>
 <div class="rsvp-shell">
 	<div class="rsvp-topbar">
-		<div class="brand"><?= htmlspecialchars($event['event_name']) ?></div>
+		<div class="brand"><?= htmlspecialchars($display_name) ?></div>
 	</div>
 	<hr class="rule">
 
@@ -200,10 +201,10 @@
 	<main class="rsvp-steps">
 		<div class="error-box" id="errorBox"></div>
 
-		<!-- STEP 1: Jadwal + jumlah tamu -->
+		<!-- STEP 1: Schedule + guest count -->
 		<section class="rsvp-step active" data-step="1">
-			<span class="step-eyebrow">Reservasi</span><span class="step-count">1 / 4</span>
-			<h1 class="step-title">Pilih jadwal reservasi</h1>
+			<div class="step-head"><span class="step-eyebrow">Reservation</span><span class="step-count">1 / 4</span></div>
+			<h1 class="step-title">Choose Your Reservation</h1>
 			<p class="step-desc"><?= htmlspecialchars($event['tagline'] ?? '') ?></p>
 
 			<div id="scheduleList" class="<?= count($schedules) > 1 ? 'schedule-grid' : '' ?>">
@@ -217,63 +218,63 @@
 					</div>
 				<?php endforeach; ?>
 				<?php if (empty($schedules)): ?>
-					<p class="step-desc">Belum ada jadwal tersedia untuk event ini.</p>
+					<p class="step-desc">No schedules are available for this event yet.</p>
 				<?php endif; ?>
 			</div>
 
-			<label class="field-label">Total guest <span class="req">*</span></label>
+			<label class="field-label">Total guests <span class="req">*</span></label>
 			<input type="number" id="guestCount" class="field-control" min="1" value="1">
 
 			<div class="deposit-box">
-				<div class="lbl">Deposit reservasi</div>
+				<div class="lbl">Reservation Deposit</div>
 				<div class="val">IDR <span id="depositValue">0</span></div>
-				<div class="hint">IDR <?= number_format($event['deposit_per_guest'], 0, ',', '.') ?> &times; jumlah tamu</div>
+				<div class="hint">IDR <?= number_format($event['deposit_per_guest'], 0, ',', '.') ?> &times; number of guests</div>
 			</div>
 		</section>
 
-		<!-- STEP 2: Data pemesan & tamu -->
+		<!-- STEP 2: Orderer & guest details -->
 		<section class="rsvp-step" data-step="2">
-			<span class="step-eyebrow">Data Tamu</span><span class="step-count">2 / 4</span>
-			<h1 class="step-title">Data pemesan &amp; tamu</h1>
-			<p class="step-desc">Kami akan mengirimkan konfirmasi ke kontak utama berikut.</p>
+			<div class="step-head"><span class="step-eyebrow">Guest Details</span><span class="step-count">2 / 4</span></div>
+			<h1 class="step-title">Booking &amp; Guest Details</h1>
+			<p class="step-desc">We'll send your confirmation to the contact below.</p>
 
-			<label class="field-label">Nama pemesan <span class="req">*</span></label>
+			<label class="field-label">Full Name <span class="req">*</span></label>
 			<input type="text" id="ordererName" class="field-control">
-			<label class="field-label">Nomor handphone <span class="req">*</span></label>
+			<label class="field-label">Phone Number <span class="req">*</span></label>
 			<input type="text" id="phone" class="field-control">
 			<label class="field-label">Email <span class="req">*</span></label>
 			<input type="email" id="email" class="field-control">
 
-			<label class="field-label" style="margin-top:20px;">Nama setiap tamu</label>
+			<label class="field-label" style="margin-top:20px;">Guest Names</label>
 			<div id="guestNameList"></div>
 
-			<label class="field-label">Apakah ada alergi makanan?</label>
+			<label class="field-label">Any food allergies?</label>
 			<div class="toggle-group">
-				<div class="toggle-btn selected" data-allergy="0">Tidak ada</div>
-				<div class="toggle-btn" data-allergy="1">Ya, ada</div>
+				<div class="toggle-btn selected" data-allergy="0">None</div>
+				<div class="toggle-btn" data-allergy="1">Yes</div>
 			</div>
 			<div id="allergyNoteWrap" style="display:none;">
-				<label class="field-label">Sebutkan alergi dan nama tamu <span class="req">*</span></label>
+				<label class="field-label">Please specify the allergy &amp; guest name <span class="req">*</span></label>
 				<textarea id="allergyNote" class="field-control"></textarea>
 			</div>
 		</section>
 
 		<!-- STEP 3: Membership -->
 		<section class="rsvp-step" data-step="3">
-			<span class="step-eyebrow">Membership</span><span class="step-count">3 / 4</span>
-			<h1 class="step-title"><?= htmlspecialchars(explode(' ', $event['event_name'])[0] ?? 'Atambah') ?> Membership</h1>
+			<div class="step-head"><span class="step-eyebrow">Membership</span><span class="step-count">3 / 4</span></div>
+			<h1 class="step-title"><?= htmlspecialchars(explode(' ', $display_name)[0]) ?> Membership</h1>
 
 			<?php if (!empty($event['membership_gift_text'])): ?>
 			<div class="member-callout">
 				<div class="star">&#10022;</div>
 				<div>
 					<div class="t1"><?= htmlspecialchars($event['membership_gift_text']) ?></div>
-					<div class="t2">Tunjukkan Gift Barcode pada saat acara untuk mengambil hadiah.</div>
+					<div class="t2">Show your Gift Barcode at the event to redeem your gift.</div>
 				</div>
 			</div>
 			<?php endif; ?>
 
-			<label class="field-label">Apakah Anda member Atambah.com?</label>
+			<label class="field-label">Are you a <?= htmlspecialchars($display_name) ?> member?</label>
 			<div class="toggle-group">
 				<div class="toggle-btn" data-member="yes">Yes</div>
 				<div class="toggle-btn" data-member="no">No</div>
@@ -281,32 +282,35 @@
 
 			<?php if (!empty($event['membership_register_url'])): ?>
 			<div class="register-box" id="registerBox" style="display:none;">
-				Belum menjadi member? Daftar gratis untuk mendapatkan special gift.<br>
-				<a href="<?= htmlspecialchars($event['membership_register_url']) ?>" target="_blank" rel="noopener">Daftar Member Atambah &#8599;</a>
+				Not a member yet? Sign up for free to receive a special gift.<br>
+				<a href="<?= htmlspecialchars($event['membership_register_url']) ?>" target="_blank" rel="noopener">Register as a Member &#8599;</a>
 			</div>
 			<?php endif; ?>
 
 			<div class="consent-row">
 				<input type="checkbox" id="marketingConsent">
-				<label for="marketingConsent">Saya bersedia menerima informasi acara, penawaran, dan promosi dari <?= htmlspecialchars($event['event_name']) ?> melalui WhatsApp atau email.</label>
+				<label for="marketingConsent">I agree to receive event information, offers, and promotions from <?= htmlspecialchars($display_name) ?> via WhatsApp or email.</label>
 			</div>
 		</section>
 
-		<!-- STEP 4: Pembayaran -->
+		<!-- STEP 4: Payment -->
 		<section class="rsvp-step" data-step="4">
-			<span class="step-eyebrow">Pembayaran</span><span class="step-count">4 / 4</span>
-			<h1 class="step-title">Pembayaran deposit</h1>
+			<div class="step-head"><span class="step-eyebrow">Payment</span><span class="step-count">4 / 4</span></div>
+			<h1 class="step-title">Deposit Payment</h1>
 
 			<div class="deposit-box" style="margin-top:0;">
-				<div class="lbl">Total deposit</div>
+				<div class="lbl">Total Deposit</div>
 				<div class="val">IDR <span id="depositValue2">0</span></div>
-				<div class="hint">Deposit akan diperhitungkan pada tagihan akhir.</div>
+				<div class="hint">The deposit will be deducted from your final bill.</div>
 			</div>
 
 			<?php if (!empty($event['bank_account_number'])): ?>
 			<div class="pay-option" style="margin-top:16px;">
 				<div class="eyebrow">BANK TRANSFER</div>
-				<div class="name"><?= htmlspecialchars($event['bank_name'] ?? 'Bank Transfer') ?><?= !empty($event['bank_account_name']) ? ' — a.n. ' . htmlspecialchars($event['bank_account_name']) : '' ?></div>
+				<div class="name"><?= htmlspecialchars($event['bank_name'] ?? 'Bank Transfer') ?></div>
+				<?php if (!empty($event['bank_account_name'])): ?>
+					<div class="account-name">Account Name: <?= htmlspecialchars($event['bank_account_name']) ?></div>
+				<?php endif; ?>
 				<div class="va-box">
 					<span id="vaNumber"><?= htmlspecialchars($event['bank_account_number']) ?></span>
 					<button type="button" id="copyVaBtn">Copy</button>
@@ -316,14 +320,14 @@
 
 			<div class="consent-row">
 				<input type="checkbox" id="paymentAgreement">
-				<label for="paymentAgreement">Saya memahami bahwa reservasi dikonfirmasi setelah pembayaran berhasil diverifikasi.</label>
+				<label for="paymentAgreement">I understand that my reservation will be confirmed once payment has been verified.</label>
 			</div>
 		</section>
 	</main>
 
 	<div class="rsvp-actions">
-		<button class="btn btn-outline" id="btnBack" style="display:none;">&larr; Kembali</button>
-		<button class="btn btn-primary" id="btnNext">Lanjutkan &rarr;</button>
+		<button class="btn btn-outline" id="btnBack" style="display:none;">&larr; Back</button>
+		<button class="btn btn-primary" id="btnNext">Continue &rarr;</button>
 	</div>
 	<?php if (!empty($event['rsvp_assistance_phone'])): ?>
 	<p class="assist-line">RSVP Assistance &middot; <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $event['rsvp_assistance_phone']) ?>"><?= htmlspecialchars($event['rsvp_assistance_phone']) ?></a></p>
@@ -371,12 +375,12 @@
 			s.classList.toggle('active', parseInt(s.dataset.step, 10) === n);
 		});
 		document.getElementById('btnBack').style.display = n === 1 ? 'none' : 'block';
-		document.getElementById('btnNext').textContent = n === TOTAL_STEPS ? 'Konfirmasi RSVP →' : 'Lanjutkan →';
+		document.getElementById('btnNext').textContent = n === TOTAL_STEPS ? 'Confirm RSVP →' : 'Continue →';
 		clearError();
 		window.scrollTo({ top: 0, behavior: 'instant' });
 	}
 
-	// --- STEP 1: jadwal & jumlah tamu ---
+	// --- STEP 1: schedule & guest count ---
 	document.querySelectorAll('.schedule-card').forEach(function (card) {
 		card.addEventListener('click', function () {
 			document.querySelectorAll('.schedule-card').forEach(function (c) { c.classList.remove('selected'); });
@@ -400,7 +404,7 @@
 	guestCountInput.addEventListener('input', updateDeposit);
 	updateDeposit();
 
-	// --- STEP 2: nama tamu dinamis + alergi ---
+	// --- STEP 2: dynamic guest names + allergy ---
 	function renderGuestNameInputs() {
 		const count = Math.max(1, parseInt(guestCountInput.value, 10) || 1);
 		const wrap = document.getElementById('guestNameList');
@@ -413,7 +417,7 @@
 			const input = document.createElement('input');
 			input.type = 'text';
 			input.className = 'field-control guest-name-input';
-			input.placeholder = 'Sesuai identitas';
+			input.placeholder = 'As per ID';
 			input.value = existing[i] || (i === 0 ? document.getElementById('ordererName').value : '');
 			row.appendChild(input);
 			wrap.appendChild(row);
@@ -450,33 +454,33 @@
 		});
 	}
 
-	// --- Validasi per step ---
+	// --- Per-step validation ---
 	function validateStep(n) {
 		if (n === 1) {
-			if (!selectedScheduleId) return 'Pilih jadwal reservasi terlebih dahulu.';
+			if (!selectedScheduleId) return 'Please select a reservation date first.';
 			const count = parseInt(guestCountInput.value, 10) || 0;
-			if (count < 1) return 'Total guest minimal 1.';
-			if (selectedQuota !== null && count > selectedQuota) return 'Kuota jadwal ini tidak mencukupi (sisa ' + selectedQuota + ' tamu).';
+			if (count < 1) return 'Total guests must be at least 1.';
+			if (selectedQuota !== null && count > selectedQuota) return 'Not enough quota for this schedule (' + selectedQuota + ' spot(s) remaining).';
 			return null;
 		}
 		if (n === 2) {
-			if (!document.getElementById('ordererName').value.trim()) return 'Nama pemesan wajib diisi.';
-			if (!document.getElementById('phone').value.trim()) return 'Nomor handphone wajib diisi.';
+			if (!document.getElementById('ordererName').value.trim()) return 'Full name is required.';
+			if (!document.getElementById('phone').value.trim()) return 'Phone number is required.';
 			const email = document.getElementById('email').value.trim();
-			if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Email tidak valid.';
+			if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Please enter a valid email address.';
 			const guestInputs = document.querySelectorAll('.guest-name-input');
 			for (const inp of guestInputs) {
-				if (!inp.value.trim()) return 'Lengkapi nama setiap tamu.';
+				if (!inp.value.trim()) return 'Please fill in every guest name.';
 			}
-			if (allergyFlag && !document.getElementById('allergyNote').value.trim()) return 'Sebutkan alergi dan nama tamu.';
+			if (allergyFlag && !document.getElementById('allergyNote').value.trim()) return 'Please specify the allergy details and guest name.';
 			return null;
 		}
 		if (n === 3) {
-			if (!memberFlag) return 'Pilih status membership Anda.';
+			if (!memberFlag) return 'Please select your membership status.';
 			return null;
 		}
 		if (n === 4) {
-			if (!document.getElementById('paymentAgreement').checked) return 'Centang persetujuan sebelum konfirmasi RSVP.';
+			if (!document.getElementById('paymentAgreement').checked) return 'Please check the agreement box before confirming your RSVP.';
 			return null;
 		}
 		return null;
@@ -485,7 +489,7 @@
 	function submitRsvp() {
 		const btn = document.getElementById('btnNext');
 		btn.disabled = true;
-		btn.textContent = 'Memproses...';
+		btn.textContent = 'Processing...';
 
 		const guestNames = Array.from(document.querySelectorAll('.guest-name-input')).map(function (i) { return i.value.trim(); });
 		const fd = new URLSearchParams();
@@ -508,15 +512,15 @@
 		}).then(function (r) { return r.json(); }).then(function (data) {
 			if (!data.success) {
 				btn.disabled = false;
-				btn.textContent = 'Konfirmasi RSVP →';
-				showError(data.message || 'Gagal menyimpan RSVP. Coba lagi.');
+				btn.textContent = 'Confirm RSVP →';
+				showError(data.message || 'Failed to save your RSVP. Please try again.');
 				return;
 			}
 			window.location.href = data.redirect_url;
 		}).catch(function () {
 			btn.disabled = false;
-			btn.textContent = 'Konfirmasi RSVP →';
-			showError('Gagal menghubungi server. Periksa koneksi internet Anda.');
+			btn.textContent = 'Confirm RSVP →';
+			showError('Could not reach the server. Please check your internet connection.');
 		});
 	}
 

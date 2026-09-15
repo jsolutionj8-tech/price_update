@@ -40,6 +40,7 @@ class Events extends MY_Controller
 		$this->event_model->create(array(
 			'slug'                     => $slug,
 			'event_name'               => $this->input->post('event_name', TRUE),
+			'invite_text'              => $this->input->post('invite_text', TRUE),
 			'tagline'                  => $this->input->post('tagline', TRUE),
 			'venue_name'               => $this->input->post('venue_name', TRUE),
 			'venue_address'            => $this->input->post('venue_address', TRUE),
@@ -82,6 +83,7 @@ class Events extends MY_Controller
 
 		$this->event_model->update($id, array(
 			'event_name'               => $this->input->post('event_name', TRUE),
+			'invite_text'              => $this->input->post('invite_text', TRUE),
 			'tagline'                  => $this->input->post('tagline', TRUE),
 			'venue_name'               => $this->input->post('venue_name', TRUE),
 			'venue_address'            => $this->input->post('venue_address', TRUE),
@@ -145,8 +147,29 @@ class Events extends MY_Controller
 		$schedule = $this->event_schedule_model->find($id);
 		if (!$schedule) show_404();
 
+		$rsvp_count = $this->event_schedule_model->count_rsvps($id);
+		if ($rsvp_count > 0) {
+			$this->session->set_flashdata('error', 'Jadwal ini tidak bisa dihapus karena sudah ada ' . $rsvp_count . ' RSVP tamu yang memakainya. Nonaktifkan saja jadwal ini (tombol "Nonaktifkan") supaya tidak muncul lagi di form RSVP, tanpa menghapus data tamu yang sudah terlanjur mendaftar.');
+			redirect('events/edit/' . $schedule['event_id']);
+		}
+
 		$this->event_schedule_model->delete($id);
 		$this->session->set_flashdata('success', 'Jadwal berhasil dihapus.');
+		redirect('events/edit/' . $schedule['event_id']);
+	}
+
+	/**
+	 * Alternatif hapus utk jadwal yang sudah punya RSVP (lihat schedule_delete()) — cukup
+	 * disembunyikan dari form RSVP publik (get_for_event($id, TRUE) hanya ambil is_active=1),
+	 * data RSVP tamu yang sudah ada tetap utuh.
+	 */
+	public function schedule_toggle($id)
+	{
+		$schedule = $this->event_schedule_model->find($id);
+		if (!$schedule) show_404();
+
+		$this->event_schedule_model->update($id, array('is_active' => $schedule['is_active'] ? 0 : 1));
+		$this->session->set_flashdata('success', $schedule['is_active'] ? 'Jadwal dinonaktifkan.' : 'Jadwal diaktifkan kembali.');
 		redirect('events/edit/' . $schedule['event_id']);
 	}
 
@@ -166,7 +189,7 @@ class Events extends MY_Controller
 		unset($r);
 
 		$this->render_view('events/rsvps', array(
-			'title' => 'RSVP - ' . $event['event_name'],
+			'title' => 'RSVP - ' . ($event['event_name'] !== '' ? $event['event_name'] : '(Tanpa nama)'),
 			'event' => $event,
 			'rsvps' => $rsvps,
 		));
@@ -194,8 +217,10 @@ class Events extends MY_Controller
 
 	private function _validate()
 	{
+		// Nama Event sengaja TIDAK wajib — beberapa flyer cukup pakai teks undangan (invite_text)
+		// tanpa judul besar (lihat Event_rsvp::index() & views/event_rsvp/flyer.php). Slug tetap
+		// otomatis terisi "event" kalau nama dikosongkan (lihat _generate_slug()).
 		$this->load->library('form_validation');
-		$this->form_validation->set_rules('event_name', 'Nama Event', 'required');
 		$this->form_validation->set_rules('deposit_per_guest', 'Deposit per Tamu', 'required|numeric');
 
 		if ($this->form_validation->run() === FALSE) {

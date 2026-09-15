@@ -2,8 +2,13 @@
 	<h6 class="fw-bold mb-3"><?= isset($event) ? 'Edit Event' : 'Tambah Event' ?></h6>
 	<form method="post" action="<?= isset($event) ? base_url('events/update/' . $event['id']) : base_url('events/store') ?>" enctype="multipart/form-data">
 		<div class="mb-3">
-			<label class="form-label">Nama Event</label>
-			<input type="text" name="event_name" class="form-control" required value="<?= htmlspecialchars($event['event_name'] ?? '') ?>" placeholder="A Dialogue of Taste">
+			<label class="form-label">Nama Event <span class="text-muted small">(opsional — kosongkan kalau flyer tidak perlu judul besar)</span></label>
+			<input type="text" name="event_name" class="form-control" value="<?= htmlspecialchars($event['event_name'] ?? '') ?>" placeholder="A Dialogue of Taste">
+		</div>
+		<div class="mb-3">
+			<label class="form-label">Teks Undangan (Eyebrow di Flyer)</label>
+			<input type="text" name="invite_text" class="form-control" value="<?= htmlspecialchars($event['invite_text'] ?? '') ?>" placeholder="You're Invited">
+			<div class="form-text">Tampil kecil di atas judul pada halaman flyer. Kosongkan untuk pakai default "You're Invited".</div>
 		</div>
 		<div class="mb-3">
 			<label class="form-label">Tagline / Deskripsi Singkat</label>
@@ -93,7 +98,7 @@
 	<h6 class="fw-bold mb-3">Jadwal Reservasi</h6>
 	<div class="table-responsive mb-3">
 		<table class="table table-sm align-middle">
-			<thead><tr><th>Tanggal</th><th>Jam</th><th>Kuota</th><th>Urutan</th><th></th></tr></thead>
+			<thead><tr><th>Tanggal</th><th>Jam</th><th>Kuota</th><th>Urutan</th><th>Status</th><th></th></tr></thead>
 			<tbody>
 			<?php foreach ($schedules as $s): ?>
 				<tr>
@@ -101,13 +106,15 @@
 					<td><?= substr($s['event_time'], 0, 5) ?> WIB</td>
 					<td><?= $s['quota'] !== null ? $s['quota'] . ' tamu' : 'Tanpa batas' ?></td>
 					<td><?= $s['sort_order'] ?></td>
-					<td class="text-end">
-						<a href="<?= base_url('events/schedule-delete/' . $s['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus jadwal ini?')"><i class="bi bi-trash"></i></a>
+					<td><?= status_badge($s['is_active'] ? 'active' : 'inactive') ?></td>
+					<td class="text-end text-nowrap">
+						<a href="<?= base_url('events/schedule-toggle/' . $s['id']) ?>" class="btn btn-sm btn-outline-secondary" title="<?= $s['is_active'] ? 'Nonaktifkan' : 'Aktifkan' ?>"><i class="bi bi-<?= $s['is_active'] ? 'pause' : 'play' ?>-fill"></i></a>
+						<a href="<?= base_url('events/schedule-delete/' . $s['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus jadwal ini? Kalau sudah ada RSVP yang memakainya, penghapusan akan ditolak — nonaktifkan saja jadwal tsb.')"><i class="bi bi-trash"></i></a>
 					</td>
 				</tr>
 			<?php endforeach; ?>
 			<?php if (empty($schedules)): ?>
-				<tr><td colspan="5" class="text-center text-muted py-3">Belum ada jadwal. Tambahkan minimal satu jadwal sebelum menyebar link undangan.</td></tr>
+				<tr><td colspan="6" class="text-center text-muted py-3">Belum ada jadwal. Tambahkan minimal satu jadwal sebelum menyebar link undangan.</td></tr>
 			<?php endif; ?>
 			</tbody>
 		</table>

@@ -13,7 +13,7 @@
 			<?php foreach ($events as $e): ?>
 				<?php $rsvp_url = base_url('rsvp/' . $e['slug']); ?>
 				<tr>
-					<td><b><?= htmlspecialchars($e['event_name']) ?></b></td>
+					<td><b><?= $e['event_name'] !== '' ? htmlspecialchars($e['event_name']) : '<span class="text-muted fw-normal">(Tanpa nama)</span>' ?></b></td>
 					<td><?= htmlspecialchars($e['venue_name'] ?? '-') ?></td>
 					<td><?= rupiah($e['deposit_per_guest']) ?></td>
 					<td><?= status_badge($e['is_active'] ? 'active' : 'inactive') ?></td>

@@ -34,6 +34,17 @@ class Event_schedule_model extends CI_Model
 		return (int) ($row['guest_count'] ?? 0);
 	}
 
+	/**
+	 * Jumlah baris RSVP (semua status, termasuk cancelled) yang masih menunjuk ke jadwal ini —
+	 * dipakai Events::schedule_delete() utk menolak hapus jadwal yang masih dipakai, krn FK
+	 * event_rsvps.schedule_id sengaja TIDAK cascade (RSVP tamu tidak boleh ikut hilang diam2
+	 * hanya krn admin menghapus jadwalnya).
+	 */
+	public function count_rsvps($schedule_id)
+	{
+		return (int) $this->db->where('schedule_id', $schedule_id)->count_all_results('event_rsvps');
+	}
+
 	public function create($data)
 	{
 		$this->db->insert($this->table, $data);

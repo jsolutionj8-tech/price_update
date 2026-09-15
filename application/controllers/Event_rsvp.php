@@ -147,7 +147,15 @@ class Event_rsvp extends CI_Controller
 	public function ticket($ticket_code)
 	{
 		$rsvp = $this->event_rsvp_model->find_by_ticket_code($ticket_code);
-		if (!$rsvp) show_404();
+		if (!$rsvp) {
+			// Diagnostik sementara — tiket ADT-xxxxxx sempat 404 padahal datanya ada di DB
+			// (terlihat di admin Events > RSVP). Dicatat detail lengkap spy ketahuan persis
+			// di titik mana pencariannya gagal, baru dihapus setelah root cause ketemu.
+			log_message('error', 'RSVP ticket() 404 — param diterima: ' . var_export($ticket_code, TRUE)
+				. ' | last_query: ' . $this->db->last_query()
+				. ' | db group: ' . var_export($this->db->database, TRUE));
+			show_404();
+		}
 
 		$event = $this->event_model->find($rsvp['event_id']);
 		$schedule = $this->event_schedule_model->find($rsvp['schedule_id']);
@@ -169,7 +177,11 @@ class Event_rsvp extends CI_Controller
 	public function barcode($code)
 	{
 		$rsvp = $this->event_rsvp_model->find_by_any_code($code);
-		if (!$rsvp) show_404();
+		if (!$rsvp) {
+			log_message('error', 'RSVP barcode() 404 — param diterima: ' . var_export($code, TRUE)
+				. ' | last_query: ' . $this->db->last_query());
+			show_404();
+		}
 
 		$this->load->library('ticket_barcode');
 		$png = $this->ticket_barcode->png($code);
@@ -228,7 +240,7 @@ class Event_rsvp extends CI_Controller
 		$this->email->clear(TRUE);
 		$this->email->from($smtp['from_email'], $smtp['from_name']);
 		$this->email->to($rsvp['email']);
-		$this->email->subject('Konfirmasi RSVP - ' . $event['event_name']);
+		$this->email->subject('Konfirmasi RSVP - ' . ($event['event_name'] !== '' ? $event['event_name'] : 'Atambah'));
 		$this->email->message($body);
 
 		try {
