@@ -64,11 +64,13 @@
 	.info-grid .lbl { color: var(--gold); font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
 	.info-grid .val { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; line-height: 1.3; }
 	.info-grid .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+	.info-grid .align-right { text-align: right; }
+	.info-grid .col-right { grid-column: 2; }
 
 	.cta-btn {
 		display: block; width: 100%; text-align: center; text-decoration: none;
 		background: var(--gold); color: var(--ink); font-weight: 700; font-size: 15px;
-		letter-spacing: .03em; padding: 16px; border-radius: 12px; margin-top: 6px;
+		letter-spacing: .03em; padding: 16px; border-radius: 12px; margin-top: 24px;
 	}
 
 	.rsvp-line { text-align: center; font-size: 12px; color: var(--gold); margin-top: 16px; }
@@ -97,7 +99,7 @@
 				<div class="val"><?= htmlspecialchars($date_text ?: '-') ?></div>
 				<?php if (!empty($day_text)): ?><div class="sub"><?= htmlspecialchars($day_text) ?></div><?php endif; ?>
 			</div>
-			<div>
+			<div class="align-right">
 				<div class="lbl">Time</div>
 				<div class="val"><?= htmlspecialchars($time_text ?: '-') ?></div>
 			</div>
@@ -115,8 +117,8 @@
 			</div>
 			<?php endif; ?>
 			<?php if (!empty($event['dresscode'])): ?>
-			<div>
-				<div class="lbl">Dresscode</div>
+			<div class="col-right align-right">
+				<div class="lbl">Dress Code</div>
 				<div class="val"><?= htmlspecialchars($event['dresscode']) ?></div>
 			</div>
 			<?php endif; ?>

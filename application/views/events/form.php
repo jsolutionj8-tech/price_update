@@ -119,7 +119,29 @@
 <?php if (isset($event)): ?>
 <div class="card card-stat p-4" style="max-width:720px;">
 	<h6 class="fw-bold mb-3">Jadwal Reservasi</h6>
-	<div class="table-responsive mb-3">
+	<form method="post" action="<?= base_url('events/schedule-store/' . $event['id']) ?>" class="row g-2 align-items-end">
+		<div class="col-md-3">
+			<label class="form-label">Tanggal</label>
+			<input type="date" name="event_date" class="form-control" required>
+		</div>
+		<div class="col-md-2">
+			<label class="form-label">Jam</label>
+			<input type="time" name="event_time" class="form-control" required value="18:00">
+		</div>
+		<div class="col-md-2">
+			<label class="form-label">Kuota (opsional)</label>
+			<input type="number" name="quota" class="form-control" min="1" placeholder="Tanpa batas">
+		</div>
+		<div class="col-md-2">
+			<label class="form-label">Urutan</label>
+			<input type="number" name="sort_order" class="form-control" value="0">
+		</div>
+		<div class="col-md-3">
+			<button class="btn btn-outline-primary w-100"><i class="bi bi-plus-lg me-1"></i>Tambah Jadwal</button>
+		</div>
+	</form>
+	<hr>
+	<div class="table-responsive">
 		<table class="table table-sm align-middle">
 			<thead><tr><th>Tanggal</th><th>Jam</th><th>Kuota</th><th>Urutan</th><th>Status</th><th></th></tr></thead>
 			<tbody>
@@ -142,26 +164,5 @@
 			</tbody>
 		</table>
 	</div>
-	<form method="post" action="<?= base_url('events/schedule-store/' . $event['id']) ?>" class="row g-2 align-items-end">
-		<div class="col-md-3">
-			<label class="form-label">Tanggal</label>
-			<input type="date" name="event_date" class="form-control" required>
-		</div>
-		<div class="col-md-2">
-			<label class="form-label">Jam</label>
-			<input type="time" name="event_time" class="form-control" required value="18:00">
-		</div>
-		<div class="col-md-2">
-			<label class="form-label">Kuota (opsional)</label>
-			<input type="number" name="quota" class="form-control" min="1" placeholder="Tanpa batas">
-		</div>
-		<div class="col-md-2">
-			<label class="form-label">Urutan</label>
-			<input type="number" name="sort_order" class="form-control" value="0">
-		</div>
-		<div class="col-md-3">
-			<button class="btn btn-outline-primary w-100"><i class="bi bi-plus-lg me-1"></i>Tambah Jadwal</button>
-		</div>
-	</form>
 </div>
 <?php endif; ?>

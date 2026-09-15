@@ -9,20 +9,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
 <style>
 	:root {
-		--cream: #F7F2E9;
-		--cream-deep: #EFE6D6;
-		--ink: #201B14;
-		--gold: #B8873B;
+		--ink: #0E0C09;
+		--surface: #17140F;
+		--surface-2: #1F1B14;
+		--border: rgba(255,255,255,.14);
+		--gold: #C9A15A;
 		--gold-soft: #E8D9BE;
-		--muted: #8A7F6D;
+		--muted: #B8AFA0;
 		--danger: #B3413A;
 		--radius: 14px;
 	}
 	* { box-sizing: border-box; }
 	body {
 		margin: 0;
-		background: var(--cream);
-		color: var(--ink);
+		background: var(--ink);
+		color: #fff;
 		font-family: 'Plus Jakarta Sans', sans-serif;
 		-webkit-font-smoothing: antialiased;
 	}
@@ -30,7 +31,7 @@
 		max-width: 480px;
 		margin: 0 auto;
 		min-height: 100vh;
-		background: var(--cream);
+		background: var(--ink);
 		display: flex;
 		flex-direction: column;
 	}
@@ -45,7 +46,7 @@
 		letter-spacing: .06em;
 		text-transform: uppercase;
 	}
-	hr.rule { border: none; border-top: 1px solid var(--cream-deep); margin: 16px 24px 0; }
+	hr.rule { border: none; border-top: 1px solid var(--border); margin: 16px 24px 0; }
 
 	.step-indicator {
 		display: flex;
@@ -58,14 +59,14 @@
 		width: 26px; height: 26px; border-radius: 50%;
 		display: flex; align-items: center; justify-content: center;
 		font-size: 12px; font-weight: 600;
-		border: 1px solid #D8CDB8;
+		border: 1px solid var(--border);
 		color: var(--muted);
-		background: var(--cream);
+		background: var(--surface);
 		flex-shrink: 0;
 	}
-	.step-dot.active { background: var(--gold); border-color: var(--gold); color: #fff; }
-	.step-dot.done { background: var(--ink); border-color: var(--ink); color: #fff; }
-	.step-line { flex: 1; height: 1px; background: #D8CDB8; max-width: 28px; }
+	.step-dot.active { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+	.step-dot.done { background: transparent; border-color: var(--gold); color: var(--gold); }
+	.step-line { flex: 1; height: 1px; background: var(--border); max-width: 28px; }
 
 	.rsvp-steps { flex: 1; padding: 8px 24px 24px; }
 	.rsvp-step { display: none; }
@@ -80,11 +81,12 @@
 		font-weight: 800;
 		margin: 6px 0 8px;
 		line-height: 1.2;
+		color: #fff;
 	}
 	.step-desc { color: var(--muted); font-size: 14px; line-height: 1.5; margin-bottom: 18px; }
 
 	.schedule-card {
-		border: 1.5px solid #D8CDB8;
+		border: 1.5px solid var(--border);
 		border-radius: var(--radius);
 		padding: 16px 18px;
 		display: flex;
@@ -92,11 +94,11 @@
 		gap: 16px;
 		margin-bottom: 12px;
 		cursor: pointer;
-		background: #fff;
+		background: var(--surface);
 		transition: border-color .15s, background .15s;
 	}
-	.schedule-card.selected { border-color: var(--gold); background: #FFFDF8; }
-	.schedule-card .day-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; }
+	.schedule-card.selected { border-color: var(--gold); background: rgba(201,161,90,.1); }
+	.schedule-card .day-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; color: #fff; }
 	.schedule-card .day-name { color: var(--gold); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 	.schedule-card .day-date { color: var(--muted); font-size: 13px; margin-top: 2px; }
 
@@ -107,18 +109,19 @@
 	#scheduleList.schedule-grid .day-num { font-size: 26px; }
 	#scheduleList.schedule-grid .day-date { font-size: 12px; }
 
-	label.field-label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; }
+	label.field-label { display: block; font-size: 13px; font-weight: 600; margin: 14px 0 6px; color: #fff; }
 	label.field-label .req { color: var(--danger); }
 	.field-control {
 		width: 100%;
-		border: 1.5px solid #D8CDB8;
+		border: 1.5px solid var(--border);
 		border-radius: 10px;
 		padding: 12px 14px;
 		font-size: 15px;
 		font-family: inherit;
-		background: #fff;
-		color: var(--ink);
+		background: var(--surface);
+		color: #fff;
 	}
+	.field-control::placeholder { color: var(--muted); }
 	.field-control:focus { outline: none; border-color: var(--gold); }
 	textarea.field-control { resize: vertical; min-height: 80px; }
 
@@ -135,17 +138,17 @@
 	.toggle-group { display: flex; gap: 10px; }
 	.toggle-btn {
 		flex: 1;
-		border: 1.5px solid #D8CDB8;
+		border: 1.5px solid var(--border);
 		border-radius: 10px;
 		padding: 12px;
 		text-align: center;
 		font-size: 14px;
 		font-weight: 600;
 		cursor: pointer;
-		background: #fff;
-		color: var(--ink);
+		background: var(--surface);
+		color: #fff;
 	}
-	.toggle-btn.selected { background: var(--ink); border-color: var(--ink); color: #fff; }
+	.toggle-btn.selected { background: var(--gold); border-color: var(--gold); color: var(--ink); }
 
 	.guest-name-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 	.guest-name-row .idx {
@@ -154,34 +157,34 @@
 	}
 
 	.member-callout {
-		background: var(--ink); color: #fff; border-radius: var(--radius); padding: 16px 18px;
+		background: var(--surface); border: 1px solid rgba(201,161,90,.35); color: #fff; border-radius: var(--radius); padding: 16px 18px;
 		display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px;
 	}
 	.member-callout .star { color: var(--gold); font-size: 20px; }
 	.member-callout .t1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; }
 	.member-callout .t2 { font-size: 12px; opacity: .75; margin-top: 4px; }
 
-	.register-box { border: 1px solid var(--gold-soft); background: #FFFDF8; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-top: 14px; }
+	.register-box { border: 1px solid var(--gold-soft); background: var(--surface); color: #EFE9DD; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-top: 14px; }
 	.register-box a { color: var(--gold); font-weight: 600; }
 
 	.consent-row { display: flex; align-items: flex-start; gap: 10px; margin-top: 16px; font-size: 13px; color: var(--muted); }
-	.consent-row input { margin-top: 3px; }
+	.consent-row input { margin-top: 3px; accent-color: var(--gold); }
 
-	.pay-option { border: 1.5px solid #D8CDB8; border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; background: #fff; }
+	.pay-option { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 12px; background: var(--surface); }
 	.pay-option .eyebrow { font-size: 11px; color: var(--gold); font-weight: 700; letter-spacing: .08em; }
-	.pay-option .name { font-weight: 600; margin: 2px 0 2px; }
+	.pay-option .name { font-weight: 600; margin: 2px 0 2px; color: #fff; }
 	.pay-option .account-name { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
-	.va-box { display: flex; align-items: center; justify-content: space-between; border: 1px dashed #D8CDB8; border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 15px; }
-	.va-box button { border: none; background: var(--ink); color: #fff; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+	.va-box { display: flex; align-items: center; justify-content: space-between; border: 1px dashed var(--border); border-radius: 8px; padding: 10px 12px; font-family: monospace; font-size: 15px; color: #fff; }
+	.va-box button { border: none; background: var(--gold); color: var(--ink); border-radius: 6px; padding: 6px 12px; font-size: 12px; font-weight: 700; cursor: pointer; }
 
 	.rsvp-actions { padding: 14px 24px 28px; display: flex; gap: 10px; }
 	.btn {
 		flex: 1; border: none; border-radius: 12px; padding: 15px; font-size: 14px; font-weight: 700;
 		letter-spacing: .02em; cursor: pointer; text-align: center;
 	}
-	.btn-primary { background: var(--ink); color: #fff; }
+	.btn-primary { background: var(--gold); color: var(--ink); }
 	.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
-	.btn-outline { background: #fff; border: 1.5px solid var(--ink); color: var(--ink); }
+	.btn-outline { background: transparent; border: 1.5px solid rgba(255,255,255,.35); color: #fff; }
 
 	.assist-line { text-align: center; font-size: 12px; color: var(--muted); margin-top: 6px; }
 	.assist-line a { color: var(--gold); }
