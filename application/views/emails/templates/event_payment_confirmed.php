@@ -23,8 +23,8 @@ $c_brand       = '#3D5C6C';
 $c_muted       = '#6E8894';
 $c_border      = '#DCEAEF';
 ?>
-<div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;background:<?= $c_page ?>;padding:32px 16px;">
-	<div style="max-width:520px;margin:0 auto;">
+<div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#fff;">
+	<div style="max-width:520px;margin:0 auto;background:<?= $c_page ?>;padding:32px 16px;">
 		<div style="text-align:center;margin-bottom:20px;">
 			<div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:<?= $c_brand ?>;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;">Reservation Confirmed</div>
 			<?php if (!empty($event['event_name'])): ?>
