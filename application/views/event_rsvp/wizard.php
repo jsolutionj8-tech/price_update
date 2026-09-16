@@ -35,25 +35,12 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.rsvp-topbar {
-		padding: 22px 24px 0;
-		text-align: center;
-	}
-	.rsvp-topbar .brand {
-		font-family: 'Plus Jakarta Sans', sans-serif;
-		font-size: 18px;
-		font-weight: 700;
-		letter-spacing: .06em;
-		text-transform: uppercase;
-	}
-	hr.rule { border: none; border-top: 1px solid var(--border); margin: 16px 24px 0; }
-
 	.step-indicator {
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		gap: 6px;
-		padding: 18px 24px 4px;
+		padding: 28px 24px 4px;
 	}
 	.step-dot {
 		width: 26px; height: 26px; border-radius: 50%;
@@ -109,6 +96,20 @@
 		content: '\2713'; position: absolute; inset: 0; display: flex; align-items: center;
 		justify-content: center; font-size: 11px; font-weight: 700; color: var(--ink);
 	}
+
+	.section-intro { margin-bottom: 18px; }
+	.section-intro-label { font-size: 15px; font-weight: 700; color: #fff; }
+	.section-intro-detail { font-style: italic; color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+	.schedule-recap { margin-bottom: 18px; }
+	.recap-row {
+		display: flex; align-items: center; gap: 10px;
+		border: 1.5px solid var(--border); border-radius: 10px;
+		padding: 10px 14px; margin-bottom: 8px; font-size: 14px; color: var(--muted);
+	}
+	.recap-row .recap-day-num { font-weight: 700; color: #fff; }
+	.recap-row.selected { border-color: var(--gold); color: #fff; }
+	.recap-row.selected .recap-day-num { color: var(--gold); }
 
 	.guest-row {
 		display: flex; align-items: center; justify-content: space-between;
@@ -187,7 +188,11 @@
 		background: var(--surface); border: 1px solid rgba(201,161,90,.35); color: #fff; border-radius: var(--radius); padding: 16px 18px;
 		display: flex; gap: 12px; align-items: flex-start; margin-bottom: 18px;
 	}
-	.member-callout .star { color: var(--gold); font-size: 20px; }
+	.member-callout .member-logo-wrap {
+		background: #fff; border-radius: 8px; padding: 6px 10px; flex-shrink: 0;
+		display: flex; align-items: center;
+	}
+	.member-callout .member-logo { height: 16px; width: auto; display: block; }
 	.member-callout .t1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; }
 	.member-callout .t2 { font-size: 12px; opacity: .75; margin-top: 4px; }
 
@@ -221,11 +226,6 @@
 </head>
 <body>
 <div class="rsvp-shell">
-	<div class="rsvp-topbar">
-		<div class="brand"><?= htmlspecialchars($display_name) ?></div>
-	</div>
-	<hr class="rule">
-
 	<div class="step-indicator" id="stepIndicator"></div>
 
 	<main class="rsvp-steps">
@@ -234,12 +234,12 @@
 		<!-- STEP 1: Schedule + guest count -->
 		<section class="rsvp-step active" data-step="1">
 			<div class="step-head"><span class="step-eyebrow">Reservation</span><span class="step-count">1 / 4</span></div>
-			<h1 class="step-title">Choose Your Reservation</h1>
+			<h1 class="step-title">Choose Your</h1>
 			<p class="step-desc"><?= htmlspecialchars($event['tagline'] ?? '') ?></p>
 
 			<div id="scheduleList">
 				<?php foreach ($schedules as $s): $ts = strtotime($s['event_date']); ?>
-					<div class="schedule-card" data-schedule-id="<?= $s['id'] ?>" data-quota="<?= $s['quota'] !== null ? (int) $s['quota'] : '' ?>" data-date-label="<?= htmlspecialchars(date('l', $ts) . ', ' . tgl_indo($s['event_date'])) ?>">
+					<div class="schedule-card" data-schedule-id="<?= $s['id'] ?>" data-quota="<?= $s['quota'] !== null ? (int) $s['quota'] : '' ?>" data-date-label="<?= htmlspecialchars(date('l', $ts) . ', ' . tgl_indo($s['event_date'])) ?>" data-time-label="<?= substr($s['event_time'], 0, 5) ?> WIB">
 						<div class="schedule-card-top">
 							<div class="day-num"><?= date('d', $ts) ?></div>
 							<div class="day-info">
@@ -287,12 +287,32 @@
 		<!-- STEP 2: Orderer & guest details -->
 		<section class="rsvp-step" data-step="2">
 			<div class="step-head"><span class="step-eyebrow">Guest Details</span><span class="step-count">2 / 4</span></div>
-			<h1 class="step-title">Booking &amp; Guest Details</h1>
-			<p class="step-desc">We'll send your confirmation to the contact below.</p>
+			<h1 class="step-title">Reserve Your Seat</h1>
+
+			<div class="section-intro">
+				<div class="section-intro-label">Your Evening</div>
+				<div class="section-intro-detail" id="eveningSummary">Select a date to see your seating time.</div>
+			</div>
+
+			<?php if (count($schedules) > 1): ?>
+			<div class="schedule-recap" id="scheduleRecap">
+				<?php foreach ($schedules as $s): $ts = strtotime($s['event_date']); ?>
+					<div class="recap-row" data-schedule-id="<?= $s['id'] ?>">
+						<span class="recap-day-num"><?= date('d', $ts) ?></span>
+						<span class="recap-day-name"><?= date('l', $ts) ?></span>
+					</div>
+				<?php endforeach; ?>
+			</div>
+			<?php endif; ?>
+
+			<div class="section-intro">
+				<div class="section-intro-label">Your Contact</div>
+				<div class="section-intro-detail">We'll confirm here.</div>
+			</div>
 
 			<label class="field-label">Full Name <span class="req">*</span></label>
 			<input type="text" id="ordererName" class="field-control">
-			<label class="field-label">Phone Number <span class="req">*</span></label>
+			<label class="field-label">WhatsApp Number <span class="req">*</span></label>
 			<input type="text" id="phone" class="field-control">
 			<label class="field-label">Email <span class="req">*</span></label>
 			<input type="email" id="email" class="field-control">
@@ -314,11 +334,11 @@
 		<!-- STEP 3: Membership -->
 		<section class="rsvp-step" data-step="3">
 			<div class="step-head"><span class="step-eyebrow">Membership</span><span class="step-count">3 / 4</span></div>
-			<h1 class="step-title"><?= htmlspecialchars(explode(' ', $display_name)[0]) ?> Membership</h1>
+			<h1 class="step-title">Atambah.com Membership</h1>
 
 			<?php if (!empty($event['membership_gift_text'])): ?>
 			<div class="member-callout">
-				<div class="star">&#10022;</div>
+				<div class="member-logo-wrap"><img class="member-logo" src="<?= base_url('assets/images/atambah-logo.png') ?>" alt="Atambah"></div>
 				<div>
 					<div class="t1"><?= htmlspecialchars($event['membership_gift_text']) ?></div>
 					<div class="t2">Show your Gift Barcode at the event to redeem your gift.</div>
@@ -326,7 +346,7 @@
 			</div>
 			<?php endif; ?>
 
-			<label class="field-label">Are you a <?= htmlspecialchars($display_name) ?> member?</label>
+			<label class="field-label">Atambah.com Membership</label>
 			<div class="toggle-group">
 				<div class="toggle-btn" data-member="yes">Yes</div>
 				<div class="toggle-btn" data-member="no">No</div>
@@ -391,11 +411,13 @@
 	const TOTAL_STEPS = 4;
 	const depositPerGuest = <?= (float) $event['deposit_per_guest'] ?>;
 	const submitUrl = <?= json_encode(base_url('rsvp/' . $event['slug'] . '/submit')) ?>;
+	const venueName = <?= json_encode($event['venue_name'] ?? '') ?>;
 
 	let currentStep = 1;
 	let selectedScheduleId = null;
 	let selectedQuota = null;
 	let selectedDateLabel = null;
+	let selectedTimeLabel = null;
 	let allergyFlag = 0;
 	let memberFlag = null;
 
@@ -445,9 +467,11 @@
 			selectedScheduleId = card.dataset.scheduleId;
 			selectedQuota = card.dataset.quota !== '' ? parseInt(card.dataset.quota, 10) : null;
 			selectedDateLabel = card.dataset.dateLabel || null;
+			selectedTimeLabel = card.dataset.timeLabel || null;
 			card.appendChild(guestRow);
 			guestRow.style.display = 'flex';
 			updateDepositLine();
+			updateEveningSummary();
 		});
 	});
 	if (document.querySelectorAll('.schedule-card').length === 1) {
@@ -473,6 +497,15 @@
 		}
 		const perGuest = depositPerGuest.toLocaleString('id-ID');
 		el.textContent = 'IDR ' + perGuest + ' × ' + count + ' guest' + (count > 1 ? 's' : '') + ', ' + selectedDateLabel;
+	}
+	function updateEveningSummary() {
+		const el = document.getElementById('eveningSummary');
+		if (el && selectedTimeLabel) {
+			el.textContent = 'Seating begins at ' + selectedTimeLabel + (venueName ? ', ' + venueName : '') + '.';
+		}
+		document.querySelectorAll('#scheduleRecap .recap-row').forEach(function (row) {
+			row.classList.toggle('selected', row.dataset.scheduleId === String(selectedScheduleId));
+		});
 	}
 	function setGuestCount(n) {
 		n = Math.max(1, n);

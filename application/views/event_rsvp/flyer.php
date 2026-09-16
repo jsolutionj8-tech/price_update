@@ -21,8 +21,7 @@
 		font-family: 'Plus Jakarta Sans', sans-serif;
 		-webkit-font-smoothing: antialiased;
 	}
-	.shell { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--ink); display: flex; flex-direction: column; }
-	.scroll-area { flex: 1; }
+	.shell { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--ink); }
 
 	/* Lebar gambar dipatok penuh selebar card (width:100%, height:auto mengikuti rasio
 	   asli) supaya tidak ada letterbox/area hitam kosong di kiri-kanan gambar. */
@@ -64,7 +63,6 @@
 	.info-grid .sub { color: var(--muted); font-size: 11.5px; margin-top: 3px; text-shadow: 0 1px 4px rgba(0,0,0,.6); }
 
 	.cta-wrap {
-		position: sticky; bottom: 0;
 		background: var(--ink);
 		padding: 6px 24px calc(18px + env(safe-area-inset-bottom));
 	}
