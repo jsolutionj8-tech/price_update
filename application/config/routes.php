@@ -210,6 +210,7 @@ $route['rsvp/(:any)/daftar']           = 'event_rsvp/form/$1';
 $route['rsvp/(:any)/submit']           = 'event_rsvp/submit/$1';
 $route['rsvp-ticket/(:any)']           = 'event_rsvp/ticket/$1';
 $route['rsvp-barcode/(:any)']          = 'event_rsvp/barcode/$1';
+$route['rsvp-qrcode/(:any)']           = 'event_rsvp/qrcode/$1';
 
 // CLI (dipanggil via cron, lihat dokumentasi)
 $route['cli/send_email_queue']         = 'cli/send_email_queue';

@@ -201,8 +201,35 @@ class Events extends MY_Controller
 		if (!$rsvp) show_404();
 
 		$this->event_rsvp_model->mark_paid($rsvp_id, $this->auth_lib->user_id());
-		$this->session->set_flashdata('success', 'Deposit ditandai lunas.');
+		$this->_send_payment_confirmed_email($rsvp_id);
+		$this->session->set_flashdata('success', 'Deposit ditandai lunas & email konfirmasi terkirim.');
 		redirect('events/rsvps/' . $rsvp['event_id']);
+	}
+
+	/**
+	 * Kirim email konfirmasi pembayaran (dgn QR code check-in) ke pemesan saat admin klik
+	 * "Paid" di daftar RSVP. Kegagalan kirim email TIDAK membatalkan status paid yang sudah
+	 * tersimpan — deposit tetap tercatat lunas walau emailnya gagal terkirim.
+	 */
+	private function _send_payment_confirmed_email($rsvp_id)
+	{
+		$rsvp = $this->event_rsvp_model->find($rsvp_id);
+		$event = $this->event_model->find($rsvp['event_id']);
+		$schedule = $this->event_schedule_model->find($rsvp['schedule_id']);
+		$guests = $this->event_rsvp_model->get_guests($rsvp_id);
+
+		$this->load->library('event_mailer');
+		$this->event_mailer->send(
+			$rsvp['email'],
+			'Deposit Terverifikasi - ' . ($event['event_name'] !== '' ? $event['event_name'] : 'Atambah'),
+			'emails/templates/event_payment_confirmed',
+			array(
+				'event'    => $event,
+				'schedule' => $schedule,
+				'rsvp'     => $rsvp,
+				'guests'   => $guests,
+			)
+		);
 	}
 
 	public function cancel_rsvp($rsvp_id)

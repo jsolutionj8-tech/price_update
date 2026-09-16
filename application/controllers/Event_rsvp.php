@@ -214,6 +214,22 @@ class Event_rsvp extends CI_Controller
 		$this->output->set_content_type('image/png')->set_output($png);
 	}
 
+	/**
+	 * Gambar QR code PNG on-the-fly — dipakai di email konfirmasi pembayaran (mark_paid,
+	 * lihat Events::mark_paid()), di-embed lewat <img src="..."> yang menunjuk ke endpoint
+	 * ini (bukan attachment/CID), sama seperti pola barcode() di atas.
+	 */
+	public function qrcode($code)
+	{
+		$rsvp = $this->event_rsvp_model->find_by_any_code($code);
+		if (!$rsvp) show_404();
+
+		$this->load->library('ticket_qrcode');
+		$png = $this->ticket_qrcode->png($code);
+
+		$this->output->set_content_type('image/png')->set_output($png);
+	}
+
 	private function _json_error($message)
 	{
 		$this->output->set_content_type('application/json')->set_output(json_encode(array(
@@ -237,41 +253,17 @@ class Event_rsvp extends CI_Controller
 	 */
 	private function _send_confirmation_email($event, $schedule, $rsvp, $guest_names)
 	{
-		$this->load->model('smtp_settings_model');
-		$smtp = $this->smtp_settings_model->get();
-		if (empty($smtp)) return;
-
-		$this->load->config('email');
-		$this->load->library('email', array(
-			'protocol'     => 'smtp',
-			'smtp_host'    => $smtp['smtp_host'],
-			'smtp_port'    => $smtp['smtp_port'],
-			'smtp_user'    => $smtp['smtp_user'],
-			'smtp_pass'    => $smtp['smtp_pass'],
-			'smtp_crypto'  => $smtp['smtp_crypto'],
-			'smtp_timeout' => $this->config->item('smtp_timeout') ?: 30,
-			'mailtype'     => $this->config->item('mailtype'),
-			'charset'      => $this->config->item('charset'),
-			'newline'      => $this->config->item('newline'),
-		));
-
-		$body = $this->load->view('emails/templates/event_confirmation', array(
-			'event'       => $event,
-			'schedule'    => $schedule,
-			'rsvp'        => $rsvp,
-			'guest_names' => $guest_names,
-		), TRUE);
-
-		$this->email->clear(TRUE);
-		$this->email->from($smtp['from_email'], $smtp['from_name']);
-		$this->email->to($rsvp['email']);
-		$this->email->subject('Konfirmasi RSVP - ' . ($event['event_name'] !== '' ? $event['event_name'] : 'Atambah'));
-		$this->email->message($body);
-
-		try {
-			$this->email->send();
-		} catch (Exception $e) {
-			log_message('error', 'Gagal kirim email konfirmasi RSVP (ticket ' . $rsvp['ticket_code'] . '): ' . $e->getMessage());
-		}
+		$this->load->library('event_mailer');
+		$this->event_mailer->send(
+			$rsvp['email'],
+			'Konfirmasi RSVP - ' . ($event['event_name'] !== '' ? $event['event_name'] : 'Atambah'),
+			'emails/templates/event_confirmation',
+			array(
+				'event'       => $event,
+				'schedule'    => $schedule,
+				'rsvp'        => $rsvp,
+				'guest_names' => $guest_names,
+			)
+		);
 	}
 }
