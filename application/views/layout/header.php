@@ -89,6 +89,8 @@
 		/* Badge "Nominal" di menu Master Biaya: frame putih, tulisan biru atambah, lebar disamakan dgn badge "Persentase". */
 		.badge-nominal { background-color: #fff; color: #3D5C6C; border: 1px solid #3D5C6C; }
 		.cost-type-badge { display: inline-block; width: 6.5rem; }
+		/* Badge "Member" (bg-brand) di daftar RSVP event — lebar disamakan dgn badge kolom Status (6.5rem). */
+		.badge.bg-brand { display: inline-block; width: 6.5rem; text-align: center; }
 		/* Baris "Kode: ... | Brand: ..." di kartu Nama Produk — sedikit lebih besar dari <small> bawaan */
 		.product-header-sub { font-size: 1rem; }
 		/* Ikon kecil di judul tiap kartu Harga per Channel (lihat helper channel_icon()) */
