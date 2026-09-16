@@ -12,27 +12,28 @@ $cal_url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
 	. '&details=' . rawurlencode('Booking code: ' . $rsvp['ticket_code'])
 	. '&location=' . rawurlencode($maps_query);
 
-// Background = biru Atambah asli tapi di-"tint" jadi jauh lebih terang/lembut (dicampur
-// putih) — bukan solid #3D5C6C lagi (kontrasnya terlalu tinggi/berat), tetap dari hue biru
-// yg sama supaya masih kerasa "biru Atambah", cuma versi low-contrast. Karena background
-// jadi terang lagi, semua teks & tombol yg tadinya putih (utk kontras di atas biru solid)
-// dibalik lagi jadi gelap/biru brand seperti biasa.
-$c_page        = '#F1F5F6';
+// Box background = biru Atambah asli/solid (bukan tint terang lagi). Karena boxnya gelap,
+// teks "Reservation Confirmed"/judul acara/sambutan yg duduk LANGSUNG di atas box ini
+// dibuat terang (putih/biru muda) spy tetap kontras; elemen yg masih di dalam kartu putih
+// sendiri (E-Ticket box & tabel detail) tetap pakai warna gelap seperti biasa.
+$c_page        = '#3D5C6C';
 $c_ink         = '#1F333D';
 $c_brand       = '#3D5C6C';
 $c_muted       = '#6E8894';
 $c_border      = '#DCEAEF';
+$c_on_page     = '#fff';
+$c_on_page_mut = '#C7D9E0';
 ?>
 <div style="font-family:'Plus Jakarta Sans',Arial,sans-serif;background:#fff;">
 	<div style="max-width:520px;margin:0 auto;background:<?= $c_page ?>;padding:32px 16px;">
 		<div style="text-align:center;margin-bottom:20px;">
-			<div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:<?= $c_brand ?>;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;">Reservation Confirmed</div>
+			<div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:<?= $c_on_page ?>;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;">Reservation Confirmed</div>
 			<?php if (!empty($event['event_name'])): ?>
-				<div style="font-size:15px;color:<?= $c_ink ?>;margin-top:8px;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;"><?= htmlspecialchars($event['event_name']) ?></div>
+				<div style="font-size:15px;color:<?= $c_on_page ?>;margin-top:8px;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;"><?= htmlspecialchars($event['event_name']) ?></div>
 			<?php endif; ?>
 		</div>
 
-		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:14px;color:<?= $c_ink ?>;line-height:1.6;margin-top:0;text-align:center;">
+		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:14px;color:<?= $c_on_page ?>;line-height:1.6;margin-top:0;text-align:center;">
 			Hi <b><?= htmlspecialchars($rsvp['orderer_name']) ?></b>, you're confirmed. Your e-ticket is below.
 		</p>
 
@@ -44,7 +45,7 @@ $c_border      = '#DCEAEF';
 		</div>
 
 		<div style="text-align:center;margin-bottom:22px;">
-			<a href="<?= htmlspecialchars($cal_url) ?>" style="display:inline-block;background:<?= $c_brand ?>;color:#fff;text-decoration:none;font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:13px;font-weight:bold;padding:13px 30px;border-radius:999px;">Add to calendar</a>
+			<a href="<?= htmlspecialchars($cal_url) ?>" style="display:inline-block;background:#fff;color:<?= $c_brand ?>;text-decoration:none;font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:13px;font-weight:bold;padding:13px 30px;border-radius:999px;">Add to calendar</a>
 		</div>
 
 		<table style="width:100%;border-collapse:collapse;font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:13px;background:#fff;border-radius:8px;overflow:hidden;">
@@ -92,12 +93,12 @@ $c_border      = '#DCEAEF';
 			</table>
 
 		<?php if (!empty($event['rsvp_assistance_phone'])): ?>
-		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:12px;color:<?= $c_muted ?>;text-align:center;margin-top:22px;">
-			Plans changed? Let us know on WhatsApp at <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $event['rsvp_assistance_phone']) ?>" style="color:<?= $c_brand ?>;font-weight:bold;"><?= htmlspecialchars($event['rsvp_assistance_phone']) ?></a>.
+		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:12px;color:<?= $c_on_page_mut ?>;text-align:center;margin-top:22px;">
+			Plans changed? Let us know on WhatsApp at <a href="https://wa.me/<?= preg_replace('/[^0-9]/', '', $event['rsvp_assistance_phone']) ?>" style="color:#fff;font-weight:bold;"><?= htmlspecialchars($event['rsvp_assistance_phone']) ?></a>.
 		</p>
 		<?php endif; ?>
 
-		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:11px;color:<?= $c_muted ?>;text-align:center;margin-top:18px;margin-bottom:0;">
+		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:11px;color:<?= $c_on_page_mut ?>;text-align:center;margin-top:18px;margin-bottom:0;">
 			Sent automatically for booking <?= htmlspecialchars($rsvp['ticket_code']) ?>.
 		</p>
 	</div>
