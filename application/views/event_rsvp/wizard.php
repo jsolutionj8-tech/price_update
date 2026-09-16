@@ -196,6 +196,16 @@
 	.member-callout .t1 { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 700; }
 	.member-callout .t2 { font-size: 12px; opacity: .75; margin-top: 4px; }
 
+	.membership-title, .membership-label { display: flex; align-items: center; gap: 10px; }
+	.membership-label { gap: 8px; }
+	.brand-chip {
+		background: #fff; border-radius: 6px; padding: 4px 9px; flex-shrink: 0;
+		display: inline-flex; align-items: center;
+	}
+	.brand-chip img { height: 13px; width: auto; display: block; }
+	.brand-chip-lg { border-radius: 8px; padding: 6px 12px; }
+	.brand-chip-lg img { height: 20px; }
+
 	.register-box { border: 1px solid var(--gold-soft); background: var(--surface); color: #EFE9DD; border-radius: 10px; padding: 12px 14px; font-size: 13px; margin-top: 14px; }
 	.register-box a { color: var(--gold); font-weight: 600; }
 
@@ -334,7 +344,7 @@
 		<!-- STEP 3: Membership -->
 		<section class="rsvp-step" data-step="3">
 			<div class="step-head"><span class="step-eyebrow">Membership</span><span class="step-count">3 / 4</span></div>
-			<h1 class="step-title">Atambah.com Membership</h1>
+			<h1 class="step-title membership-title"><span class="brand-chip brand-chip-lg"><img src="<?= base_url('assets/images/atambah-logo-mark.png') ?>" alt="Atambah.com"></span> Membership</h1>
 
 			<?php if (!empty($event['membership_gift_text'])): ?>
 			<div class="member-callout">
@@ -346,22 +356,25 @@
 			</div>
 			<?php endif; ?>
 
-			<label class="field-label">Atambah.com Membership</label>
+			<label class="field-label membership-label"><span class="brand-chip"><img src="<?= base_url('assets/images/atambah-logo-mark.png') ?>" alt="Atambah.com"></span> Membership</label>
 			<div class="toggle-group">
-				<div class="toggle-btn" data-member="yes">Yes</div>
 				<div class="toggle-btn" data-member="no">No</div>
+				<div class="toggle-btn" data-member="yes">Yes</div>
 			</div>
 
-			<?php if (!empty($event['membership_register_url'])): ?>
-			<div class="register-box" id="registerBox" style="display:none;">
-				Not a member yet? Sign up for free to receive a special gift.<br>
-				<a href="<?= htmlspecialchars($event['membership_register_url']) ?>" target="_blank" rel="noopener">Register as a Member &#8599;</a>
+			<?php if (!empty($event['membership_gift_text'])): ?>
+			<div class="register-box" id="memberNoteNo" style="display:none;">
+				Not a member? Join free and you're in the lucky draw for <?= htmlspecialchars($event['membership_gift_text']) ?>.
+				<?php if (!empty($event['membership_register_url'])): ?>
+					<br><a href="<?= htmlspecialchars($event['membership_register_url']) ?>" target="_blank" rel="noopener">Register as a Member &#8599;</a>
+				<?php endif; ?>
 			</div>
+			<div class="register-box" id="memberNoteYes" style="display:none;">You're in the draw.</div>
 			<?php endif; ?>
 
 			<div class="consent-row">
 				<input type="checkbox" id="marketingConsent">
-				<label for="marketingConsent">I agree to receive event information, offers, and promotions from <?= htmlspecialchars($display_name) ?> via WhatsApp or email.</label>
+				<label for="marketingConsent">Send me event news and offers from Atambah on WhatsApp or email.</label>
 			</div>
 		</section>
 
@@ -562,8 +575,10 @@
 			document.querySelectorAll('[data-member]').forEach(function (b) { b.classList.remove('selected'); });
 			btn.classList.add('selected');
 			memberFlag = btn.dataset.member;
-			const box = document.getElementById('registerBox');
-			if (box) box.style.display = memberFlag === 'no' ? 'block' : 'none';
+			const noteNo = document.getElementById('memberNoteNo');
+			const noteYes = document.getElementById('memberNoteYes');
+			if (noteNo) noteNo.style.display = memberFlag === 'no' ? 'block' : 'none';
+			if (noteYes) noteYes.style.display = memberFlag === 'yes' ? 'block' : 'none';
 		});
 	});
 
