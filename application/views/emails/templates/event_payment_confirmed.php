@@ -28,7 +28,7 @@ $c_border      = '#DCEAEF';
 		<div style="text-align:center;margin-bottom:20px;">
 			<div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:<?= $c_brand ?>;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;">Reservation Confirmed</div>
 			<?php if (!empty($event['event_name'])): ?>
-				<div style="font-size:22px;color:<?= $c_ink ?>;margin-top:8px;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;"><?= htmlspecialchars($event['event_name']) ?></div>
+				<div style="font-size:15px;color:<?= $c_ink ?>;margin-top:8px;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;"><?= htmlspecialchars($event['event_name']) ?></div>
 			<?php endif; ?>
 		</div>
 
