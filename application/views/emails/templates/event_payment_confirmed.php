@@ -17,7 +17,7 @@ $cal_url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
 // yg sama supaya masih kerasa "biru Atambah", cuma versi low-contrast. Karena background
 // jadi terang lagi, semua teks & tombol yg tadinya putih (utk kontras di atas biru solid)
 // dibalik lagi jadi gelap/biru brand seperti biasa.
-$c_page        = '#E7EEF1';
+$c_page        = '#F1F5F6';
 $c_ink         = '#1F333D';
 $c_brand       = '#3D5C6C';
 $c_muted       = '#6E8894';
