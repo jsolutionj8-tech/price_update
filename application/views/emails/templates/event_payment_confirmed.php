@@ -29,11 +29,11 @@ $c_on_page_mut = '#C7D9E0';
 		<div style="text-align:center;margin-bottom:20px;">
 			<div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:<?= $c_on_page ?>;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;">Reservation Confirmed</div>
 			<?php if (!empty($event['event_name'])): ?>
-				<div style="font-size:15px;color:<?= $c_on_page ?>;margin-top:16px;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;"><?= htmlspecialchars($event['event_name']) ?></div>
+				<div style="font-size:18px;color:<?= $c_on_page ?>;margin-top:16px;font-weight:bold;font-family:'Plus Jakarta Sans',Arial,sans-serif;"><?= htmlspecialchars($event['event_name']) ?></div>
 			<?php endif; ?>
 		</div>
 
-		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:14px;color:<?= $c_on_page ?>;line-height:1.6;margin-top:16px;text-align:center;">
+		<p style="font-family:'Plus Jakarta Sans',Arial,sans-serif;font-size:14px;color:<?= $c_on_page ?>;line-height:1.6;margin-top:26px;text-align:center;">
 			Hi <b><?= htmlspecialchars($rsvp['orderer_name']) ?></b>, you're confirmed. Your e-ticket is below.
 		</p>
 
