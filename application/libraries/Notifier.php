@@ -57,6 +57,13 @@ class Notifier
 			'mailtype'     => $this->CI->config->item('mailtype'),
 			'charset'      => $this->CI->config->item('charset'),
 			'newline'      => $this->CI->config->item('newline'),
+			// wordwrap default CI3 = TRUE, walau mailtype = 'html' — library-nya TETAP
+			// memotong body HTML tiap ~76 karakter pakai soft line break (quoted-printable).
+			// Sebagian SMTP relay/anti-spam scanner (mis. Dewaweb) tidak merekonstruksi soft
+			// break itu dgn benar pas diteruskan, jadi space "nyasar" muncul di tengah kata
+			// (mis. "door" jadi "do or") DAN bisa merusak atribut style="..." yg kepotong di
+			// tengah, bikin seluruh styling HTML hilang. Wajib FALSE utk email HTML.
+			'wordwrap'     => FALSE,
 		));
 	}
 
