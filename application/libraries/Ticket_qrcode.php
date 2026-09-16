@@ -15,10 +15,14 @@ class Ticket_qrcode
 	public function png($code, $scale = 6)
 	{
 		$options = new \chillerlan\QRCode\QROptions(array(
-			'outputType' => \chillerlan\QRCode\QRCode::OUTPUT_IMAGE_PNG,
-			'eccLevel'   => \chillerlan\QRCode\QRCode::ECC_M,
-			'scale'      => $scale,
+			'outputType'       => \chillerlan\QRCode\QRCode::OUTPUT_IMAGE_PNG,
+			'eccLevel'         => \chillerlan\QRCode\QRCode::ECC_M,
+			'scale'            => $scale,
 			'imageTransparent' => false,
+			// Default chillerlan/php-qrcode: render() balikin STRING data-URI base64
+			// ("data:image/png;base64,...."), bukan biner PNG mentah. imageBase64=false
+			// wajib diset spy hasilnya biner asli yg bisa langsung di-output sbg image/png.
+			'imageBase64'      => false,
 		));
 
 		return (new \chillerlan\QRCode\QRCode($options))->render($code);
