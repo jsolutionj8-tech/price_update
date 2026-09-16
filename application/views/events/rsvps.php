@@ -36,12 +36,12 @@
 						<?= $r['guest_count'] ?> orang
 						<div class="small text-muted"><?= htmlspecialchars(implode(', ', array_column($r['guests'], 'guest_name'))) ?></div>
 					</td>
-					<td><?= $r['is_member'] === 'yes' ? '<span class="badge bg-purple text-white" style="background:#7c3aed;">Member</span>' : '-' ?></td>
+					<td><?= $r['is_member'] === 'yes' ? '<span class="badge bg-brand text-white">Member</span>' : '-' ?></td>
 					<td><?= rupiah($r['deposit_amount']) ?></td>
 					<td><?= status_badge($r['payment_status']) ?></td>
 					<td class="text-end text-nowrap">
 						<?php if ($r['payment_status'] === 'pending'): ?>
-							<a href="<?= base_url('events/mark-paid/' . $r['id']) ?>" class="btn btn-sm btn-outline-success" onclick="return confirm('Tandai deposit RSVP ini sudah lunas?')"><i class="bi bi-check-lg"></i> Lunas</a>
+							<a href="<?= base_url('events/mark-paid/' . $r['id']) ?>" class="btn btn-sm btn-outline-success" onclick="return confirm('Tandai deposit RSVP ini sudah lunas?')"><i class="bi bi-check-lg"></i> Paid</a>
 							<a href="<?= base_url('events/cancel-rsvp/' . $r['id']) ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Batalkan RSVP ini?')"><i class="bi bi-x-lg"></i></a>
 						<?php endif; ?>
 					</td>
