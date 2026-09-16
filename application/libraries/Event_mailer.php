@@ -1,12 +1,24 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception as PHPMailerException;
+
 /**
  * Event_mailer
  * Kirim email terkait RSVP event (konfirmasi submit, konfirmasi pembayaran, dst) pakai
  * kredensial SMTP yang sama dengan notifikasi harga (menu Settings), lepas dari class
  * Notifier (yang khusus utk batch harga). Dipakai oleh Event_rsvp (konfirmasi submit) &
  * Events (konfirmasi pembayaran saat admin klik Paid).
+ *
+ * Pakai PHPMailer langsung (bukan library Email bawaan CodeIgniter) — CI3 meng-encode body
+ * HTML pakai quoted-printable yg WAJIB dipotong tiap ~76 karakter dgn soft line break
+ * "=\r\n" (aturan MIME, tidak bisa dimatikan lewat config 'wordwrap'). Sebagian SMTP
+ * relay/anti-spam scanner (terbukti kejadian di Dewaweb) tidak merekonstruksi soft break
+ * itu dgn benar saat diteruskan, jadi muncul spasi nyasar di tengah kata ("door" jadi
+ * "do or") dan atribut style="..." yg kepotong bikin browser/webmail buang semua styling.
+ * PHPMailer dgn Encoding=base64 tidak punya soft-break yg bermakna sama sekali (whitespace
+ * di dalam base64 diabaikan total oleh decoder manapun), jadi kebal dari masalah ini.
  */
 class Event_mailer
 {
@@ -27,39 +39,29 @@ class Event_mailer
 		$smtp = $this->CI->smtp_settings_model->get();
 		if (empty($smtp)) return FALSE;
 
-		$this->CI->load->config('email');
-		$this->CI->load->library('email', array(
-			'protocol'     => 'smtp',
-			'smtp_host'    => $smtp['smtp_host'],
-			'smtp_port'    => $smtp['smtp_port'],
-			'smtp_user'    => $smtp['smtp_user'],
-			'smtp_pass'    => $smtp['smtp_pass'],
-			'smtp_crypto'  => $smtp['smtp_crypto'],
-			'smtp_timeout' => $this->CI->config->item('smtp_timeout') ?: 30,
-			'mailtype'     => $this->CI->config->item('mailtype'),
-			'charset'      => $this->CI->config->item('charset'),
-			'newline'      => $this->CI->config->item('newline'),
-			// wordwrap default CI3 = TRUE, walau mailtype = 'html' — library-nya TETAP
-			// memotong body HTML tiap ~76 karakter pakai soft line break (quoted-printable).
-			// Sebagian SMTP relay/anti-spam scanner (mis. Dewaweb) tidak merekonstruksi soft
-			// break itu dgn benar pas diteruskan, jadi space "nyasar" muncul di tengah kata
-			// (mis. "door" jadi "do or") DAN bisa merusak atribut style="..." yg kepotong di
-			// tengah, bikin seluruh styling HTML hilang. Wajib FALSE utk email HTML.
-			'wordwrap'     => FALSE,
-		));
-
 		$body = $this->CI->load->view($view, $data, TRUE);
 
-		$this->CI->email->clear(TRUE);
-		$this->CI->email->from($smtp['from_email'], $smtp['from_name']);
-		$this->CI->email->to($to);
-		$this->CI->email->subject($subject);
-		$this->CI->email->message($body);
-
+		$mail = new PHPMailer(TRUE);
 		try {
-			return (bool) $this->CI->email->send();
-		} catch (Exception $e) {
-			log_message('error', 'Event_mailer::send gagal (' . $subject . '): ' . $e->getMessage());
+			$mail->isSMTP();
+			$mail->Host       = $smtp['smtp_host'];
+			$mail->Port       = (int) $smtp['smtp_port'];
+			$mail->SMTPAuth   = TRUE;
+			$mail->Username   = $smtp['smtp_user'];
+			$mail->Password   = $smtp['smtp_pass'];
+			$mail->SMTPSecure = $smtp['smtp_crypto'] ?: FALSE;
+			$mail->CharSet    = 'UTF-8';
+			$mail->Encoding   = PHPMailer::ENCODING_BASE64;
+
+			$mail->setFrom($smtp['from_email'], $smtp['from_name']);
+			$mail->addAddress($to);
+			$mail->isHTML(TRUE);
+			$mail->Subject = $subject;
+			$mail->Body    = $body;
+
+			return $mail->send();
+		} catch (PHPMailerException $e) {
+			log_message('error', 'Event_mailer::send gagal (' . $subject . '): ' . $mail->ErrorInfo);
 			return FALSE;
 		}
 	}
