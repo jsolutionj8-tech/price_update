@@ -1,7 +1,11 @@
 <div class="card card-stat p-3 mb-3">
 	<div class="d-flex justify-content-between align-items-center">
 		<h6 class="fw-bold mb-0">RSVP — <?= $event['event_name'] !== '' ? htmlspecialchars($event['event_name']) : '(Tanpa nama)' ?></h6>
-		<a href="<?= base_url('events') ?>" class="btn btn-outline-secondary btn-sm">Kembali</a>
+		<div class="d-flex gap-2">
+			<a href="<?= base_url('events/rsvps-export/' . $event['id']) ?>" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+			<a href="<?= base_url('events/rsvps-export-pdf/' . $event['id']) ?>" class="btn btn-outline-danger btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
+			<a href="<?= base_url('events') ?>" class="btn btn-outline-secondary btn-sm">Kembali</a>
+		</div>
 	</div>
 </div>
 

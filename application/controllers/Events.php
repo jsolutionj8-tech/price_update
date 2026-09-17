@@ -195,6 +195,24 @@ class Events extends MY_Controller
 		));
 	}
 
+	/**
+	 * Tombol "Export Excel" di halaman detail RSVP — lihat Rsvp_exporter utk isi kolom.
+	 */
+	public function rsvps_export($event_id)
+	{
+		$this->load->library('rsvp_exporter');
+		$this->rsvp_exporter->export_to_browser($event_id);
+	}
+
+	/**
+	 * Tombol "Export PDF" di halaman detail RSVP.
+	 */
+	public function rsvps_export_pdf($event_id)
+	{
+		$this->load->library('rsvp_exporter');
+		$this->rsvp_exporter->export_to_pdf_browser($event_id);
+	}
+
 	public function mark_paid($rsvp_id)
 	{
 		$rsvp = $this->event_rsvp_model->find($rsvp_id);
