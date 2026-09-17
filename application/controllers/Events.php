@@ -189,10 +189,104 @@ class Events extends MY_Controller
 		unset($r);
 
 		$this->render_view('events/rsvps', array(
-			'title' => 'RSVP - ' . ($event['event_name'] !== '' ? $event['event_name'] : '(Tanpa nama)'),
-			'event' => $event,
-			'rsvps' => $rsvps,
+			'title'     => 'RSVP - ' . ($event['event_name'] !== '' ? $event['event_name'] : '(Tanpa nama)'),
+			'event'     => $event,
+			'rsvps'     => $rsvps,
+			'schedules' => $this->event_schedule_model->get_for_event($event_id),
 		));
+	}
+
+	/**
+	 * Input RSVP manual oleh admin (mis. tamu yang booking lewat telepon/WhatsApp) —
+	 * dari modal "Tambah RSVP Manual" di halaman detail RSVP. Alur & validasinya
+	 * meniru Event_rsvp::submit() (form publik) supaya datanya konsisten (kuota,
+	 * kode tiket unik, dst), hanya field-nya diisi admin, bukan tamu sendiri.
+	 */
+	public function rsvp_store($event_id)
+	{
+		$event = $this->event_model->find($event_id);
+		if (!$event) show_404();
+
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('schedule_id', 'Jadwal', 'required|integer');
+		$this->form_validation->set_rules('orderer_name', 'Nama Pemesan', 'required|trim');
+		$this->form_validation->set_rules('phone', 'No. HP', 'required|trim');
+		$this->form_validation->set_rules('email', 'Email', 'required|valid_email');
+		$this->form_validation->set_rules('guest_count', 'Jumlah Tamu', 'required|integer|greater_than[0]');
+		$this->form_validation->set_rules('guest_names', 'Nama Tamu', 'required');
+		$this->form_validation->set_rules('is_member', 'Status Member', 'required|in_list[yes,no]');
+		$this->form_validation->set_rules('payment_status', 'Status Pembayaran', 'required|in_list[pending,paid]');
+		$this->form_validation->set_rules('deposit_amount', 'Deposit', 'required|numeric');
+
+		if ($this->form_validation->run() === FALSE) {
+			$this->session->set_flashdata('error', validation_errors());
+			redirect('events/rsvps/' . $event_id);
+		}
+
+		$schedule = $this->event_schedule_model->find((int) $this->input->post('schedule_id'));
+		if (!$schedule || (int) $schedule['event_id'] !== (int) $event_id) {
+			$this->session->set_flashdata('error', 'Jadwal tidak valid.');
+			redirect('events/rsvps/' . $event_id);
+		}
+
+		$guest_count = (int) $this->input->post('guest_count');
+		$guest_names = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $this->input->post('guest_names'))), function ($n) {
+			return $n !== '';
+		}));
+		if (count($guest_names) !== $guest_count) {
+			$this->session->set_flashdata('error', 'Jumlah nama tamu (' . count($guest_names) . ') tidak sesuai dengan Jumlah Tamu (' . $guest_count . '). Isi satu nama per baris.');
+			redirect('events/rsvps/' . $event_id);
+		}
+
+		if (!empty($schedule['quota'])) {
+			$booked = $this->event_schedule_model->guest_count_booked($schedule['id']);
+			if ($booked + $guest_count > $schedule['quota']) {
+				$sisa = max(0, $schedule['quota'] - $booked);
+				$this->session->set_flashdata('error', 'Kuota jadwal ini tidak mencukupi. Sisa kuota: ' . $sisa . ' tamu.');
+				redirect('events/rsvps/' . $event_id);
+			}
+		}
+
+		$allergy_note = trim($this->input->post('allergy_note', TRUE));
+		$payment_status = $this->input->post('payment_status');
+
+		$data = array(
+			'event_id'          => $event_id,
+			'schedule_id'       => $schedule['id'],
+			'orderer_name'      => $this->input->post('orderer_name', TRUE),
+			'phone'             => $this->input->post('phone', TRUE),
+			'email'             => $this->input->post('email', TRUE),
+			'guest_count'       => $guest_count,
+			'is_member'         => $this->input->post('is_member'),
+			'marketing_consent' => 0,
+			'has_allergy'       => $allergy_note !== '' ? 1 : 0,
+			'allergy_note'      => $allergy_note !== '' ? $allergy_note : NULL,
+			'deposit_amount'    => (float) $this->input->post('deposit_amount'),
+			'payment_method'    => $this->input->post('payment_method', TRUE) ?: 'bank_transfer',
+			'payment_status'    => $payment_status,
+			'ticket_code'       => $this->event_rsvp_model->generate_unique_ticket_code('ADT'),
+			'gift_code'         => $this->event_rsvp_model->generate_unique_ticket_code('GIFT'),
+		);
+
+		if ($payment_status === 'paid') {
+			$data['verified_by'] = $this->auth_lib->user_id();
+			$data['verified_at'] = date('Y-m-d H:i:s');
+		}
+
+		$rsvp = $this->event_rsvp_model->create_with_guests($data, $guest_names);
+		if (!$rsvp) {
+			$this->session->set_flashdata('error', 'Gagal menyimpan RSVP.');
+			redirect('events/rsvps/' . $event_id);
+		}
+
+		// Khusus input manual: TIDAK kirim email konfirmasi booking — cukup kirim email
+		// (konfirmasi pembayaran + QR check-in) kalau admin langsung menandainya lunas.
+		if ($payment_status === 'paid') {
+			$this->_send_payment_confirmed_email($rsvp['id']);
+		}
+
+		$this->session->set_flashdata('success', 'RSVP manual berhasil ditambahkan.');
+		redirect('events/rsvps/' . $event_id);
 	}
 
 	/**

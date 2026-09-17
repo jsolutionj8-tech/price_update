@@ -203,6 +203,7 @@ $route['events/schedule-toggle/(:num)'] = 'events/schedule_toggle/$1';
 $route['events/rsvps/(:num)']          = 'events/rsvps/$1';
 $route['events/rsvps-export/(:num)']     = 'events/rsvps_export/$1';
 $route['events/rsvps-export-pdf/(:num)'] = 'events/rsvps_export_pdf/$1';
+$route['events/rsvp-store/(:num)']       = 'events/rsvp_store/$1';
 $route['events/mark-paid/(:num)']      = 'events/mark_paid/$1';
 $route['events/cancel-rsvp/(:num)']    = 'events/cancel_rsvp/$1';
 
