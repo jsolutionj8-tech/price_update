@@ -25,12 +25,13 @@ class Rsvp_exporter
 	}
 
 	/**
-	 * @param bool $raw_deposit TRUE = angka mentah (Excel bisa dijumlah), FALSE = teks
-	 *             sudah diformat rupiah (utk PDF, murni tampilan cetak).
+	 * @param bool  $raw_deposit TRUE = angka mentah (Excel bisa dijumlah), FALSE = teks
+	 *              sudah diformat rupiah (utk PDF, murni tampilan cetak).
+	 * @param array $filters    date_from/date_to opsional, memfilter berdasarkan tanggal Jadwal.
 	 */
-	protected function _build_rows($event_id, $raw_deposit)
+	protected function _build_rows($event_id, $raw_deposit, array $filters = array())
 	{
-		$rsvps = $this->CI->event_rsvp_model->get_for_event($event_id);
+		$rsvps = $this->CI->event_rsvp_model->get_for_event($event_id, $filters);
 
 		$status_labels = array(
 			'pending'   => 'Pending',
@@ -64,7 +65,7 @@ class Rsvp_exporter
 	 * Bangun file .xlsx dari RSVP satu event lalu langsung dikirim ke browser
 	 * (download). Method ini exit() di akhir.
 	 */
-	public function export_to_browser($event_id)
+	public function export_to_browser($event_id, array $filters = array())
 	{
 		if (!class_exists('\PhpOffice\PhpSpreadsheet\Spreadsheet')) {
 			show_error('Library PhpSpreadsheet belum terpasang. Jalankan "composer install" pada root project.');
@@ -77,10 +78,10 @@ class Rsvp_exporter
 		$sheet = $spreadsheet->getActiveSheet();
 		$sheet->setTitle('RSVP');
 		$sheet->fromArray($this->_headers(), NULL, 'A1');
-		$sheet->fromArray($this->_build_rows($event_id, TRUE), NULL, 'A2');
+		$sheet->fromArray($this->_build_rows($event_id, TRUE, $filters), NULL, 'A2');
 
 		$slug = $event['event_name'] !== '' ? $event['event_name'] : $event['slug'];
-		$filename = 'rsvp_' . preg_replace('/[^a-z0-9]+/i', '_', $slug) . '_' . date('Ymd_His') . '.xlsx';
+		$filename = 'rsvp_' . preg_replace('/[^a-z0-9]+/i', '_', $slug) . $this->_filename_date_suffix($filters) . '_' . date('Ymd_His') . '.xlsx';
 		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 		header('Content-Disposition: attachment;filename="' . $filename . '"');
 		header('Cache-Control: max-age=0');
@@ -94,7 +95,7 @@ class Rsvp_exporter
 	 * Bangun file .pdf (tabel sederhana) dari RSVP satu event lalu langsung
 	 * dikirim ke browser (download). Method ini exit() di akhir.
 	 */
-	public function export_to_pdf_browser($event_id)
+	public function export_to_pdf_browser($event_id, array $filters = array())
 	{
 		if (!class_exists('\Dompdf\Dompdf')) {
 			show_error('Library Dompdf belum terpasang. Jalankan "composer install" pada root project.');
@@ -104,8 +105,12 @@ class Rsvp_exporter
 		if (!$event) show_404();
 
 		$headers = $this->_headers();
-		$rows = $this->_build_rows($event_id, FALSE);
+		$rows = $this->_build_rows($event_id, FALSE, $filters);
 		$title = 'RSVP — ' . ($event['event_name'] !== '' ? $event['event_name'] : '(Tanpa nama)');
+		if (!empty($filters['date_from']) || !empty($filters['date_to'])) {
+			$title .= ' (' . ($filters['date_from'] ? tgl_indo($filters['date_from']) : '...')
+				. ' s/d ' . ($filters['date_to'] ? tgl_indo($filters['date_to']) : '...') . ')';
+		}
 
 		$html = '<html><head><meta charset="utf-8"><style>
 			body { font-family: sans-serif; font-size: 9px; }
@@ -138,8 +143,19 @@ class Rsvp_exporter
 		$dompdf->render();
 
 		$slug = $event['event_name'] !== '' ? $event['event_name'] : $event['slug'];
-		$filename = 'rsvp_' . preg_replace('/[^a-z0-9]+/i', '_', $slug) . '_' . date('Ymd_His') . '.pdf';
+		$filename = 'rsvp_' . preg_replace('/[^a-z0-9]+/i', '_', $slug) . $this->_filename_date_suffix($filters) . '_' . date('Ymd_His') . '.pdf';
 		$dompdf->stream($filename, array('Attachment' => TRUE));
 		exit;
+	}
+
+	/**
+	 * "_2026-09-19" (satu tanggal) atau "_2026-09-19_2026-09-20" (rentang) utk disisipkan
+	 * ke nama file export kalau filter tanggal dipakai — kosong kalau tidak difilter.
+	 */
+	protected function _filename_date_suffix(array $filters)
+	{
+		if (empty($filters['date_from']) && empty($filters['date_to'])) return '';
+		if (($filters['date_from'] ?? '') === ($filters['date_to'] ?? '')) return '_' . $filters['date_from'];
+		return '_' . ($filters['date_from'] ?: 'awal') . '_sd_' . ($filters['date_to'] ?: 'akhir');
 	}
 }

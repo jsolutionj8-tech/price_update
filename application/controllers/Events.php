@@ -182,7 +182,12 @@ class Events extends MY_Controller
 		$event = $this->event_model->find($event_id);
 		if (!$event) show_404();
 
-		$rsvps = $this->event_rsvp_model->get_for_event($event_id);
+		$filters = array(
+			'date_from' => $this->input->get('date_from'),
+			'date_to'   => $this->input->get('date_to'),
+		);
+
+		$rsvps = $this->event_rsvp_model->get_for_event($event_id, $filters);
 		foreach ($rsvps as &$r) {
 			$r['guests'] = $this->event_rsvp_model->get_guests($r['id']);
 		}
@@ -193,6 +198,7 @@ class Events extends MY_Controller
 			'event'     => $event,
 			'rsvps'     => $rsvps,
 			'schedules' => $this->event_schedule_model->get_for_event($event_id),
+			'filters'   => $filters,
 		));
 	}
 
@@ -291,11 +297,18 @@ class Events extends MY_Controller
 
 	/**
 	 * Tombol "Export Excel" di halaman detail RSVP — lihat Rsvp_exporter utk isi kolom.
+	 * date_from/date_to opsional (dari filter tanggal di halaman yang sama) memfilter
+	 * berdasarkan tanggal Jadwal, supaya export bisa dibatasi per-hari utk event
+	 * multi-hari alih-alih selalu semua RSVP.
 	 */
 	public function rsvps_export($event_id)
 	{
+		$filters = array(
+			'date_from' => $this->input->get('date_from'),
+			'date_to'   => $this->input->get('date_to'),
+		);
 		$this->load->library('rsvp_exporter');
-		$this->rsvp_exporter->export_to_browser($event_id);
+		$this->rsvp_exporter->export_to_browser($event_id, $filters);
 	}
 
 	/**
@@ -303,8 +316,12 @@ class Events extends MY_Controller
 	 */
 	public function rsvps_export_pdf($event_id)
 	{
+		$filters = array(
+			'date_from' => $this->input->get('date_from'),
+			'date_to'   => $this->input->get('date_to'),
+		);
 		$this->load->library('rsvp_exporter');
-		$this->rsvp_exporter->export_to_pdf_browser($event_id);
+		$this->rsvp_exporter->export_to_pdf_browser($event_id, $filters);
 	}
 
 	public function mark_paid($rsvp_id)

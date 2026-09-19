@@ -1,13 +1,49 @@
+<?php
+	$qs_base = array();
+	if (!empty($filters['date_from'])) $qs_base['date_from'] = $filters['date_from'];
+	if (!empty($filters['date_to'])) $qs_base['date_to'] = $filters['date_to'];
+	$export_qs = $qs_base ? '?' . http_build_query($qs_base) : '';
+?>
+<!-- Flatpickr utk kalender tanggal Dari/Sampai — sama seperti filter di menu Riwayat Perubahan Harga. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css">
+
 <div class="card card-stat p-3 mb-3">
-	<div class="d-flex justify-content-between align-items-center">
+	<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
 		<h6 class="fw-bold mb-0">RSVP — <?= $event['event_name'] !== '' ? htmlspecialchars($event['event_name']) : '(Tanpa nama)' ?></h6>
 		<div class="d-flex gap-2">
 			<button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#manualRsvpModal"><i class="bi bi-plus-lg"></i> Tambah RSVP Manual</button>
-			<a href="<?= base_url('events/rsvps-export/' . $event['id']) ?>" class="btn btn-outline-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
-			<a href="<?= base_url('events/rsvps-export-pdf/' . $event['id']) ?>" class="btn btn-outline-danger btn-sm"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
 			<a href="<?= base_url('events') ?>" class="btn btn-outline-secondary btn-sm">Kembali</a>
 		</div>
 	</div>
+	<hr>
+	<style>
+		.rsvp-filter-form .form-control-sm,
+		.rsvp-filter-form .btn-sm { height: 31px; line-height: 1.5; box-sizing: border-box; }
+	</style>
+	<form method="get" class="row g-2 align-items-end rsvp-filter-form">
+		<div class="col-md-3">
+			<label class="form-label small mb-1">Tanggal Jadwal Dari</label>
+			<input type="text" name="date_from" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="<?= htmlspecialchars($filters['date_from'] ?? '') ?>" placeholder="Semua tanggal">
+		</div>
+		<div class="col-md-3">
+			<label class="form-label small mb-1">Sampai</label>
+			<input type="text" name="date_to" class="form-control form-control-sm flatpickr-date" autocomplete="off" value="<?= htmlspecialchars($filters['date_to'] ?? '') ?>" placeholder="Semua tanggal">
+		</div>
+		<div class="col-md-2">
+			<label class="form-label small mb-1">&nbsp;</label>
+			<button class="btn btn-outline-secondary btn-sm w-100"><i class="bi bi-funnel me-1"></i>Terapkan</button>
+		</div>
+		<div class="col-md-4 d-flex gap-2 justify-content-md-end">
+			<div class="flex-fill">
+				<label class="form-label small mb-1 d-block">&nbsp;</label>
+				<a href="<?= base_url('events/rsvps-export/' . $event['id']) . $export_qs ?>" class="btn btn-outline-success btn-sm w-100 d-inline-flex align-items-center justify-content-center"><i class="bi bi-file-earmark-excel"></i> Export Excel</a>
+			</div>
+			<div class="flex-fill">
+				<label class="form-label small mb-1 d-block">&nbsp;</label>
+				<a href="<?= base_url('events/rsvps-export-pdf/' . $event['id']) . $export_qs ?>" class="btn btn-outline-danger btn-sm w-100 d-inline-flex align-items-center justify-content-center"><i class="bi bi-file-earmark-pdf"></i> Export PDF</a>
+			</div>
+		</div>
+	</form>
 </div>
 
 <div class="card card-stat p-3">
@@ -175,4 +211,16 @@
 
 	updateManualDeposit();
 })();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+	flatpickr('.flatpickr-date', {
+		dateFormat: 'Y-m-d',
+		altInput: true,
+		altFormat: 'd-m-Y',
+		allowInput: true
+	});
+});
 </script>

@@ -66,16 +66,21 @@ class Event_rsvp_model extends CI_Model
 
 	/**
 	 * Daftar RSVP utk 1 event (admin), lengkap dgn nama jadwal — dipakai di halaman detail
-	 * event pada menu Events.
+	 * event pada menu Events. $filters opsional: date_from/date_to memfilter berdasarkan
+	 * tanggal Jadwal (event_schedules.event_date), dipakai oleh filter tanggal & tombol
+	 * Export Excel/PDF di halaman yang sama (lihat Rsvp_exporter).
 	 */
-	public function get_for_event($event_id)
+	public function get_for_event($event_id, array $filters = array())
 	{
-		return $this->db->select('event_rsvps.*, event_schedules.event_date, event_schedules.event_time')
+		$this->db->select('event_rsvps.*, event_schedules.event_date, event_schedules.event_time')
 			->from($this->table)
 			->join('event_schedules', 'event_schedules.id = event_rsvps.schedule_id')
-			->where('event_rsvps.event_id', $event_id)
-			->order_by('event_rsvps.created_at', 'DESC')
-			->get()->result_array();
+			->where('event_rsvps.event_id', $event_id);
+
+		if (!empty($filters['date_from'])) $this->db->where('event_schedules.event_date >=', $filters['date_from']);
+		if (!empty($filters['date_to'])) $this->db->where('event_schedules.event_date <=', $filters['date_to']);
+
+		return $this->db->order_by('event_rsvps.created_at', 'DESC')->get()->result_array();
 	}
 
 	public function mark_paid($id, $user_id)
